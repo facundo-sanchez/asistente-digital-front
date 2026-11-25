@@ -10,7 +10,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
-import { BILLING_FREQUENCIES, SERVICE_CATEGORIES, type ServiceRequest } from "@/types/api";
+import { BILLING_FREQUENCIES, SERVICE_CATEGORIES, type ServiceRequest, type ServiceResponse } from "@/types/api";
 import { FormTextField } from "@/components/forms/FormTextField";
 import { applyApiErrors } from "@/lib/api/form-errors";
 import { BILLING_FREQUENCY_LABELS } from "@/lib/billing-frequencies";
@@ -43,20 +43,53 @@ function toRequest(values: ServiceFormValues): ServiceRequest {
   };
 }
 
-/** Alta de un servicio (CU-001). Al guardar lleva al detalle del servicio nuevo. */
-export function ServiceForm() {
+/** Valores del formulario a partir de un servicio existente (edición). */
+function toFormValues(service: ServiceResponse): DefaultValues<ServiceFormValues> {
+  return {
+    // El autocompletado solo necesita id, nombre y categoría del proveedor
+    provider: {
+      id: service.providerId,
+      name: service.providerName,
+      category: service.category,
+      code: "",
+      website: null,
+      custom: false,
+      active: true,
+    },
+    name: service.name,
+    customerReference: service.customerReference ?? "",
+    category: service.category,
+    billingFrequency: service.billingFrequency,
+    startDate: service.startDate ?? "",
+    endDate: service.endDate ?? "",
+    notes: service.notes ?? "",
+  };
+}
+
+/**
+ * Alta (CU-001) o edición de un servicio, según venga service. Al guardar lleva al
+ * detalle del servicio.
+ */
+export function ServiceForm({ service }: { service?: ServiceResponse }) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const { control, handleSubmit, setError, setValue, getValues, formState } = useForm<ServiceFormValues>({
     resolver: yupResolver(serviceSchema),
-    defaultValues: EMPTY,
+    defaultValues: service ? toFormValues(service) : EMPTY,
   });
+  const cancelHref = service ? `/services/${service.id}` : "/services";
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
     try {
-      const created = await servicesApi.create(toRequest(values));
-      router.push(`/services/${created.id}?created=1`);
+      if (service) {
+        await servicesApi.update(service.id, toRequest(values));
+        router.push(`/services/${service.id}?updated=1`);
+      } else {
+        const created = await servicesApi.create(toRequest(values));
+        router.push(`/services/${created.id}?created=1`);
+      }
+      router.refresh();
     } catch (e) {
       setFormError(applyApiErrors(e, setError, { providerId: "provider" }));
     }
@@ -141,9 +174,9 @@ export function ServiceForm() {
 
         <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
           <Button type="submit" variant="contained" size="large" loading={formState.isSubmitting}>
-            Guardar servicio
+            {service ? "Guardar cambios" : "Guardar servicio"}
           </Button>
-          <Button component={NextLink} href="/services" size="large" color="inherit">
+          <Button component={NextLink} href={cancelHref} size="large" color="inherit">
             Cancelar
           </Button>
         </Box>

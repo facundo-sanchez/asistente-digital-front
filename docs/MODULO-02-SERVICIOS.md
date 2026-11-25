@@ -21,7 +21,7 @@ Lo que ya existe antes de empezar:
 |---|---|---|---|---|
 | 2.1 | Catálogo de proveedores (solo lectura) | `feature/servicios-1-proveedores` | — | [x] sin PR |
 | 2.2 | Alta, listado y detalle de servicios | `feature/servicios-2-alta-listado` | 2.1 | [x] sin PR |
-| 2.3 | Edición, activar/desactivar y baja | `feature/servicios-3-edicion-estado` | 2.2 | [ ] |
+| 2.3 | Edición, activar/desactivar y baja | `feature/servicios-3-edicion-estado` | 2.2 | [x] sin PR |
 | 2.4 | Proveedor propio ("no encuentro mi proveedor") | `feature/servicios-4-proveedor-propio` | 2.1, 2.2 | [ ] |
 | 2.5 | Posibles duplicados y ayuda del nro. de socio | `feature/servicios-5-duplicados` | 2.2 | [ ] |
 
@@ -94,17 +94,22 @@ Queda fuera de este módulo (se suma cuando existan esos módulos):
 **Objetivo:** el usuario mantiene sus servicios al día.
 
 ### Backend
-- [ ] `PUT /services/{id}`: mismas validaciones que el alta.
-- [ ] `PATCH /services/{id}/status` (`{ active }`): activar o desactivar.
-- [ ] `DELETE /services/{id}`: baja lógica (desactiva, no borra), como dice la SPEC §6.2. El historial de facturas y obligaciones no se pierde.
-- [ ] Tests: edición, cambio de estado, baja e intento sobre un servicio ajeno (404).
+- [x] `PUT /services/{id}`: mismas validaciones que el alta.
+- [x] `PATCH /services/{id}/status` (`{ active }`): activar o desactivar.
+- [x] `DELETE /services/{id}`: baja lógica (desactiva, no borra), como dice la SPEC §6.2. El historial de facturas y obligaciones no se pierde.
+- [x] Tests: edición, cambio de estado, baja e intento sobre un servicio ajeno (404).
 
 ### Frontend
-- [ ] `/services/[id]/edit`: reutiliza el formulario del alta.
-- [ ] Activar/desactivar desde el detalle y desde la fila del listado, con confirmación solo para desactivar; el texto aclara que el historial se conserva.
-- [ ] El listado muestra los inactivos atenuados y por defecto filtra solo activos.
+- [x] `/services/[id]/edit`: reutiliza el formulario del alta.
+- [x] Activar/desactivar desde el detalle y desde la fila del listado, con confirmación solo para desactivar; el texto aclara que el historial se conserva.
+- [x] El listado muestra los inactivos atenuados y por defecto filtra solo activos.
 
 **Listo cuando:** se edita el nro. de socio, se desactiva el servicio, desaparece del filtro "activos" y se puede reactivar.
+
+**Hecho (25/11/2026):**
+- Backend: `PUT /services/{id}`, `PATCH /services/{id}/status` y `DELETE /services/{id}` (baja lógica, 204). Reglas del alta extraídas a `ServiceDraftValidator` (compartidas por alta y edición). Al editar se acepta el proveedor que el servicio ya tenía aunque se haya dado de baja. 6 tests nuevos.
+- Frontend: `/services/[id]/edit` (mismo `ServiceForm` en modo edición), botones Editar y Desactivar/Reactivar en el detalle; desactivar pide confirmación y aclara que el historial se conserva. Cambio respecto del plan: la acción de estado vive en el detalle y no en cada fila del listado, para no sumar botones a la tabla.
+- Verificado de punta a punta: edición, desactivar, filtros activos/inactivos, reactivar, baja, aislamiento (404 para otro usuario) y validación (400).
 
 ---
 
@@ -162,3 +167,4 @@ Queda fuera de este módulo (se suma cuando existan esos módulos):
 | 25/11/2026 | — | Plan del módulo creado | — |
 | 25/11/2026 | 2.1 | Catálogo de proveedores: `GET /providers` y `GET /providers/{id}`, paginación compartida, `ProviderAutocomplete`, mapeo de categorías y tintes. Corrección del mapeo de `email_domains` | sin PR |
 | 25/11/2026 | 2.2 | Alta, listado y detalle de servicios (API + pantallas), helpers compartidos de búsqueda y enums, tabla tipo libro de cuentas reutilizable | sin PR |
+| 25/11/2026 | 2.3 | Edición, activar/desactivar y baja lógica de servicios | sin PR |

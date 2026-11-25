@@ -89,12 +89,12 @@
 - [x] Tipos `Service`, `Provider` y `ServiceCategory`
 - [~] API: `GET/POST/PUT/DELETE /services`, `PATCH /services/{id}/status`, `GET /providers` (proveedores hecho en 2.1)
 - [x] Listado de servicios con filtros (categoría, activo/inactivo)
-- [~] Formulario de alta y edición: categoría, proveedor, referencia de cliente y periodicidad (alta hecha en 2.2; edición en 2.3)
+- [x] Formulario de alta y edición: categoría, proveedor, referencia de cliente y periodicidad
 - [ ] Campo "Nro. de socio / suministro" destacado, con ayuda de dónde encontrarlo en la factura (es lo que asocia las facturas del email al servicio)
 - [ ] Al crear un servicio de un proveedor con detección por email, sugerir "Conectá Gmail para recibir tus facturas automáticamente"
 - [ ] Advertencia de posible duplicado
 - [ ] Detalle del servicio: facturas, obligaciones y documentos asociados
-- [ ] Activar o desactivar un servicio
+- [x] Activar o desactivar un servicio
 
 ## Fase 4 – Documentos (CU-009) 🔗
 
