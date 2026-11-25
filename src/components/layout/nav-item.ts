@@ -2,5 +2,5 @@
 export interface NavItem {
   label: string;
   href: string;
-  icon: "dashboard" | "services" | "documents" | "profile";
+  icon: "dashboard" | "services" | "obligations" | "documents" | "profile";
 }

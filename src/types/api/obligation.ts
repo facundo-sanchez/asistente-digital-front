@@ -49,6 +49,8 @@ export type RecurrenceOrigin = (typeof RECURRENCE_ORIGINS)[number];
 export interface ObligationResponse {
   id: UUID;
   serviceId: UUID | null;
+  /** Nombre del servicio asociado (null si no tiene). */
+  serviceName: string | null;
   invoiceId: UUID | null;
   assetId: UUID | null;
   recurrenceId: UUID | null;
@@ -85,17 +87,9 @@ export interface ObligationRequest {
   dueDate: ISODate;
 }
 
-/** PATCH /obligations/{id}/cancel */
+/** POST /obligations/{id}/cancel */
 export interface CancelObligationRequest {
   reason?: string | null;
-}
-
-/** Filtros de GET /obligations. */
-export interface ObligationFilters {
-  status?: ObligationStatus;
-  from?: ISODate;
-  to?: ISODate;
-  serviceId?: UUID;
 }
 
 export interface RecurringRuleResponse {

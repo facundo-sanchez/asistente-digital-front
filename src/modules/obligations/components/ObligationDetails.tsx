@@ -1,0 +1,40 @@
+import type { ReactNode } from "react";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import type { ObligationResponse } from "@/types/api";
+import { DetailList } from "@/components/layout/DetailList";
+import { formatDate, formatDay } from "@/lib/dates";
+import { formatMoney } from "@/lib/money";
+import { OBLIGATION_TYPE_LABELS } from "@/lib/obligation-labels";
+import { ObligationStatus } from "./ObligationStatus";
+
+const EMPTY = (
+  <Typography component="span" color="text.secondary">
+    —
+  </Typography>
+);
+
+function money(amount: number | null, currency: string | null): ReactNode {
+  const text = formatMoney(amount, currency);
+  return text ? <span className="tabular-nums">{text}</span> : EMPTY;
+}
+
+/** Datos de la obligación: estado, vencimiento, importes, servicio y notas. */
+export function ObligationDetails({ obligation }: { obligation: ObligationResponse }) {
+  const rows: [string, ReactNode][] = [
+    ["Estado", <ObligationStatus key="status" status={obligation.effectiveStatus} />],
+    ["Vence", <span key="due" className="tabular-nums">{formatDate(obligation.dueDate)}</span>],
+    ["Tipo", OBLIGATION_TYPE_LABELS[obligation.obligationType]],
+    ["Servicio", obligation.serviceName ?? EMPTY],
+    ["Importe", money(obligation.amount, obligation.currency)],
+    ["Pagado", money(obligation.paidAmount, obligation.currency)],
+    ["Saldo", money(obligation.balance, obligation.currency)],
+  ];
+  if (obligation.cancelledAt) {
+    rows.push(["Cancelada", `${formatDay(obligation.cancelledAt)}${obligation.cancelReason ? ` · ${obligation.cancelReason}` : ""}`]);
+  }
+  if (obligation.description) {
+    rows.push(["Notas", <Box key="notes" component="span" sx={{ whiteSpace: "pre-line" }}>{obligation.description}</Box>]);
+  }
+  return <DetailList rows={rows} />;
+}
