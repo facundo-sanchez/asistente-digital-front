@@ -1,6 +1,7 @@
 /** Llamadas de documentos desde el navegador (módulo 3). */
+import { api } from "@/lib/api/client";
 import { uploadFile } from "@/lib/api/upload";
-import type { DocumentResponse, DocumentType } from "@/types/api";
+import type { DocumentResponse, DocumentType, DocumentUpdateRequest } from "@/types/api";
 
 export const documentsApi = {
   upload: (file: File, documentType: DocumentType, title: string, onProgress: (percent: number) => void) => {
@@ -10,4 +11,6 @@ export const documentsApi = {
     if (title.trim()) form.append("title", title.trim());
     return uploadFile<DocumentResponse>("documents", form, onProgress);
   },
+  update: (id: string, request: DocumentUpdateRequest) => api.put<DocumentResponse>(`documents/${id}`, request),
+  remove: (id: string) => api.delete<void>(`documents/${id}`),
 };

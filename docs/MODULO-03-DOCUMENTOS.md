@@ -30,8 +30,8 @@
 |---|---|---|---|---|
 | 3.1 | Subir un documento (almacenamiento en disco + validaciones) | `feature/documentos-1-subida` | — | [x] sin PR |
 | 3.2 | Repositorio: listado, búsqueda y filtros | `feature/documentos-2-listado` | 3.1 | [x] sin PR |
-| 3.3 | Descarga y vista previa | `feature/documentos-3-descarga` | 3.1 | [ ] |
-| 3.4 | Edición, asociación a servicio, vencimiento y baja | `feature/documentos-4-edicion` | 3.2 | [ ] |
+| 3.3 | Descarga y vista previa | `feature/documentos-3-descarga` | 3.1 | [x] |
+| 3.4 | Edición, asociación a servicio, vencimiento y baja | `feature/documentos-4-edicion` | 3.2 | [x] |
 | 3.5 | Documentos dentro del servicio | `feature/documentos-5-en-servicio` | 3.4 | [ ] |
 | 3.6 | (Opcional) Adaptador MinIO/S3 | `feature/documentos-6-minio` | 3.1 | [ ] |
 
@@ -79,28 +79,32 @@ Orden recomendado: 3.1 → 3.2 → 3.3 → 3.4 → 3.5. Con 3.1 a 3.3 el módulo
 ## Parte 3.3 – Descarga y vista previa
 
 ### Backend
-- [ ] `GET /documents/{id}/download`: envía el archivo con su tipo y nombre original (`Content-Disposition`), sin cargarlo entero en memoria.
+- [x] `GET /documents/{id}/download`: envía el archivo con su tipo y nombre original (`Content-Disposition`), sin cargarlo entero en memoria.
 
 ### Frontend
-- [ ] El BFF reenvía la descarga tal cual (streaming).
-- [ ] `/documents/[id]`: datos del documento, vista previa (PDF embebido o imagen) y botón Descargar.
+- [x] El BFF reenvía la descarga tal cual (streaming).
+- [x] `/documents/[id]`: datos del documento, vista previa (PDF embebido o imagen) y botón Descargar.
 
 **Listo cuando:** se ve un PDF y una foto en la vista previa y se descargan con su nombre original.
+
+**Hecho (25/11/2026):** `GET /documents/{id}/download` (`?inline=true` para la vista previa) envía el `InputStream` del storage sin cargarlo en memoria, con `Content-Disposition` que conserva acentos (`filename*` UTF-8, clase `ContentDisposition`), `nosniff` y `no-store`. El BFF genérico ahora reenvía el cuerpo como stream y los encabezados de descarga. Front: `/documents/[id]` con vista previa (PDF en `iframe`, imagen en `img`), datos y botón Descargar; los títulos del listado llevan al detalle. Se extrajo `DetailList` (lista rótulo/valor, también la usa el detalle de servicio) y `lib/dates`. Verificado: PDF y PNG se ven y se bajan con el nombre original (incluido «Póliza «auto» 2026.pdf»), contenido idéntico, otro usuario 404, sin sesión 401. 3 tests de backend nuevos.
 
 ---
 
 ## Parte 3.4 – Edición, asociación, vencimiento y baja
 
 ### Backend
-- [ ] `PUT /documents/{id}` (`DocumentUpdateRequest`: título, tipo, servicio, vencimiento). El servicio tiene que ser del usuario.
-- [ ] `DELETE /documents/{id}`: borrado lógico (204).
-- [ ] Tests: asociar a un servicio ajeno (400), baja, aislamiento.
+- [x] `PUT /documents/{id}` (`DocumentUpdateRequest`: título, tipo, servicio, vencimiento). El servicio tiene que ser del usuario.
+- [x] `DELETE /documents/{id}`: borrado lógico (204).
+- [x] Tests: asociar a un servicio ajeno (400), baja, aislamiento.
 
 ### Frontend
-- [ ] Editar desde el detalle (título, tipo, servicio con autocompletado, vencimiento).
-- [ ] Eliminar con confirmación.
+- [x] Editar desde el detalle (título, tipo, servicio con autocompletado, vencimiento).
+- [x] Eliminar con confirmación.
 
 **Listo cuando:** se asocia una factura a "Luz casa" con vencimiento y se elimina otro documento.
+
+**Hecho (25/11/2026):** `ManageDocumentUseCase` (`update` y `delete`), `PUT /documents/{id}` y `DELETE /documents/{id}` (baja lógica; el archivo se conserva y el mismo archivo se puede volver a subir). `DocumentUpdateRequest` quedó solo con título, tipo, servicio y vencimiento (bien y obligación llegan con sus módulos). Front: `/documents/[id]/edit` (`DocumentForm` con autocompletado de servicios) y `DocumentDeleteAction` con confirmación; avisos tras guardar y eliminar. Verificado: asociar a «Luz casa» con vencimiento 200, servicio ajeno 400, sin tipo 400, editar o borrar ajeno 404, borrado 204 y luego 404 en detalle y descarga. 4 tests de backend nuevos.
 
 ---
 

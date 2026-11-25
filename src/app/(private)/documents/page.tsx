@@ -33,7 +33,11 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
   ]);
   const documents = result?.content ?? [];
   const hasFilters = !!filters.query || !!filters.documentType || !!filters.serviceId;
-  const justUploaded = firstParam(raw.uploaded) === "1";
+  const notice = firstParam(raw.uploaded) === "1"
+    ? "Subimos el documento."
+    : firstParam(raw.deleted) === "1"
+      ? "Eliminamos el documento."
+      : null;
 
   const uploadButton = (
     <ButtonLink href="/documents/new" variant="contained" startIcon={<UploadFileOutlined />}>
@@ -44,7 +48,7 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Se
   return (
     <Stack spacing={4} sx={{ maxWidth: 1200 }}>
       <PageHeader title="Documentos" description="Facturas, comprobantes, pólizas y papeles importantes en un solo lugar." action={uploadButton} />
-      {justUploaded && <Alert severity="success">Subimos el documento.</Alert>}
+      {notice && <Alert severity="success">{notice}</Alert>}
       <DocumentFilters filters={filters} services={(services?.content ?? []).map(({ id, name }) => ({ id, name }))} />
       <Panel
         title={hasFilters ? "Resultados" : "Tus documentos"}
