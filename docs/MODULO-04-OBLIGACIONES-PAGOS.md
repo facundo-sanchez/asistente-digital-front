@@ -24,7 +24,8 @@
 | Pagos | No se borran ni se editan: se **anulan** con motivo; corregir = anular y crear uno nuevo que lo reemplaza | RN-008: historial completo |
 | Cancelar | Solo si no está pagada; con motivo opcional. Una obligación con pagos no se cancela: primero se anulan | Cancelar algo con pagos vigentes dejaría el saldo sin sentido |
 | Comprobante | `receiptDocumentId` opcional: un documento ya subido del usuario | Reusa el módulo 3; subir uno nuevo desde el pago queda para después si hace falta |
-| Recurrencias (CU-014) | Fuera de este módulo | Necesitan las facturas (módulo 5) para detectarse |
+| Recurrencias (CU-014) | Las configura el usuario (parte 4.6): alquiler, seguros, VTV. Las **detectadas** desde facturas quedan para el módulo 5 | El alquiler vence todos los meses y no tiene factura: cargarlo a mano cada mes no tiene sentido |
+| Cómo se generan | Una tarea diaria crea solo el **próximo** vencimiento de cada regla activa, unos días antes del período; nunca dos para el mismo período | La lista no se llena de meses futuros y un servidor apagado se pone al día solo |
 | Importes | `BigDecimal` en el backend; en el front se formatean con `Intl.NumberFormat("es-AR")` | Sin errores de redondeo |
 
 ## Resumen de partes
@@ -36,8 +37,9 @@
 | 4.3 | Registrar un pago (total o parcial) | `feature/obligaciones-3-pago` | 4.2 | [ ] |
 | 4.4 | Historial de pagos, anulación y corrección | `feature/obligaciones-4-historial` | 4.3 | [ ] |
 | 4.5 | Vencimientos dentro del servicio | `feature/obligaciones-5-en-servicio` | 4.1 | [ ] |
+| 4.6 | Vencimientos que se repiten (alquiler, seguros) | `feature/obligaciones-6-recurrentes` | 4.2 | [ ] |
 
-Orden recomendado: 4.1 → 4.2 → 4.3 → 4.4 → 4.5. Con 4.1 a 4.3 el módulo ya es usable.
+Orden: 4.1 → 4.2 → 4.3 → 4.4 → 4.5 → 4.6. Con 4.1 a 4.3 el módulo ya es usable.
 
 ---
 
@@ -114,3 +116,22 @@ Orden recomendado: 4.1 → 4.2 → 4.3 → 4.4 → 4.5. Con 4.1 a 4.3 el módulo
 - [ ] En `/services/[id]`, el panel "Facturas y vencimientos" muestra las obligaciones del servicio y "Nuevo vencimiento" que ya lo deja asociado.
 
 **Listo cuando:** desde el detalle de "Luz casa" se carga un vencimiento y aparece en su panel.
+
+---
+
+## Parte 4.6 – Vencimientos que se repiten
+
+**Objetivo:** el alquiler (o un seguro, la VTV) se carga una vez y el sistema genera el vencimiento de cada período.
+
+### Backend
+- [ ] Tipo de obligación `RENT` ("Alquiler"), con migración Flyway (la base valida los tipos).
+- [ ] `RecurringRuleRepository` y casos de uso: crear (crea también el primer vencimiento), editar (afecta a los próximos, no a los ya creados), desactivar.
+- [ ] `POST/GET/PUT /recurring-rules`, `PATCH /recurring-rules/{id}/status`.
+- [ ] Tarea diaria (Quarkus Scheduler) que crea el próximo vencimiento de cada regla activa unos días antes; día 31 → último día de los meses cortos; sin duplicados por período (`recurrence_id` + vencimiento).
+- [ ] Tests: cálculo de fechas (mensual, bimestral, anual, día 31, febrero), no duplica, regla inactiva no genera, regla ajena (404).
+
+### Frontend
+- [ ] En el alta de vencimiento: "Se repite" con periodicidad y día del mes.
+- [ ] En el detalle: "Se repite cada mes" con acceso a editar o desactivar la regla.
+
+**Listo cuando:** se carga "Alquiler depto" mensual el día 10 y, al correr la tarea, aparece el vencimiento del mes siguiente con el mismo importe; al desactivar la regla deja de generarse.
