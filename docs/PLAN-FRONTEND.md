@@ -20,9 +20,9 @@
 ## Decisiones pendientes
 
 - [x] **Integración con proveedores (luz, gas, agua…):** vía email (Gmail, solo lectura) + extracción IA + confirmación del usuario. Sin APIs de proveedores ni scraping por ahora. (24/11/2026)
-- [ ] **Autenticación:** la SPEC propone Better Auth en Next.js (BFF) con un JWT firmado hacia Quarkus, pero el backend actual ya tiene un login propio con JWT y Google. Hay que elegir uno de los dos modelos y documentarlo.
-- [ ] **basePath / nombre de la app:** mantener `/mi-balance` o cambiarlo (por ejemplo, `/asistente`).
-- [ ] **Estado del servidor:** Redux Toolkit + RTK Query, o Redux solo para la UI y fetch/Server Components para los datos.
+- [x] **Autenticación:** JWT propio del backend (RS256 + refresh rotativo) y Next.js como BFF con cookies httpOnly. Better Auth descartado. Documentado en SPEC técnica §7.1. (24/11/2026)
+- [~] **basePath / nombre de la app:** ahora es configurable con `NEXT_PUBLIC_BASE_PATH` (vacío = raíz). Falta decidir el valor final (hoy los `.env` locales usan `/mi-balance`).
+- [ ] **Estado del servidor:** Redux Toolkit + RTK Query, o Redux solo para la UI y fetch/Server Components para los datos. (Módulo Auth resuelto sin Redux: Server Components + fetch al BFF.)
 - [ ] **Estilos:** definir cuándo se usa MUI y cuándo Tailwind, para no mezclarlos sin criterio.
 - [x] **Contratos API:** interfaces TypeScript escritas a mano en `src/types/api/`, espejo 1:1 de los DTOs Java (`interface` + uniones de strings para enums, no clases). Evaluar más adelante generarlas desde OpenAPI (`openapi-typescript`). (24/11/2026)
 
@@ -33,52 +33,54 @@
 - [x] Crear el proyecto con Next.js 16 + TypeScript
 - [x] Instalar las dependencias base (MUI, RTK, RHF, yup, axios, charts, tablas)
 - [x] Dockerfile multi-stage con salida `standalone`
-- [ ] Renombrar `package.json` (`deudas`), los metadata (`MiBalance`), `lang="es"` y el README
-- [ ] Definir `basePath` y redirects en `next.config.ts`
-- [ ] Variables de entorno: `.env.example` (`API_INTERNAL_URL`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_BASE_PATH`)
-- [ ] Revisar o eliminar `src/app/api/env/route.ts`
-- [ ] Crear la estructura de carpetas de la SPEC §10.1 (`components/`, `modules/`, `lib/`, `hooks/`, `types/`, `theme/`)
-- [ ] Configurar ESLint y Prettier, y verificar que pasen `npm run lint` y `npm run build`
-- [ ] Configurar el testing: Vitest + Testing Library
+- [x] Renombrar `package.json` (`deudas`), los metadata (`MiBalance`) y `lang="es"` — falta el README
+- [x] `basePath` configurable por `NEXT_PUBLIC_BASE_PATH` y redirect de `/` en `next.config.ts`
+- [x] Variables de entorno: `.env.example` (`API_BACKEND`, `NEXT_PUBLIC_BASE_PATH`, `COOKIE_SECURE`)
+- [x] Eliminar `src/app/api/env/route.ts` (estaba vacío)
+- [~] Estructura de carpetas de la SPEC §10.1: `components/`, `modules/`, `lib/`, `types/`, `theme/` creadas (falta `hooks/` cuando haga falta)
+- [~] `npm run lint` y `npm run build` pasan. Falta Prettier
+- [~] Configurar el testing: Vitest (`npm test`) con tests de seguridad del login (25/11/2026). Falta Testing Library para componentes
 - [ ] Scripts `typecheck` y `test` en `package.json`
 
 ## Fase 1 – Infraestructura de UI y cliente HTTP
 
 ### Tema y layout
-- [ ] Tema MUI (paleta, tipografía Nunito, modo claro/oscuro) con `@mui/material-nextjs` (AppRouterCacheProvider)
-- [ ] Integración entre Tailwind 4 y MUI (orden de CSS layers)
+- [x] Tema MUI (paleta, tipografía Nunito, locale es) con `@mui/material-nextjs/v16-appRouter` — modo oscuro pendiente
+- [x] Integración entre Tailwind 4 y MUI (`@layer theme, base, mui, components, utilities` + `enableCssLayer`)
 - [ ] `LocalizationProvider` de los date pickers (moment, locale `es`)
-- [ ] Layout privado: sidebar con módulos, topbar con usuario, notificaciones y logout
-- [ ] Layout responsive (drawer colapsable en mobile)
-- [ ] Páginas `not-found`, `error.tsx`, `loading.tsx` y `global-error.tsx`
+- [x] Layout privado: sidebar con módulos, topbar con usuario y logout (`components/layout/AppShell`) — notificaciones en el módulo 8
+- [x] Layout responsive (drawer colapsable en mobile)
+- [~] Páginas `not-found`, `error.tsx` y `global-error.tsx` — falta `loading.tsx`
 
 ### Componentes comunes (`components/common`, `components/forms`)
 - [ ] Wrapper de tabla (material-react-table) con paginación y filtros del servidor
-- [ ] Inputs de formulario conectados a RHF: texto, select, fecha, moneda/importe, archivo
+- [~] Inputs de formulario conectados a RHF: texto, select y contraseña (`FormTextField`, `FormPasswordField`) — faltan fecha, importe y archivo
 - [ ] Diálogo de confirmación para operaciones sensibles
 - [ ] Snackbar/toast global para éxito y error
 - [ ] Estados vacíos, skeletons y chips de estado (obligación, factura, procesamiento)
 - [ ] Formateadores: moneda (ARS, ISO 4217), fechas con la zona horaria del usuario (RN-012)
 
 ### Cliente API (`lib/api`)
-- [ ] Instancia de axios centralizada: base URL, interceptores y serialización de parámetros
-- [ ] Manejo uniforme de errores según Problem Details (`type`, `title`, `status`, `detail`, `code`)
+- [x] Cliente HTTP centralizado con `fetch` (`lib/api/client.ts`): basePath, reintento ante 401, `ApiError`. Se descartó axios: no hacía falta
+- [x] Manejo uniforme de errores con el `ErrorResponse` del backend (incluye `violations` por campo → `applyApiErrors` los marca en el formulario)
 - [x] Tipos genéricos: `PageResponse<T>`, `PageParams`, `ErrorResponse`, alias de fechas/importes (`src/types/api/common.ts`)
 - [x] Tipos de request/response y enums de todos los módulos (`src/types/api/*.ts`)
-- [ ] Proxy BFF en Next (route handlers) para no exponer tokens ni la URL interna en el navegador
+- [x] BFF en Next: `/api/auth/*` (sesión en cookies httpOnly) y `/api/backend/[...path]` (reenvío con token + refresh automático)
 - [ ] Store Redux y providers (según la decisión sobre el estado del servidor)
 
 ## Fase 2 – Autenticación y usuario (MVP) 🔗
 
-- [ ] Implementar el modelo de autenticación elegido (Better Auth o el JWT actual del backend)
-- [ ] `app/(auth)/login`: formulario de email/contraseña y login con Google
-- [ ] `app/(auth)/register` con validación yup
-- [ ] Recuperar contraseña (forgot/reset)
-- [ ] Validación de email al registrarse
-- [ ] `proxy.ts`: proteger `(private)/*` y redirigir a login
-- [ ] Manejar la expiración y renovación de la sesión, y el logout
-- [ ] Perfil `/users/me`: ver y editar nombre, zona horaria y locale
-- [ ] Preferencias de usuario `/users/me/preferences`
+- [x] Modelo de autenticación: JWT propio del backend + BFF
+- [x] `app/(auth)/login`: formulario de email/contraseña, con `?next=` validado (sin open redirect)
+- [x] **Login con Google** (backend + front): OAuth 2.0 + PKCE vía BFF, vinculación segura por email verificado, "Crear contraseña" en el perfil para cuentas solo Google (25/11/2026)
+- [x] `app/(auth)/register` con validación yup
+- [x] Recuperar contraseña (forgot/reset)
+- [x] Validación de email al registrarse (confirmación con botón, no al abrir el enlace) + reenvío desde el banner
+- [x] **Confirmación de email:** envío real por SMTP (`quarkus-mailer`), elegido con `EMAIL_DELIVERY=smtp`. Desarrollo con Mailpit, producción con Gmail u otro SMTP. Si el SMTP falla, el registro sigue y el usuario puede reenviar (25/11/2026)
+- [x] `proxy.ts`: proteger el área privada y redirigir a login
+- [x] Manejar la expiración y renovación de la sesión (proxy + BFF), y el logout
+- [x] Perfil `/profile`: nombre, zona horaria, idioma, moneda y cambio de contraseña
+- [ ] Preferencias de notificación → se hacen en el módulo 8 (Notificaciones)
 
 ## Fase 3 – Servicios y proveedores (CU-001) 🔗
 
@@ -237,4 +239,8 @@
 | 24/11/2026 | Decisión: integración con proveedores vía email (Gmail) |
 | 24/11/2026 | Backend: entities, modelos de dominio, DTOs y mappers (MapStruct) de los 12 módulos. Front: tipos `src/types/api/` alineados con los DTOs |
 | 24/11/2026 | Tarjetas de crédito: CU-015/016/017 y RN-016..020 en las specs, migración V9, módulo `card` en backend y `src/types/api/card.ts`. Nuevas fases 6b y 9b |
+| 24/11/2026 | Módulo 0 + 1 (rama `feature/auth-user`): base del front, BFF, proxy, login/registro/recupero/verificación, perfil. Backend: Flyway, manejo de errores, auth JWT, tests. Probado de punta a punta |
 | 24/11/2026 | Caso BBVA (resumen en el cuerpo del email, sin PDF): migración V10, extracción por regex (`EMAIL_BODY`), `account_last_four`, cierre opcional, RN-016 por vencimiento |
+| 25/11/2026 | Confirmación de email: adaptador SMTP en el backend (`EMAIL_DELIVERY=log\|smtp`, variables `SMTP_*`). Probado con un servidor SMTP real |
+| 25/11/2026 | Login con Google: `POST /auth/google/authorization` y `POST /auth/google` en el backend; `/api/auth/google` y su callback en el BFF; botón en login y registro. Probado de punta a punta contra un Google simulado (firma, PKCE, state, cancelación, reuso del código, vinculación) |
+| 25/11/2026 | Revisión de código (ponytail-review) y correcciones: claves JWT fuera del repo y obligatorias en producción; emails nunca al log en producción; refresh atómico con 409 cuando otro pedido ya rotó la sesión (el BFF y el proxy no borran las cookies); cambio de contraseña con sesión vencida; tests del id_token de Google (backend) y de `safeNextPath`/state (Vitest) |

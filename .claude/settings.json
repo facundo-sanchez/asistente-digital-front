@@ -1,18 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "extraKnownMarketplaces": {
-    "superpowers-marketplace": {
-      "source": { "source": "github", "repo": "obra/superpowers-marketplace" }
-    },
-    "thedotmack": {
-      "source": { "source": "github", "repo": "thedotmack/claude-mem" }
-    },
-    "impeccable": {
-      "source": { "source": "github", "repo": "pbakaus/impeccable" }
-    },
-    "ponytail": {
-      "source": { "source": "github", "repo": "DietrichGebert/ponytail" }
-    }
+  "env": {
+    "CLAUDE_MEM_TELEMETRY": "0",
+    "DO_NOT_TRACK": "1",
+    "CLAUDE_MEM_ONLINE_OPTIN": "false"
   },
   "enabledPlugins": {
     "superpowers@superpowers-marketplace": true,
@@ -20,9 +11,30 @@
     "impeccable@impeccable": true,
     "ponytail@ponytail": true
   },
-  "env": {
-    "CLAUDE_MEM_TELEMETRY": "0",
-    "DO_NOT_TRACK": "1",
-    "CLAUDE_MEM_ONLINE_OPTIN": "false"
+  "extraKnownMarketplaces": {
+    "superpowers-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "obra/superpowers-marketplace"
+      }
+    },
+    "thedotmack": {
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
+      }
+    },
+    "impeccable": {
+      "source": {
+        "source": "github",
+        "repo": "pbakaus/impeccable"
+      }
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    }
   }
 }

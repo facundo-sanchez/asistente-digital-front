@@ -50,13 +50,21 @@ export interface PageParams {
 }
 
 /**
- * Error que devuelve hoy el backend (org.acme.infrastructure.resources.rest.exceptions.ErrorResponse).
+ * Error uniforme del backend (org.acme.infrastructure.resources.rest.exceptions.ErrorResponse).
  * timestamp es LocalDateTime: sin zona horaria.
  */
 export interface ErrorResponse {
   mensaje: string;
   status: number;
   timestamp: string;
+  /** Errores por campo; solo en validaciones (400). */
+  violations: FieldViolation[] | null;
+}
+
+export interface FieldViolation {
+  /** Nombre del campo del request (ej. "email"). */
+  field: string;
+  message: string;
 }
 
 // ----------------------------------------------------------------------------
