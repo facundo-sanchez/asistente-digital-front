@@ -3,7 +3,7 @@
 import { useState } from "react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
-import { Controller, useForm, type DefaultValues } from "react-hook-form";
+import { Controller, useForm, useWatch, type DefaultValues } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -17,6 +17,7 @@ import { BILLING_FREQUENCY_LABELS } from "@/lib/billing-frequencies";
 import { CATEGORY_LABELS } from "@/lib/service-categories";
 import { ProviderAutocomplete } from "@/modules/providers/components/ProviderAutocomplete";
 import { servicesApi } from "../api";
+import { DuplicateWarning } from "./DuplicateWarning";
 import { serviceSchema, type ServiceFormValues } from "../validation";
 
 /** Proveedor y categoría arrancan vacíos: los completa el usuario (o el proveedor elegido). */
@@ -77,6 +78,7 @@ export function ServiceForm({ service }: { service?: ServiceResponse }) {
     resolver: yupResolver(serviceSchema),
     defaultValues: service ? toFormValues(service) : EMPTY,
   });
+  const [watchedProvider, watchedReference] = useWatch({ control, name: ["provider", "customerReference"] });
   const cancelHref = service ? `/services/${service.id}` : "/services";
 
   const onSubmit = handleSubmit(async (values) => {
@@ -138,6 +140,8 @@ export function ServiceForm({ service }: { service?: ServiceResponse }) {
           slotProps={{ htmlInput: { inputMode: "text", autoComplete: "off" } }}
           sx={{ "& .MuiOutlinedInput-root": { bgcolor: "background.default" } }}
         />
+
+        <DuplicateWarning providerId={watchedProvider?.id} customerReference={watchedReference ?? ""} excludeId={service?.id} />
 
         <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
           <FormTextField<ServiceFormValues> name="category" control={control} label="Categoría" select required>

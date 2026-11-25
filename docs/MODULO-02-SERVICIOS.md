@@ -23,7 +23,7 @@ Lo que ya existe antes de empezar:
 | 2.2 | Alta, listado y detalle de servicios | `feature/servicios-2-alta-listado` | 2.1 | [x] sin PR |
 | 2.3 | Edición, activar/desactivar y baja | `feature/servicios-3-edicion-estado` | 2.2 | [x] sin PR |
 | 2.4 | Proveedor propio ("no encuentro mi proveedor") | `feature/servicios-4-proveedor-propio` | 2.1, 2.2 | [x] sin PR |
-| 2.5 | Posibles duplicados y ayuda del nro. de socio | `feature/servicios-5-duplicados` | 2.2 | [ ] |
+| 2.5 | Posibles duplicados y ayuda del nro. de socio | `feature/servicios-5-duplicados` | 2.2 | [x] sin PR |
 
 Orden recomendado: 2.1 → 2.2 → 2.3 → 2.4 → 2.5. Después de 2.2 el módulo ya es usable; 2.3 a 2.5 lo completan.
 
@@ -140,15 +140,21 @@ Queda fuera de este módulo (se suma cuando existan esos módulos):
 **Objetivo:** evitar servicios repetidos y ayudar a completar el dato que asocia las facturas del email al servicio (CU-001, flujo alternativo).
 
 ### Backend
-- [ ] Al crear o editar, buscar servicios del mismo usuario con el mismo proveedor y el mismo nro. de socio (sin espacios ni guiones, sin distinguir mayúsculas).
-- [ ] La respuesta de `POST` y `PUT` informa los posibles duplicados (`possibleDuplicates`) sin bloquear el alta. Si se prefiere confirmar antes de guardar, usar `GET /services/duplicates?providerId=&customerReference=`; decidirlo al empezar la parte.
-- [ ] Tests de la normalización y de la detección.
+- [x] Al crear o editar, buscar servicios del mismo usuario con el mismo proveedor y el mismo nro. de socio (sin espacios ni guiones, sin distinguir mayúsculas).
+- [x] La respuesta de `POST` y `PUT` informa los posibles duplicados (`possibleDuplicates`) sin bloquear el alta. Si se prefiere confirmar antes de guardar, usar `GET /services/duplicates?providerId=&customerReference=`; decidirlo al empezar la parte.
+- [x] Tests de la normalización y de la detección.
 
 ### Frontend
-- [ ] Aviso no bloqueante en el formulario: "Ya tenés un servicio de Coopelectric con el socio 10234" + enlace al existente.
-- [ ] Campo "Nro. de socio / suministro" destacado, con ayuda de dónde encontrarlo en la factura. El texto de ayuda sale del proveedor cuando lo tiene; si no, uno genérico.
+- [x] Aviso no bloqueante en el formulario: "Ya tenés un servicio de Coopelectric con el socio 10234" + enlace al existente.
+- [x] Campo "Nro. de socio / suministro" destacado, con ayuda de dónde encontrarlo en la factura. El texto de ayuda sale del proveedor cuando lo tiene; si no, uno genérico.
 
 **Listo cuando:** registrar dos veces el mismo socio de Coopelectric muestra el aviso con el enlace al servicio existente.
+
+**Hecho (25/11/2026):**
+- Decisiones: el duplicado se avisa **antes de guardar** con `GET /services/duplicates?providerId=&customerReference=&excludeId=` (no bloquea); la ayuda del nro. de socio es un **texto fijo** en el front (no hay datos verificados por proveedor y no se inventan).
+- Backend: `CustomerReference.normalize` (sin espacios, guiones, puntos ni mayúsculas: "10.234-5" = "102345"); `ServiceQueryUseCase.possibleDuplicates` compara en Java los servicios del mismo proveedor. 5 tests nuevos.
+- Frontend: `DuplicateWarning` debajo del nro. de socio (alta y edición), consulta cuando el usuario deja de escribir y enlaza al servicio existente; si la consulta falla no muestra nada.
+- Verificado de punta a punta: "99-999" encuentra "99999" y "99.999", al editar no se avisa sobre el propio servicio, otro usuario no ve duplicados ajenos, sin proveedor responde 400.
 
 ---
 
@@ -162,8 +168,8 @@ Queda fuera de este módulo (se suma cuando existan esos módulos):
 
 | Tema | Opciones | Se decide en |
 |---|---|---|
-| Duplicados: aviso después de guardar o confirmación antes | `possibleDuplicates` en la respuesta / `GET /services/duplicates` | 2.5 |
-| Texto de ayuda del nro. de socio por proveedor | Columna nueva en `providers` / dentro de `metadata` / texto fijo en el front | 2.5 |
+| Duplicados: aviso después de guardar o confirmación antes | **Decidido:** aviso antes de guardar con `GET /services/duplicates` | 2.5 |
+| Texto de ayuda del nro. de socio por proveedor | **Decidido:** texto fijo en el front (sin datos verificados por proveedor) | 2.5 |
 
 ## Registro de avances
 
@@ -174,3 +180,5 @@ Queda fuera de este módulo (se suma cuando existan esos módulos):
 | 25/11/2026 | 2.2 | Alta, listado y detalle de servicios (API + pantallas), helpers compartidos de búsqueda y enums, tabla tipo libro de cuentas reutilizable | sin PR |
 | 25/11/2026 | 2.3 | Edición, activar/desactivar y baja lógica de servicios | sin PR |
 | 25/11/2026 | 2.4 | Proveedor propio: `POST /providers` y diálogo "Crealo" en el formulario | sin PR |
+| 25/11/2026 | 2.5 | Aviso de posibles duplicados antes de guardar (`GET /services/duplicates`) | sin PR |
+| 25/11/2026 | — | **Módulo 2 completo** (5/5 partes) | — |
