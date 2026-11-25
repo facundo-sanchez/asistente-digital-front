@@ -4,7 +4,7 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import ArrowBackOutlined from "@mui/icons-material/ArrowBackOutlined";
-import type { ObligationResponse } from "@/types/api";
+import type { DocumentResponse, ObligationResponse, PageResponse } from "@/types/api";
 import { ButtonLink } from "@/components/common/ButtonLink";
 import { TextLink } from "@/components/common/TextLink";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -15,14 +15,20 @@ import { isUuid } from "@/lib/uuid";
 import { ServiceDocumentsPanel } from "@/modules/documents/components/ServiceDocumentsPanel";
 import { ObligationCancelAction } from "@/modules/obligations/components/ObligationCancelAction";
 import { ObligationDetails } from "@/modules/obligations/components/ObligationDetails";
+import { RegisterPaymentAction } from "@/modules/payments/components/RegisterPaymentAction";
 
 export const metadata: Metadata = { title: "Vencimiento" };
 
 export default async function ObligationPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {
   const { id } = await params;
   if (!isUuid(id)) notFound();
-  const obligation = await serverGet<ObligationResponse>(`/obligations/${id}`);
+  const [obligation, documents] = await Promise.all([
+    serverGet<ObligationResponse>(`/obligations/${id}`),
+    // shortcut: comprobantes entre los 100 documentos más nuevos; con más, buscar al tipear
+    serverGet<PageResponse<DocumentResponse>>("/documents?size=100"),
+  ]);
   if (!obligation) notFound();
+  const receipts = (documents?.content ?? []).map((d) => ({ id: d.id, name: d.title ?? d.originalFilename }));
   const query = await searchParams;
   const notice = firstParam(query.created) === "1"
     ? "Registramos el vencimiento."
@@ -44,10 +50,12 @@ export default async function ObligationPage({ params, searchParams }: { params:
           action={
             editable && (
               <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: "wrap" }}>
-                <ButtonLink href={`/obligations/${obligation.id}/edit`} variant="contained">
+                <RegisterPaymentAction obligation={obligation} receipts={receipts} />
+                <ButtonLink href={`/obligations/${obligation.id}/edit`} variant="outlined">
                   Editar
                 </ButtonLink>
-                <ObligationCancelAction id={obligation.id} title={obligation.title} />
+                {/* Con pagos vigentes no se cancela: primero se anulan (4.4) */}
+                {obligation.paidAmount === 0 && <ObligationCancelAction id={obligation.id} title={obligation.title} />}
               </Stack>
             )
           }

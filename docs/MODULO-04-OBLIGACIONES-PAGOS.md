@@ -34,7 +34,7 @@
 |---|---|---|---|---|
 | 4.1 | Alta manual y listado con filtros | `feature/obligaciones-1-2` (junto con 4.2) | — | [x] |
 | 4.2 | Detalle, edición y cancelación | `feature/obligaciones-1-2` | 4.1 | [x] |
-| 4.3 | Registrar un pago (total o parcial) | `feature/obligaciones-3-pago` | 4.2 | [ ] |
+| 4.3 | Registrar un pago (total o parcial) | `feature/obligaciones-3-pago` | 4.2 | [x] |
 | 4.4 | Historial de pagos, anulación y corrección | `feature/obligaciones-4-historial` | 4.3 | [ ] |
 | 4.5 | Vencimientos dentro del servicio | `feature/obligaciones-5-en-servicio` | 4.1 | [ ] |
 | 4.6 | Vencimientos que se repiten (alquiler, seguros) | `feature/obligaciones-6-recurrentes` | 4.2 | [ ] |
@@ -85,14 +85,16 @@ Orden: 4.1 → 4.2 → 4.3 → 4.4 → 4.5 → 4.6. Con 4.1 a 4.3 el módulo ya 
 ## Parte 4.3 – Registrar un pago
 
 ### Backend
-- [ ] `PaymentRepository` y `RegisterPaymentUseCase`: obligación del usuario y no cancelada ni pagada, moneda igual a la de la obligación, comprobante del usuario; actualiza estado y `paid_at` en la misma transacción.
-- [ ] `POST /payments` → 201.
-- [ ] Tests: pago total → `PAID`, parcial → `PARTIALLY_PAID` con saldo, sin importe → `PAID`, moneda distinta (400), obligación ajena (404), cancelada (400).
+- [x] `PaymentRepository` y `RegisterPaymentUseCase`: obligación del usuario y no cancelada ni pagada, moneda igual a la de la obligación, comprobante del usuario; actualiza estado y `paid_at` en la misma transacción.
+- [x] `POST /payments` → 201.
+- [x] Tests: pago total → `PAID`, parcial → `PARTIALLY_PAID` con saldo, sin importe → `PAID`, moneda distinta (400), obligación ajena (404), cancelada (400).
 
 ### Frontend
-- [ ] "Registrar pago" en el detalle: diálogo con importe (sugiere el saldo), fecha (hoy), medio de pago, comprobante opcional (documentos del usuario) y notas.
+- [x] "Registrar pago" en el detalle: diálogo con importe (sugiere el saldo), fecha (hoy), medio de pago, comprobante opcional (documentos del usuario) y notas.
 
 **Listo cuando:** se paga la mitad de una factura y queda "Pago parcial" con el saldo; al pagar el resto queda "Pagada".
+
+**Hecho (25/11/2026):** `Obligation.applyPaidAmount` (nada → Pendiente, todo o más o sin importe → Pagada con `paid_at`, si no → Pago parcial; lo reusa la anulación de la 4.4), `PaymentRepository`, `RegisterPaymentUseCase` (obligación del usuario, ni pagada ni cancelada, misma moneda, comprobante del usuario) y `POST /payments`. Front: "Registrar pago" en el detalle (sugiere el saldo, fecha de hoy, medio, comprobante entre los documentos, notas); "Cancelar vencimiento" se oculta si ya hay pagos. Verificado contra la base: 15000 de 40000 → Pago parcial con saldo 25000, el resto → Pagada, otra moneda / fecha futura / ya pagada 400, ajena 404, cancelar con pagos 400. 7 tests de backend y 2 de front nuevos. Atajo anotado: dos pagos simultáneos de la misma obligación no se bloquean (un usuario por cuenta).
 
 ---
 
