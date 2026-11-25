@@ -29,7 +29,7 @@
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
 | 3.1 | Subir un documento (almacenamiento en disco + validaciones) | `feature/documentos-1-subida` | — | [x] sin PR |
-| 3.2 | Repositorio: listado, búsqueda y filtros | `feature/documentos-2-listado` | 3.1 | [ ] |
+| 3.2 | Repositorio: listado, búsqueda y filtros | `feature/documentos-2-listado` | 3.1 | [x] sin PR |
 | 3.3 | Descarga y vista previa | `feature/documentos-3-descarga` | 3.1 | [ ] |
 | 3.4 | Edición, asociación a servicio, vencimiento y baja | `feature/documentos-4-edicion` | 3.2 | [ ] |
 | 3.5 | Documentos dentro del servicio | `feature/documentos-5-en-servicio` | 3.4 | [ ] |
@@ -63,14 +63,16 @@ Orden recomendado: 3.1 → 3.2 → 3.3 → 3.4 → 3.5. Con 3.1 a 3.3 el módulo
 ## Parte 3.2 – Repositorio: listado, búsqueda y filtros
 
 ### Backend
-- [ ] `GET /documents?query=&documentType=&serviceId=&page=&size=` (sin borrados, más nuevos primero; busca en título y nombre de archivo).
-- [ ] `GET /documents/{id}` (404 si es de otro usuario o está borrado).
-- [ ] Tests: filtros y aislamiento entre usuarios.
+- [x] `GET /documents?query=&documentType=&serviceId=&page=&size=` (sin borrados, más nuevos primero; busca en título y nombre de archivo).
+- [x] `GET /documents/{id}` (404 si es de otro usuario o está borrado).
+- [x] Tests: filtros y aislamiento entre usuarios.
 
 ### Frontend
-- [ ] `/documents`: tabla tipo libro de cuentas (tipo, título/archivo, servicio, tamaño, fecha), filtros en la URL, paginación, estados vacío y cargando.
+- [x] `/documents`: tabla tipo libro de cuentas (tipo, título/archivo, servicio, tamaño, fecha), filtros en la URL, paginación, estados vacío y cargando.
 
 **Listo cuando:** se filtran facturas de un servicio y se busca por nombre de archivo.
+
+**Hecho (25/11/2026):** `GET /documents` (búsqueda en título y archivo, tipo, servicio, más nuevos primero) y `GET /documents/{id}`, con `serviceName` en la respuesta (`DocumentView`, nombres en una sola consulta). Front: `/documents` con filtros en la URL, tabla, paginación, estados vacíos y aviso tras subir. Para no repetir código entre listados se extrajeron `useUrlFilters` y `SearchField` (también los usa Servicios). Corrección encontrada en la prueba: `Map.of().get(null)` lanza excepción; los documentos sin servicio ya no consultan el mapa, y el repositorio en memoria de los tests ahora devuelve un mapa inmutable como el real. 4 tests de backend y 3 de front nuevos.
 
 ---
 
@@ -130,3 +132,4 @@ Orden recomendado: 3.1 → 3.2 → 3.3 → 3.4 → 3.5. Con 3.1 a 3.3 el módulo
 |---|---|---|---|
 | 25/11/2026 | — | Plan del módulo creado | — |
 | 25/11/2026 | 3.1 | Subida de documentos: almacenamiento en disco, validación por contenido, repetidos, barra de progreso | sin PR |
+| 25/11/2026 | 3.2 | Listado, búsqueda y filtros de documentos | sin PR |

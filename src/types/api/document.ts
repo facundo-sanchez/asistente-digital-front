@@ -44,6 +44,8 @@ export type ExtractionValidationStatus =
 export interface DocumentResponse {
   id: UUID;
   serviceId: UUID | null;
+  /** Nombre del servicio asociado (null si no tiene). */
+  serviceName: string | null;
   assetId: UUID | null;
   obligationId: UUID | null;
   documentType: DocumentType;
