@@ -2,17 +2,62 @@
 @layer theme, base, mui, components, utilities;
 @import "tailwindcss";
 
-:root {
-  --background: #f5f7fa;
-  --foreground: #171717;
-}
-
+/* Tailwind usa los mismos colores que MUI (variables del tema, cambian con el modo) */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-nunito);
+  --color-background: var(--mui-palette-background-default);
+  --color-foreground: var(--mui-palette-text-primary);
+  --font-sans: var(--font-archivo);
 }
 
-body {
-  font-family: var(--font-nunito), Helvetica, Arial, sans-serif;
+/*
+ * Estilos globales en la capa "base": van antes de "mui", así los componentes de MUI
+ * pueden sobrescribirlos (ej. los campos de texto, que marcan el foco con su borde).
+ * Fuera de una capa ganarían siempre, aunque el tema diga otra cosa.
+ */
+@layer base {
+  /* Superficies del navegador con la paleta del tema */
+  ::selection {
+    background: color-mix(in srgb, var(--mui-palette-secondary-main) 28%, transparent);
+    color: var(--mui-palette-text-primary);
+  }
+
+  html {
+    caret-color: var(--mui-palette-secondary-main);
+    scrollbar-color: var(--mui-palette-divider) transparent;
+    scrollbar-width: thin;
+  }
+
+  /* Un solo acento para el foco de teclado en toda la app */
+  :focus-visible {
+    outline: 2px solid var(--mui-palette-secondary-main);
+    outline-offset: 2px;
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+  }
+}
+
+/* Roseta guilloché: el arco se dibuja una vez al aparecer (el único movimiento de la app) */
+@keyframes rosette-draw {
+  from {
+    stroke-dashoffset: var(--rosette-circumference);
+  }
+}
+
+.guilloche-rosette__arc {
+  animation: rosette-draw 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guilloche-rosette__arc {
+    animation: none;
+  }
+}
+
+/* Montos y fechas: cifras de ancho fijo para que se alineen en columna */
+.tabular-nums,
+input[inputmode="decimal"],
+input[inputmode="numeric"] {
+  font-variant-numeric: tabular-nums;
 }

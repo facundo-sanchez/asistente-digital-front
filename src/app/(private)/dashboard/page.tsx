@@ -1,41 +1,31 @@
 import type { Metadata } from "next";
-import Grid from "@mui/material/Grid";
-import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { requireUser } from "@/lib/server/dal";
+import { MonthPanel } from "@/modules/dashboard/components/MonthPanel";
+import { UpcomingPanel } from "@/modules/dashboard/components/UpcomingPanel";
 import { EmailVerificationBanner } from "@/modules/user/components/EmailVerificationBanner";
 
 export const metadata: Metadata = { title: "Inicio" };
 
-/** Próximos módulos (docs/ROADMAP-MODULOS.md). Se reemplaza por el dashboard real en el módulo 7. */
-const UPCOMING = [
-  { title: "Servicios", text: "Registrá luz, gas, internet y demás servicios." },
-  { title: "Obligaciones", text: "Vencimientos y pagos en un solo lugar." },
-  { title: "Tarjetas", text: "Resúmenes, consumos y cuotas pendientes." },
-];
+/** Mes en curso en el idioma y la zona horaria del usuario, ej. "Noviembre de 2026". */
+function currentMonthLabel(locale: string, timeZone: string): string {
+  const label = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone }).format(new Date());
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
 
 export default async function DashboardPage() {
   const user = await requireUser();
+  const monthLabel = currentMonthLabel(user.locale, user.timezone);
   return (
-    <Stack spacing={3}>
-      <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
-        Hola, {user.name}
-      </Typography>
+    <Stack spacing={4} sx={{ maxWidth: 1200 }}>
+      <PageHeader title={`Hola, ${user.name}`} description={`${monthLabel} · así están tus cuentas`} />
       {!user.emailVerified && <EmailVerificationBanner email={user.email} />}
-      <Grid container spacing={2}>
-        {UPCOMING.map((item) => (
-          <Grid key={item.title} size={{ xs: 12, sm: 6, lg: 4 }}>
-            <Paper variant="outlined" sx={{ p: 3, height: "100%" }}>
-              <Typography variant="overline" color="text.secondary">
-                Próximamente
-              </Typography>
-              <Typography variant="h6">{item.title}</Typography>
-              <Typography color="text.secondary">{item.text}</Typography>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
+      <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: { xs: "minmax(0, 1fr)", lg: "minmax(0, 1fr) 340px" }, alignItems: "stretch" }}>
+        <UpcomingPanel />
+        <MonthPanel />
+      </Box>
     </Stack>
   );
 }
