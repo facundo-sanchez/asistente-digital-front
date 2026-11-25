@@ -16,11 +16,13 @@ import { DOCUMENT_TYPES, type DocumentType } from "@/types/api";
 import { ApiError } from "@/lib/api/api-error";
 import { DOCUMENT_TYPE_LABELS } from "@/lib/document-types";
 import { documentsApi } from "../api";
+import type { DocumentUploadFormProps } from "./document-upload-form-props";
 import { ACCEPT_ATTRIBUTE, formatFileSize, validateFile } from "../upload-rules";
 
 /** Subir un documento: elegir o arrastrar el archivo, tipo y título opcional. */
-export function DocumentUploadForm() {
+export function DocumentUploadForm({ service }: DocumentUploadFormProps) {
   const router = useRouter();
+  const backHref = service ? `/services/${service.id}` : "/documents";
   const [file, setFile] = useState<File | null>(null);
   const [documentType, setDocumentType] = useState<DocumentType>("INVOICE");
   const [title, setTitle] = useState("");
@@ -50,8 +52,8 @@ export function DocumentUploadForm() {
     setError(null);
     setProgress(0);
     try {
-      await documentsApi.upload(file, documentType, title, setProgress);
-      router.push("/documents?uploaded=1");
+      await documentsApi.upload(file, documentType, title, service?.id ?? null, setProgress);
+      router.push(`${backHref}?uploaded=1`);
       router.refresh();
     } catch (e) {
       setProgress(null);
@@ -65,6 +67,7 @@ export function DocumentUploadForm() {
     <Box component="form" onSubmit={submit} noValidate>
       <Stack spacing={3}>
         {error && <Alert severity="error">{error}</Alert>}
+        {service && <Alert severity="info">Queda asociado al servicio «{service.name}».</Alert>}
 
         <Box
           component="label"
@@ -150,7 +153,7 @@ export function DocumentUploadForm() {
           <Button type="submit" variant="contained" size="large" loading={uploading} disabled={!file}>
             Subir documento
           </Button>
-          <Button component={NextLink} href="/documents" size="large" color="inherit" disabled={uploading}>
+          <Button component={NextLink} href={backHref} size="large" color="inherit" disabled={uploading}>
             Cancelar
           </Button>
         </Box>

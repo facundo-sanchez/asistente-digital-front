@@ -32,7 +32,7 @@
 | 3.2 | Repositorio: listado, búsqueda y filtros | `feature/documentos-2-listado` | 3.1 | [x] sin PR |
 | 3.3 | Descarga y vista previa | `feature/documentos-3-descarga` | 3.1 | [x] |
 | 3.4 | Edición, asociación a servicio, vencimiento y baja | `feature/documentos-4-edicion` | 3.2 | [x] |
-| 3.5 | Documentos dentro del servicio | `feature/documentos-5-en-servicio` | 3.4 | [ ] |
+| 3.5 | Documentos dentro del servicio | `feature/documentos-5-en-servicio` | 3.4 | [x] |
 | 3.6 | (Opcional) Adaptador MinIO/S3 | `feature/documentos-6-minio` | 3.1 | [ ] |
 
 Orden recomendado: 3.1 → 3.2 → 3.3 → 3.4 → 3.5. Con 3.1 a 3.3 el módulo ya es usable.
@@ -110,10 +110,15 @@ Orden recomendado: 3.1 → 3.2 → 3.3 → 3.4 → 3.5. Con 3.1 a 3.3 el módulo
 
 ## Parte 3.5 – Documentos dentro del servicio
 
-### Frontend (backend ya cubierto por el filtro `serviceId`)
-- [ ] En `/services/[id]`, panel "Documentos" con los del servicio y "Subir documento" que ya lo deja asociado.
+### Backend
+- [x] `POST /documents` acepta `serviceId` (del usuario; si no, 400). Cambio respecto del plan: el filtro solo no alcanzaba para subir ya asociado.
+
+### Frontend
+- [x] En `/services/[id]`, panel "Documentos" con los del servicio y "Subir documento" que ya lo deja asociado.
 
 **Listo cuando:** desde el detalle de un servicio se sube un documento y aparece en su panel.
+
+**Hecho (25/11/2026):** `UploadDocumentUseCase` valida el servicio antes de guardar el archivo y la respuesta de la subida trae `serviceName`. Front: `ServiceDocumentsPanel` en el detalle del servicio (últimos 10, enlace a todos), `/documents/new?serviceId=…` asocia y vuelve al servicio con aviso. Verificado: subida asociada muestra «Luz casa», servicio ajeno 400, el panel lista el documento. 1 test de backend nuevo.
 
 ---
 
