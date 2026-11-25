@@ -13,6 +13,9 @@ import {
   setSessionCookies,
 } from "@/lib/server/session-cookies";
 
+/** Encabezados del backend que llegan al navegador (los de descarga incluidos). */
+const FORWARDED_HEADERS = ["Content-Type", "Content-Disposition", "X-Content-Type-Options", "Cache-Control"];
+
 interface Context {
   params: Promise<{ path: string[] }>;
 }
@@ -77,11 +80,13 @@ async function handler(request: NextRequest, { params }: Context) {
     return unavailable();
   }
 
-  const body = res.status === 204 ? null : await res.arrayBuffer();
-  const response = new NextResponse(body, {
-    status: res.status,
-    headers: res.headers.get("Content-Type") ? { "Content-Type": res.headers.get("Content-Type")! } : {},
-  });
+  // El cuerpo pasa como stream: las descargas no se cargan enteras en memoria
+  const headers = new Headers();
+  for (const name of FORWARDED_HEADERS) {
+    const value = res.headers.get(name);
+    if (value) headers.set(name, value);
+  }
+  const response = new NextResponse(res.status === 204 ? null : res.body, { status: res.status, headers });
 
   if (renewed) {
     setSessionCookies(response.cookies, renewed);

@@ -2,10 +2,10 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { DocumentResponse } from "@/types/api";
 import { desktopOnly, ledgerCell, ledgerHeadCell, ledgerTable } from "@/components/ledger/ledger-styles";
+import { TextLink } from "@/components/common/TextLink";
+import { formatDay } from "@/lib/dates";
 import { DOCUMENT_TYPE_LABELS } from "@/lib/document-types";
 import { formatFileSize } from "../upload-rules";
-
-const dateFormat = new Intl.DateTimeFormat("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
 /**
  * Documentos como libro de cuentas: documento (título y archivo), tipo, servicio,
@@ -38,9 +38,9 @@ export function DocumentsTable({ documents }: { documents: DocumentResponse[] })
           {documents.map((document) => (
             <Box component="tr" key={document.id}>
               <Box component="td" sx={ledgerCell}>
-                <Typography sx={{ fontWeight: 600, overflowWrap: "anywhere" }}>
+                <TextLink href={`/documents/${document.id}`} sx={{ fontWeight: 600, color: "text.primary", overflowWrap: "anywhere" }}>
                   {document.title ?? document.originalFilename}
-                </Typography>
+                </TextLink>
                 {document.title && (
                   <Typography variant="body2" color="text.secondary" sx={{ overflowWrap: "anywhere" }}>
                     {document.originalFilename}
@@ -57,7 +57,7 @@ export function DocumentsTable({ documents }: { documents: DocumentResponse[] })
                 {formatFileSize(document.fileSize)}
               </Box>
               <Box component="td" sx={ledgerCell} className="tabular-nums">
-                {dateFormat.format(new Date(document.createdAt))}
+                {formatDay(document.createdAt)}
               </Box>
             </Box>
           ))}
