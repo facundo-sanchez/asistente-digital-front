@@ -9,11 +9,13 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import HomeOutlined from "@mui/icons-material/HomeOutlined";
 import PersonOutlined from "@mui/icons-material/PersonOutlined";
+import ReceiptLongOutlined from "@mui/icons-material/ReceiptLongOutlined";
 import type { NavItem } from "./nav-item";
 import { NAV_ITEMS } from "./nav-items";
 
 const ICONS: Record<NavItem["icon"], ReactNode> = {
   dashboard: <HomeOutlined />,
+  services: <ReceiptLongOutlined />,
   profile: <PersonOutlined />,
 };
 

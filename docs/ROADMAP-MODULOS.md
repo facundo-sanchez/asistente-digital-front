@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|---|
 | 0 | **Base** | `feature/auth-user` | Flyway, datasource, manejo de errores, paginación, "usuario actual" | Layout, tema MUI, cliente HTTP, BFF | — | [x] sin PR |
 | 1 | **Auth + Usuario** | `feature/auth-user` | Registro, login, JWT + refresh, verificación de email, recupero de contraseña, `/users/me` | Login, registro, `proxy.ts`, perfil | 0 | [x] sin PR |
-| 2 | **Proveedores + Servicios** ⭐ | `feature/servicios` | Primer CRUD completo (repositorio, caso de uso, resource, tests) | Listado, alta/edición, detalle | 1 | [ ] |
+| 2 | **Proveedores + Servicios** ⭐ | `feature/servicios-<n>-*` (5 partes, ver [MODULO-02-SERVICIOS.md](./MODULO-02-SERVICIOS.md)) | Primer CRUD completo (repositorio, caso de uso, resource, tests) | Listado, alta/edición, detalle | 1 | [x] 5/5 partes, sin PR |
 | 3 | **Documentos** | `feature/documentos` | Carga a storage (MinIO), descarga | Repositorio documental, carga de archivos | 1 | [ ] |
 | 4 | **Obligaciones + Pagos** | `feature/obligaciones-pagos` | Vista `v_obligations`, pagos parciales | Tabla con filtros, registro de pago | 2, 3 | [ ] |
 | 5 | **Facturas** (carga manual) | `feature/facturas` | Confirmar factura genera la obligación | Carga manual y validación | 2, 3, 4 | [ ] |

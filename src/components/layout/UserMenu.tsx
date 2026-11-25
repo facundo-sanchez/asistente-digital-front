@@ -30,7 +30,7 @@ export function UserMenu({ user }: { user: Pick<UserResponse, "name" | "email"> 
   return (
     <>
       <IconButton onClick={(e) => setAnchor(e.currentTarget)} aria-label="Menú de usuario" size="small">
-        <Avatar sx={{ width: 34, height: 34, bgcolor: "primary.main", color: "primary.contrastText", fontWeight: 600, fontSize: "0.95rem" }}>
+        <Avatar sx={{ width: 34, height: 34, bgcolor: "primary.main", color: "primary.contrastText", fontWeight: 600, fontSize: "1rem" }}>
           {user.name.charAt(0).toUpperCase()}
         </Avatar>
       </IconButton>
