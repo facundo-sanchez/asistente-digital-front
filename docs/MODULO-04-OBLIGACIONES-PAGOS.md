@@ -35,7 +35,7 @@
 | 4.1 | Alta manual y listado con filtros | `feature/obligaciones-1-2` (junto con 4.2) | — | [x] |
 | 4.2 | Detalle, edición y cancelación | `feature/obligaciones-1-2` | 4.1 | [x] |
 | 4.3 | Registrar un pago (total o parcial) | `feature/obligaciones-3-pago` | 4.2 | [x] |
-| 4.4 | Historial de pagos, anulación y corrección | `feature/obligaciones-4-historial` | 4.3 | [ ] |
+| 4.4 | Historial de pagos, anulación y corrección | `feature/obligaciones-4-historial` | 4.3 | [x] |
 | 4.5 | Vencimientos dentro del servicio | `feature/obligaciones-5-en-servicio` | 4.1 | [ ] |
 | 4.6 | Vencimientos que se repiten (alquiler, seguros) | `feature/obligaciones-6-recurrentes` | 4.2 | [ ] |
 
@@ -101,14 +101,16 @@ Orden: 4.1 → 4.2 → 4.3 → 4.4 → 4.5 → 4.6. Con 4.1 a 4.3 el módulo ya 
 ## Parte 4.4 – Historial, anulación y corrección
 
 ### Backend
-- [ ] `GET /obligations/{id}/payments` (incluye anulados).
-- [ ] `POST /payments/{id}/void` (motivo obligatorio) y `PUT /payments/{id}` (anula y crea el reemplazo, en una transacción). Recalculan el estado de la obligación.
-- [ ] Tests: anular el único pago vuelve a `PENDING`; corrección conserva el anulado; pago ajeno (404).
+- [x] `GET /obligations/{id}/payments` (incluye anulados).
+- [x] `POST /payments/{id}/void` (motivo obligatorio) y `PUT /payments/{id}` (anula y crea el reemplazo, en una transacción). Recalculan el estado de la obligación.
+- [x] Tests: anular el único pago vuelve a `PENDING`; corrección conserva el anulado; pago ajeno (404).
 
 ### Frontend
-- [ ] Historial de pagos en el detalle (los anulados tachados, con motivo), acciones Anular y Corregir.
+- [x] Historial de pagos en el detalle (los anulados tachados, con motivo), acciones Anular y Corregir.
 
 **Listo cuando:** se anula un pago cargado por error y la obligación vuelve a "Pendiente", con el pago anulado visible en el historial.
+
+**Hecho (25/11/2026):** `PaymentDraftValidator` (moneda y comprobante, compartido por registrar y corregir), `ManagePaymentUseCase` (`history`, `voidPayment`, `correct`: anula con motivo «Corregido» y crea el reemplazo con `replacesPaymentId`; el estado se recalcula con `applyPaidAmount`). `GET /obligations/{id}/payments`, `POST /payments/{id}/void` (204), `PUT /payments/{id}`. Front: panel "Pagos" en el detalle (fecha, importe, medio, comprobante con enlace, notas; anulados tachados con motivo) y acciones Corregir y Anular; el formulario del pago pasó a `PaymentDialog`, compartido por registrar y corregir. Verificado contra la base: anular uno de dos → Pago parcial, corregir 4000 → 40000 → Pagada, sin motivo / ya anulado 400, ajeno 404. 4 tests de backend nuevos.
 
 ---
 

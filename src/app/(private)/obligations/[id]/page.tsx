@@ -15,6 +15,7 @@ import { isUuid } from "@/lib/uuid";
 import { ServiceDocumentsPanel } from "@/modules/documents/components/ServiceDocumentsPanel";
 import { ObligationCancelAction } from "@/modules/obligations/components/ObligationCancelAction";
 import { ObligationDetails } from "@/modules/obligations/components/ObligationDetails";
+import { PaymentsPanel } from "@/modules/payments/components/PaymentsPanel";
 import { RegisterPaymentAction } from "@/modules/payments/components/RegisterPaymentAction";
 
 export const metadata: Metadata = { title: "Vencimiento" };
@@ -54,7 +55,7 @@ export default async function ObligationPage({ params, searchParams }: { params:
                 <ButtonLink href={`/obligations/${obligation.id}/edit`} variant="outlined">
                   Editar
                 </ButtonLink>
-                {/* Con pagos vigentes no se cancela: primero se anulan (4.4) */}
+                {/* Con pagos vigentes no se cancela: primero se anulan */}
                 {obligation.paidAmount === 0 && <ObligationCancelAction id={obligation.id} title={obligation.title} />}
               </Stack>
             )
@@ -65,6 +66,7 @@ export default async function ObligationPage({ params, searchParams }: { params:
       <Panel title="Datos del vencimiento">
         <ObligationDetails obligation={obligation} />
       </Panel>
+      <PaymentsPanel obligation={obligation} receipts={receipts} />
       {/* CU-005: los documentos asociados llegan por su servicio (facturas, pólizas) */}
       {obligation.serviceId && <ServiceDocumentsPanel serviceId={obligation.serviceId} />}
     </Stack>
