@@ -22,7 +22,7 @@ Lo que ya existe antes de empezar:
 | 2.1 | Catálogo de proveedores (solo lectura) | `feature/servicios-1-proveedores` | — | [x] sin PR |
 | 2.2 | Alta, listado y detalle de servicios | `feature/servicios-2-alta-listado` | 2.1 | [x] sin PR |
 | 2.3 | Edición, activar/desactivar y baja | `feature/servicios-3-edicion-estado` | 2.2 | [x] sin PR |
-| 2.4 | Proveedor propio ("no encuentro mi proveedor") | `feature/servicios-4-proveedor-propio` | 2.1, 2.2 | [ ] |
+| 2.4 | Proveedor propio ("no encuentro mi proveedor") | `feature/servicios-4-proveedor-propio` | 2.1, 2.2 | [x] sin PR |
 | 2.5 | Posibles duplicados y ayuda del nro. de socio | `feature/servicios-5-duplicados` | 2.2 | [ ] |
 
 Orden recomendado: 2.1 → 2.2 → 2.3 → 2.4 → 2.5. Después de 2.2 el módulo ya es usable; 2.3 a 2.5 lo completan.
@@ -118,15 +118,20 @@ Queda fuera de este módulo (se suma cuando existan esos módulos):
 **Objetivo:** si el proveedor no está en el catálogo, el usuario lo crea sin salir del formulario.
 
 ### Backend
-- [ ] `POST /providers` (`ProviderRequest`): crea un proveedor con `user_id` del usuario y `custom = true`. El `code` se genera a partir del nombre.
-- [ ] Validaciones: nombre obligatorio, categoría válida, sitio web con formato de URL; advertencia si ya existe uno con el mismo nombre en el catálogo.
-- [ ] Tests: alta, visible solo para su dueño, nombre repetido.
+- [x] `POST /providers` (`ProviderRequest`): crea un proveedor con `user_id` del usuario y `custom = true`. El `code` se genera a partir del nombre.
+- [x] Validaciones: nombre obligatorio, categoría válida, sitio web con formato de URL; advertencia si ya existe uno con el mismo nombre en el catálogo.
+- [x] Tests: alta, visible solo para su dueño, nombre repetido.
 
 ### Frontend
-- [ ] En `ProviderAutocomplete`, opción "No encuentro mi proveedor: crear «{texto}»" que abre un formulario corto (nombre, categoría, sitio web) y lo deja seleccionado.
-- [ ] Los proveedores propios se distinguen del catálogo (ej. rótulo "Propio").
+- [x] En `ProviderAutocomplete`, opción "No encuentro mi proveedor: crear «{texto}»" que abre un formulario corto (nombre, categoría, sitio web) y lo deja seleccionado.
+- [x] Los proveedores propios se distinguen del catálogo (ej. rótulo "Propio").
 
 **Listo cuando:** se crea "Cooperativa de Agua X", se selecciona en el servicio y otro usuario no la ve.
+
+**Hecho (25/11/2026):**
+- Backend: `POST /providers` (201). `CreateProviderUseCase` genera el `code` desde el nombre (sin tildes, mayúsculas, con sufijo `_2`… si choca con otro propio). Cambio respecto del plan: un nombre que el usuario ya ve (catálogo o propio, sin distinguir mayúsculas) responde **409** "elegilo de la lista" en lugar de un aviso no bloqueante: es más simple y evita duplicados. Sitio web validado (`http(s)://`). 5 tests nuevos.
+- Frontend: debajo del autocompletado, "¿No está tu proveedor? Crealo" abre `CreateProviderDialog` con el nombre buscado; al crearlo queda seleccionado. El submit del diálogo corta la propagación (vive en un portal pero React lo propagaría al formulario del servicio). Los propios llevan el rótulo "Propio".
+- Verificado de punta a punta: alta con tildes y "Ñ", 409 por nombre repetido (propio y del catálogo), 400 por web inválida, mismo nombre permitido para otro usuario, cada uno ve solo el suyo.
 
 ---
 
@@ -168,3 +173,4 @@ Queda fuera de este módulo (se suma cuando existan esos módulos):
 | 25/11/2026 | 2.1 | Catálogo de proveedores: `GET /providers` y `GET /providers/{id}`, paginación compartida, `ProviderAutocomplete`, mapeo de categorías y tintes. Corrección del mapeo de `email_domains` | sin PR |
 | 25/11/2026 | 2.2 | Alta, listado y detalle de servicios (API + pantallas), helpers compartidos de búsqueda y enums, tabla tipo libro de cuentas reutilizable | sin PR |
 | 25/11/2026 | 2.3 | Edición, activar/desactivar y baja lógica de servicios | sin PR |
+| 25/11/2026 | 2.4 | Proveedor propio: `POST /providers` y diálogo "Crealo" en el formulario | sin PR |
