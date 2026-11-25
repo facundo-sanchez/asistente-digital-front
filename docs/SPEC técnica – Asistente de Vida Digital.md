@@ -945,6 +945,25 @@ Algunos emisores no adjuntan el PDF. Caso real **BBVA** (asunto *"Ya podés desc
 
 - **El sistema no sigue links de los emails** (requieren sesión del home banking; riesgo de phishing y SSRF, §7.4). 
 
+#### **Reglas verificadas con emails reales (V11)** 
+
+El usuario no carga remitentes ni reglas: vienen del catálogo (`providers.email_domains` y `provider_email_rules`). Un remitente corresponde a un proveedor si es exactamente `sender_address` o si su dominio es igual o subdominio de uno de `email_domains`. 
+
+|**Proveedor**|**Remitente**|**Nro. del servicio**|**Datos del cuerpo**|
+|---|---|---|---|
+|Coopelectric|registroweb@coopelectric.com.ar|Suministro, por fila|Tabla con una fila por factura: suministro, vencimiento (dd/MM/yyyy), total (1234.56). Puede traer varias facturas|
+|Camuzzi|factura@factura.camuzzigas.com.ar|Nro. de cuenta, en el asunto|Nro. de factura, total (1.234,56), vencimiento (dd/MM/yyyy), período|
+|Personal|facturacion@email.personal.com.ar|Ninguno estable|Total a debitar, vencimiento, referente de pago (cambia cada mes: es dato de la factura, no del servicio)|
+|BBVA (tarjeta)|avisos@bbva.com.ar|Últimos 4 de la cuenta|Ver arriba|
+
+Asociación de la factura detectada al servicio, en este orden: 
+
+1. `customer_reference_regex` encuentra el nro. y coincide con `services.customer_reference` (sin espacios, guiones, barras ni mayúsculas). 
+2. Sin nro. en el email: el usuario tiene un solo servicio activo de ese proveedor. 
+3. Si no: la factura queda detectada y el usuario elige el servicio al confirmarla. 
+
+`body_fields` admite campos de filas (`groups`: `"customerReference,dueDate:dd/MM/yyyy,totalAmount:decimal"`) para emails con varias facturas. 
+
 ### **card_transactions** 
 
 |**Campo**|**Tipo**|**Descripción**|

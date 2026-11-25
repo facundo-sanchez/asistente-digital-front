@@ -11,6 +11,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Stack from "@mui/material/Stack";
 import type { ServiceResponse } from "@/types/api";
+import { ApiError } from "@/lib/api/api-error";
 import { servicesApi } from "../api";
 
 /**
@@ -30,8 +31,9 @@ export function ServiceStatusAction({ service }: { service: Pick<ServiceResponse
       await servicesApi.changeStatus(service.id, { active });
       setConfirmOpen(false);
       router.refresh();
-    } catch {
-      setError("No pudimos cambiar el estado. Probá de nuevo.");
+    } catch (e) {
+      // Mostrar el motivo del backend si lo hay (ej. sesión vencida, servicio inexistente)
+      setError(e instanceof ApiError && e.data?.mensaje ? e.data.mensaje : "No pudimos cambiar el estado. Probá de nuevo.");
     } finally {
       setSaving(false);
     }
