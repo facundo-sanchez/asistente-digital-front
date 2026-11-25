@@ -20,7 +20,7 @@ Lo que ya existe antes de empezar:
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
 | 2.1 | Catálogo de proveedores (solo lectura) | `feature/servicios-1-proveedores` | — | [x] sin PR |
-| 2.2 | Alta, listado y detalle de servicios | `feature/servicios-2-alta-listado` | 2.1 | [ ] |
+| 2.2 | Alta, listado y detalle de servicios | `feature/servicios-2-alta-listado` | 2.1 | [x] sin PR |
 | 2.3 | Edición, activar/desactivar y baja | `feature/servicios-3-edicion-estado` | 2.2 | [ ] |
 | 2.4 | Proveedor propio ("no encuentro mi proveedor") | `feature/servicios-4-proveedor-propio` | 2.1, 2.2 | [ ] |
 | 2.5 | Posibles duplicados y ayuda del nro. de socio | `feature/servicios-5-duplicados` | 2.2 | [ ] |
@@ -64,22 +64,28 @@ Queda fuera de este módulo (se suma cuando existan esos módulos):
 **Objetivo:** el usuario registra un servicio y lo ve en su lista (CU-001, flujo principal).
 
 ### Backend
-- [ ] Puerto `ServiceRepository` y adaptador Panache.
-- [ ] Caso de uso `RegisterServiceUseCase`: valida que el proveedor sea visible para el usuario; la categoría viene del proveedor por defecto y se puede cambiar; fechas coherentes (fin ≥ inicio).
-- [ ] Caso de uso `ServiceQueryUseCase`: listar (filtros: categoría, activo, texto) y consultar por id.
-- [ ] `POST /services` (201), `GET /services?category=&active=&query=&page=&size=` y `GET /services/{id}`. La respuesta del listado incluye el nombre del proveedor para no pedirlo aparte (ajustar el DTO y el tipo del front).
-- [ ] El `user_id` sale siempre del token (RN-001, RN-002); el servicio de otro usuario da 404.
-- [ ] Tests: alta válida, proveedor ajeno, fechas inválidas, filtros y aislamiento entre usuarios.
+- [x] Puerto `ServiceRepository` y adaptador Panache.
+- [x] Caso de uso `RegisterServiceUseCase`: valida que el proveedor sea visible para el usuario; la categoría viene del proveedor por defecto y se puede cambiar; fechas coherentes (fin ≥ inicio).
+- [x] Caso de uso `ServiceQueryUseCase`: listar (filtros: categoría, activo, texto) y consultar por id.
+- [x] `POST /services` (201), `GET /services?category=&active=&query=&page=&size=` y `GET /services/{id}`. La respuesta del listado incluye el nombre del proveedor para no pedirlo aparte (ajustar el DTO y el tipo del front).
+- [x] El `user_id` sale siempre del token (RN-001, RN-002); el servicio de otro usuario da 404.
+- [x] Tests: alta válida, proveedor ajeno, fechas inválidas, filtros y aislamiento entre usuarios.
 
 ### Frontend
-- [ ] Ítem "Servicios" en el riel.
-- [ ] `/services`: tabla tipo libro de cuentas (franja de tinte, servicio, proveedor, nro. de socio, periodicidad, estado), con estados cargando, vacío ("Todavía no registraste servicios" + acción "Agregar servicio") y error.
-- [ ] Filtros por categoría y por activo/inactivo, guardados en la URL (`?category=&active=`).
-- [ ] `/services/new`: formulario con proveedor (`ProviderAutocomplete`), nombre, nro. de socio, categoría, periodicidad, fechas y notas; validación con yup igual a la del backend; errores por campo del backend.
-- [ ] `/services/[id]`: detalle con los datos del servicio. Las secciones de facturas y obligaciones quedan para los módulos 4 y 5.
-- [ ] En mobile, la tabla muestra solo franja + servicio + estado, como en inicio.
+- [x] Ítem "Servicios" en el riel.
+- [x] `/services`: tabla tipo libro de cuentas (franja de tinte, servicio, proveedor, nro. de socio, periodicidad, estado), con estados cargando, vacío ("Todavía no registraste servicios" + acción "Agregar servicio") y error.
+- [x] Filtros por categoría y por activo/inactivo, guardados en la URL (`?category=&active=`).
+- [x] `/services/new`: formulario con proveedor (`ProviderAutocomplete`), nombre, nro. de socio, categoría, periodicidad, fechas y notas; validación con yup igual a la del backend; errores por campo del backend.
+- [x] `/services/[id]`: detalle con los datos del servicio. Las secciones de facturas y obligaciones quedan para los módulos 4 y 5.
+- [x] En mobile, la tabla muestra solo franja + servicio + estado, como en inicio.
 
 **Listo cuando:** se registra "Luz – Coopelectric – socio 10234", aparece en la lista con su tinte y su detalle abre; el backend rechaza el servicio de otro usuario.
+
+**Hecho (25/11/2026):**
+- Backend: `POST /services`, `GET /services?query=&category=&active=&page=&size=` (busca en nombre y nro. de socio) y `GET /services/{id}`, con `providerName` en la respuesta. El alta valida que el proveedor sea visible y activo y que las fechas sean coherentes; limpia textos (nombre, nro. de socio, notas en blanco). Extraídos a `shared`: `SearchText`, `LikePattern` y `EnumParams` (usados también por proveedores). 12 tests nuevos.
+- Frontend: ítem "Servicios" en el riel; `/services` (libro de cuentas, filtros en la URL con estado por defecto "Activos", paginación, dos estados vacíos, `loading.tsx`), `/services/new` (formulario con `ProviderAutocomplete`, el proveedor completa categoría y nombre) y `/services/[id]` (detalle; aviso de alta con `?created=1`). Lectura desde Server Components con `serverGet`. Estilos de tabla compartidos en `components/ledger`. 4 tests nuevos.
+- Aprendizaje: en Server Components no se puede pasar `NextLink` como `component` de MUI; se usan `ButtonLink` y `TextLink` (componentes de cliente).
+- Verificado de punta a punta: alta, listado, búsqueda por nro. de socio, filtros, aislamiento entre usuarios (404), validaciones (400), claro/oscuro y mobile. Un id inválido en la URL muestra "No encontramos esta página" (con `loading.tsx` Next responde 200 + `noindex`, comportamiento documentado).
 
 ---
 
@@ -155,3 +161,4 @@ Queda fuera de este módulo (se suma cuando existan esos módulos):
 |---|---|---|---|
 | 25/11/2026 | — | Plan del módulo creado | — |
 | 25/11/2026 | 2.1 | Catálogo de proveedores: `GET /providers` y `GET /providers/{id}`, paginación compartida, `ProviderAutocomplete`, mapeo de categorías y tintes. Corrección del mapeo de `email_domains` | sin PR |
+| 25/11/2026 | 2.2 | Alta, listado y detalle de servicios (API + pantallas), helpers compartidos de búsqueda y enums, tabla tipo libro de cuentas reutilizable | sin PR |

@@ -12,6 +12,8 @@ import type {
 export interface ServiceResponse {
   id: UUID;
   providerId: UUID;
+  /** Nombre del proveedor, para mostrar sin otra consulta. */
+  providerName: string;
   name: string;
   /** Nro. de cliente / socio / suministro. */
   customerReference: string | null;
