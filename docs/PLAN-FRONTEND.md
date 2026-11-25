@@ -98,6 +98,8 @@
 
 ## Fase 4 – Documentos (CU-009) 🔗
 
+> Se desarrolla en partes: ver [MODULO-03-DOCUMENTOS.md](./MODULO-03-DOCUMENTOS.md).
+
 - [ ] Tipos `Document` y `ProcessingStatus`
 - [ ] API: `GET/POST/DELETE /documents`, `POST /documents/upload`, `GET /documents/{id}/download`
 - [ ] Repositorio documental: listado, búsqueda y filtros por categoría o servicio

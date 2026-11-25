@@ -44,6 +44,8 @@ export type ExtractionValidationStatus =
 export interface DocumentResponse {
   id: UUID;
   serviceId: UUID | null;
+  /** Nombre del servicio asociado (null si no tiene). */
+  serviceName: string | null;
   assetId: UUID | null;
   obligationId: UUID | null;
   documentType: DocumentType;
@@ -59,14 +61,12 @@ export interface DocumentResponse {
   updatedAt: ISODateTime;
 }
 
-/** PUT /documents/{id} (metadatos). La carga del archivo es multipart en POST /documents/upload. */
+/** PUT /documents/{id}: título, tipo, servicio y vencimiento (null los quita). El archivo no cambia. */
 export interface DocumentUpdateRequest {
-  title?: string | null;
+  title: string | null;
   documentType: DocumentType;
-  serviceId?: UUID | null;
-  assetId?: UUID | null;
-  obligationId?: UUID | null;
-  expiresOn?: ISODate | null;
+  serviceId: UUID | null;
+  expiresOn: ISODate | null;
 }
 
 /** GET /documents/{id}/processing */

@@ -15,6 +15,7 @@ import { isUuid } from "@/lib/uuid";
 import { ServiceDetails } from "@/modules/services/components/ServiceDetails";
 import { ServiceStatusAction } from "@/modules/services/components/ServiceStatusAction";
 import { ButtonLink } from "@/components/common/ButtonLink";
+import { ServiceDocumentsPanel } from "@/modules/documents/components/ServiceDocumentsPanel";
 
 export const metadata: Metadata = { title: "Servicio" };
 
@@ -29,7 +30,9 @@ export default async function ServicePage({ params, searchParams }: { params: Pr
     ? "Registramos el servicio. Ya podés asociarle facturas y vencimientos."
     : firstParam(query.updated) === "1"
       ? "Guardamos los cambios."
-      : null;
+      : firstParam(query.uploaded) === "1"
+        ? "Subimos el documento."
+        : null;
 
   return (
     <Stack spacing={4} sx={{ maxWidth: 900 }}>
@@ -55,6 +58,7 @@ export default async function ServicePage({ params, searchParams }: { params: Pr
       <Panel title="Datos del servicio">
         <ServiceDetails service={service} />
       </Panel>
+      <ServiceDocumentsPanel serviceId={service.id} />
       <Panel title="Facturas y vencimientos">
         <Typography color="text.secondary" sx={{ maxWidth: "60ch" }}>
           Todavía no hay facturas de este servicio. Cuando las cargues, vas a ver acá sus montos, vencimientos y pagos.
