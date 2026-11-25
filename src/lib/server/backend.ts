@@ -4,6 +4,7 @@
  */
 import type { AuthResponse, ErrorResponse } from "@/types/api";
 import type { BackendRequest } from "./backend-request";
+import type { RefreshResult } from "./refresh-result";
 
 const API_BACKEND =
   process.env.API_BACKEND ?? "http://localhost:8080/asistente-digital-back/api/v1";
@@ -31,13 +32,14 @@ export async function backendFetch(path: string, req: BackendRequest = {}): Prom
   });
 }
 
-/** Renueva la sesión con el refresh token. null si el token no es válido. */
-export async function refreshSession(refreshToken: string): Promise<AuthResponse | null> {
+/** Renueva la sesión con el refresh token. El backend responde 409 si otro pedido ya lo rotó. */
+export async function refreshSession(refreshToken: string): Promise<RefreshResult> {
   try {
     const res = await backendFetch("/auth/refresh", { method: "POST", body: { refreshToken } });
-    return res.ok ? ((await res.json()) as AuthResponse) : null;
+    if (res.ok) return { status: "renewed", session: (await res.json()) as AuthResponse };
+    return { status: res.status === 409 ? "rotated" : "invalid" };
   } catch {
-    return null;
+    return { status: "invalid" };
   }
 }
 

@@ -1121,6 +1121,8 @@ Manejo uniforme de errores mediante Problem Details.
 |POST|`/auth/resend-verification`|Reenviar el email de verificación|
 |POST|`/auth/forgot-password`|Pedir enlace de reseteo (202 siempre)|
 |POST|`/auth/reset-password`|Definir contraseña nueva|
+|POST|`/auth/google/authorization`|URL de Google para elegir la cuenta (state y PKCE los genera el BFF). 503 si no está configurado|
+|POST|`/auth/google`|Login con Google: canjea el código y vincula o crea la cuenta|
 |PUT|`/users/me/password`|Cambiar contraseña|
 
 Ver §7.1. Las preferencias de notificación están en §6.8. 
@@ -1411,7 +1413,7 @@ Responsabilidades del backend (`/auth`, `/users/me`):
 
 - Perfil y cambio de contraseña. 
 
-- Login con Google: pendiente. 
+- Login con Google (OAuth 2.0 + OpenID Connect, authorization code + PKCE). El BFF genera state y PKCE y los guarda en una cookie httpOnly de 10 min; el backend canjea el código con el client secret y verifica el id_token (firma RS256 con las claves de Google, audiencia, emisor y vencimiento). Reglas: se busca por `google_subject`; si no existe, se vincula a la cuenta con el mismo email solo si Google lo da por verificado; si esa cuenta nunca verificó su email se descartan su contraseña y su nombre y se cierran sus sesiones (evita que alguien registre un email ajeno de antemano); si no hay cuenta, se crea sin contraseña y con el email verificado. Callback registrado en Google Cloud: `FRONTEND_URL` + `/api/auth/google/callback`. 
 
 ### **Tokens** 
 
@@ -2571,7 +2573,7 @@ ChatGPT - Contenido compartido
 
 ### **Decisiones que requieren definición antes de producción** 
 
-**1. Identidad:** ~~definir cómo Better Auth emitirá la identidad~~ Resuelto: JWT propio (§7.1). Pendiente: login con Google y gestión de claves de firma en producción. 
+**1. Identidad:** ~~definir cómo Better Auth emitirá la identidad~~ Resuelto: JWT propio y login con Google (§7.1). Pendiente: gestión de claves de firma en producción. 
 
 **2. Google:** completar el proceso de autorización y verificación de permisos de Gmail. 
 

@@ -10,6 +10,8 @@ export interface UserResponse {
   email: string;
   name: string;
   emailVerified: boolean;
+  /** false si la cuenta solo entra con Google: puede crear una contraseña sin indicar la actual. */
+  hasPassword: boolean;
   /** Zona IANA, ej. "America/Argentina/Buenos_Aires". */
   timezone: string;
   /** Ej. "es-AR". */
@@ -91,4 +93,28 @@ export interface AuthResponse {
 /** Respuesta de las rutas /api/auth/* del BFF hacia el navegador (sin tokens). */
 export interface SessionUserResponse {
   user: UserResponse;
+}
+
+// ----------------------------------------------------------------------------
+// Login con Google (/auth/google). Solo lo usa el BFF.
+// ----------------------------------------------------------------------------
+
+/** POST /auth/google/authorization */
+export interface GoogleAuthorizationRequest {
+  /** Valor aleatorio base64url que Google devuelve en el callback (CSRF). */
+  state: string;
+  /** PKCE: SHA-256 del code verifier, en base64url (43 caracteres). */
+  codeChallenge: string;
+}
+
+/** Respuesta de POST /auth/google/authorization */
+export interface GoogleAuthorizationResponse {
+  /** URL de Google a la que redirigir al usuario. */
+  url: string;
+}
+
+/** POST /auth/google (responde AuthResponse) */
+export interface GoogleLoginRequest {
+  code: string;
+  codeVerifier: string;
 }

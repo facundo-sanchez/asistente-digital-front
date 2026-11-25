@@ -19,7 +19,7 @@ const COOKIE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "/";
  * solo para despliegues internos sin TLS (ej. http://192.168.x.x): ahí el navegador
  * descartaría las cookies Secure y no se podría iniciar sesión.
  */
-const COOKIE_SECURE =
+export const COOKIE_SECURE =
   process.env.COOKIE_SECURE != null
     ? process.env.COOKIE_SECURE === "true"
     : process.env.NODE_ENV === "production";

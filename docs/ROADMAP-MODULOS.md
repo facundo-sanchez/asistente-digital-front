@@ -14,7 +14,7 @@
 | # | Módulo | Rama | Backend | Frontend | Depende de | Estado |
 |---|---|---|---|---|---|---|
 | 0 | **Base** | `feature/auth-user` | Flyway, datasource, manejo de errores, paginación, "usuario actual" | Layout, tema MUI, cliente HTTP, BFF | — | [x] sin PR |
-| 1 | **Auth + Usuario** | `feature/auth-user` | Registro, login, JWT + refresh, verificación de email, recupero de contraseña, `/users/me` | Login, registro, `proxy.ts`, perfil | 0 | [x] sin PR (falta login con Google) |
+| 1 | **Auth + Usuario** | `feature/auth-user` | Registro, login, JWT + refresh, verificación de email, recupero de contraseña, `/users/me` | Login, registro, `proxy.ts`, perfil | 0 | [x] sin PR |
 | 2 | **Proveedores + Servicios** ⭐ | `feature/servicios` | Primer CRUD completo (repositorio, caso de uso, resource, tests) | Listado, alta/edición, detalle | 1 | [ ] |
 | 3 | **Documentos** | `feature/documentos` | Carga a storage (MinIO), descarga | Repositorio documental, carga de archivos | 1 | [ ] |
 | 4 | **Obligaciones + Pagos** | `feature/obligaciones-pagos` | Vista `v_obligations`, pagos parciales | Tabla con filtros, registro de pago | 2, 3 | [ ] |

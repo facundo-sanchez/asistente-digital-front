@@ -45,6 +45,8 @@ async function handler(request: NextRequest, { params }: Context) {
   let accessToken = request.cookies.get(ACCESS_COOKIE)?.value;
   const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
   let renewed: AuthResponse | null = null;
+  // Otro pedido renovó la sesión en paralelo: sus cookies nuevas son las que valen
+  let rotatedElsewhere = false;
 
   const call = (token?: string) =>
     backendFetch(target, {
@@ -54,16 +56,22 @@ async function handler(request: NextRequest, { params }: Context) {
       accessToken: token,
     });
 
+  const renew = async (token: string) => {
+    const result = await refreshSession(token);
+    if (result.status === "renewed") renewed = result.session;
+    if (result.status === "rotated") rotatedElsewhere = true;
+    return result.status === "renewed" ? result.session.accessToken : undefined;
+  };
+
   let res: Response;
   try {
     if (!accessToken && refreshToken) {
-      renewed = await refreshSession(refreshToken);
-      accessToken = renewed?.accessToken;
+      accessToken = await renew(refreshToken);
     }
     res = await call(accessToken);
-    if (res.status === 401 && refreshToken && !renewed) {
-      renewed = await refreshSession(refreshToken);
-      if (renewed) res = await call(renewed.accessToken);
+    if (res.status === 401 && refreshToken && !renewed && !rotatedElsewhere) {
+      const renewedToken = await renew(refreshToken);
+      if (renewedToken) res = await call(renewedToken);
     }
   } catch {
     return unavailable();
@@ -77,7 +85,8 @@ async function handler(request: NextRequest, { params }: Context) {
 
   if (renewed) {
     setSessionCookies(response.cookies, renewed);
-  } else if (res.status === 401) {
+  } else if (res.status === 401 && !rotatedElsewhere) {
+    // Con rotatedElsewhere el 401 llega igual, pero el cliente reintenta con las cookies nuevas
     clearSessionCookies(response.cookies);
   }
   return response;

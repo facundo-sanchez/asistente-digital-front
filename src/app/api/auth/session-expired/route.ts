@@ -1,4 +1,5 @@
-import { NextResponse, type NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
+import { redirectTo } from "@/lib/server/route-helpers";
 import { clearSessionCookies } from "@/lib/server/session-cookies";
 
 /**
@@ -7,10 +8,7 @@ import { clearSessionCookies } from "@/lib/server/session-cookies";
  * lleva al login. Sin efectos fuera de la propia sesión, por eso es GET.
  */
 export function GET(request: NextRequest) {
-  const url = request.nextUrl.clone();
-  url.pathname = "/login";
-  url.search = "?expired=1";
-  const response = NextResponse.redirect(url);
+  const response = redirectTo(request, "/login?expired=1");
   clearSessionCookies(response.cookies);
   return response;
 }

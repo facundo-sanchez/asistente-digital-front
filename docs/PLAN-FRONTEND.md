@@ -39,7 +39,7 @@
 - [x] Eliminar `src/app/api/env/route.ts` (estaba vacío)
 - [~] Estructura de carpetas de la SPEC §10.1: `components/`, `modules/`, `lib/`, `types/`, `theme/` creadas (falta `hooks/` cuando haga falta)
 - [~] `npm run lint` y `npm run build` pasan. Falta Prettier
-- [ ] Configurar el testing: Vitest + Testing Library
+- [~] Configurar el testing: Vitest (`npm test`) con tests de seguridad del login (25/11/2026). Falta Testing Library para componentes
 - [ ] Scripts `typecheck` y `test` en `package.json`
 
 ## Fase 1 – Infraestructura de UI y cliente HTTP
@@ -72,7 +72,7 @@
 
 - [x] Modelo de autenticación: JWT propio del backend + BFF
 - [x] `app/(auth)/login`: formulario de email/contraseña, con `?next=` validado (sin open redirect)
-- [ ] Login con Google (backend + front)
+- [x] **Login con Google** (backend + front): OAuth 2.0 + PKCE vía BFF, vinculación segura por email verificado, "Crear contraseña" en el perfil para cuentas solo Google (25/11/2026)
 - [x] `app/(auth)/register` con validación yup
 - [x] Recuperar contraseña (forgot/reset)
 - [x] Validación de email al registrarse (confirmación con botón, no al abrir el enlace) + reenvío desde el banner
@@ -242,3 +242,5 @@
 | 24/11/2026 | Módulo 0 + 1 (rama `feature/auth-user`): base del front, BFF, proxy, login/registro/recupero/verificación, perfil. Backend: Flyway, manejo de errores, auth JWT, tests. Probado de punta a punta |
 | 24/11/2026 | Caso BBVA (resumen en el cuerpo del email, sin PDF): migración V10, extracción por regex (`EMAIL_BODY`), `account_last_four`, cierre opcional, RN-016 por vencimiento |
 | 25/11/2026 | Confirmación de email: adaptador SMTP en el backend (`EMAIL_DELIVERY=log\|smtp`, variables `SMTP_*`). Probado con un servidor SMTP real |
+| 25/11/2026 | Login con Google: `POST /auth/google/authorization` y `POST /auth/google` en el backend; `/api/auth/google` y su callback en el BFF; botón en login y registro. Probado de punta a punta contra un Google simulado (firma, PKCE, state, cancelación, reuso del código, vinculación) |
+| 25/11/2026 | Revisión de código (ponytail-review) y correcciones: claves JWT fuera del repo y obligatorias en producción; emails nunca al log en producción; refresh atómico con 409 cuando otro pedido ya rotó la sesión (el BFF y el proxy no borran las cookies); cambio de contraseña con sesión vencida; tests del id_token de Google (backend) y de `safeNextPath`/state (Vitest) |

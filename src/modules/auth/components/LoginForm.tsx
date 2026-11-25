@@ -16,9 +16,9 @@ import { authApi } from "../api";
 import { loginSchema, type LoginForm as LoginValues } from "../validation";
 import type { LoginFormProps } from "./login-form-props";
 
-export function LoginForm({ next, expired }: LoginFormProps) {
+export function LoginForm({ next, expired, initialError }: LoginFormProps) {
   const router = useRouter();
-  const [error, setFormError] = useState<string | null>(null);
+  const [error, setFormError] = useState<string | null>(initialError ?? null);
   const { control, handleSubmit, setError, formState } = useForm<LoginValues>({
     resolver: yupResolver(loginSchema),
     defaultValues: { email: "", password: "" },

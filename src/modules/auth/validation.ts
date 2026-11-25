@@ -57,6 +57,13 @@ export const changePasswordSchema = yup.object({
 });
 export type ChangePasswordForm = yup.InferType<typeof changePasswordSchema>;
 
+/** Cuenta que solo entra con Google: crea su primera contraseña, sin indicar la actual. */
+export const createPasswordSchema = yup.object({
+  currentPassword: yup.string().defined(),
+  newPassword,
+  confirmPassword: confirm("newPassword"),
+});
+
 export const profileSchema = yup.object({
   name: yup.string().trim().required("Ingresá tu nombre").max(150),
   timezone: yup.string().required("Elegí una zona horaria"),

@@ -1,6 +1,7 @@
 /** Utilidades de los route handlers del BFF. Solo servidor. */
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import type { AuthResponse, SessionUserResponse } from "@/types/api";
+import { withBasePath } from "@/lib/config";
 import { backendFetch, unavailableError } from "./backend";
 import { setSessionCookies } from "./session-cookies";
 
@@ -22,6 +23,14 @@ export async function passthrough(res: Response): Promise<NextResponse> {
     status: res.status,
     headers: { "Content-Type": res.headers.get("Content-Type") ?? "application/json" },
   });
+}
+
+/**
+ * Redirección a una ruta interna de la app ("/login?error=x"). Agrega el basePath a mano:
+ * en los route handlers, request.nextUrl no lo trae.
+ */
+export function redirectTo(request: NextRequest, pathWithQuery: string): NextResponse {
+  return NextResponse.redirect(new URL(withBasePath(pathWithQuery), request.nextUrl.origin));
 }
 
 export function unavailable(): NextResponse {

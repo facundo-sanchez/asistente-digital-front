@@ -44,14 +44,18 @@ export async function proxy(request: NextRequest) {
 
   // Access token vencido: se renueva en este mismo request
   if (refreshToken) {
-    const session = await refreshSession(refreshToken);
-    if (session) {
+    const result = await refreshSession(refreshToken);
+    if (result.status === "renewed") {
       // La request que sigue (Server Components) ya ve la cookie nueva
-      request.cookies.set(ACCESS_COOKIE, session.accessToken);
-      request.cookies.set(REFRESH_COOKIE, session.refreshToken);
+      request.cookies.set(ACCESS_COOKIE, result.session.accessToken);
+      request.cookies.set(REFRESH_COOKIE, result.session.refreshToken);
       const response = NextResponse.next({ request: { headers: request.headers } });
-      setSessionCookies(response.cookies, session);
+      setSessionCookies(response.cookies, result.session);
       return response;
+    }
+    if (result.status === "rotated") {
+      // Otro pedido (ej. un prefetch) ya renovó: se repite con las cookies que dejó, sin borrarlas
+      return NextResponse.redirect(request.nextUrl);
     }
   }
 

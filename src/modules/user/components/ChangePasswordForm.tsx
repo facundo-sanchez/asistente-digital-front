@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Alert from "@mui/material/Alert";
@@ -13,25 +14,38 @@ import { authApi } from "@/modules/auth/api";
 import {
   PASSWORD_HINT,
   changePasswordSchema,
+  createPasswordSchema,
   type ChangePasswordForm as ChangePasswordValues,
 } from "@/modules/auth/validation";
+import type { ChangePasswordFormProps } from "./change-password-form-props";
 
 const EMPTY: ChangePasswordValues = { currentPassword: "", newPassword: "", confirmPassword: "" };
 
-/** Cambio de contraseña. El backend cierra las demás sesiones; esta sigue abierta. */
-export function ChangePasswordForm() {
+/**
+ * Cambio de contraseña. El backend cierra las demás sesiones; esta sigue abierta.
+ * Si la cuenta solo entra con Google, crea la primera contraseña (sin pedir la actual).
+ */
+export function ChangePasswordForm({ hasPassword }: ChangePasswordFormProps) {
+  const router = useRouter();
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const { control, handleSubmit, setError, reset, formState } = useForm<ChangePasswordValues>({
-    resolver: yupResolver(changePasswordSchema),
+    resolver: yupResolver(hasPassword ? changePasswordSchema : createPasswordSchema),
     defaultValues: EMPTY,
   });
 
   const onSubmit = handleSubmit(async ({ currentPassword, newPassword }) => {
     setResult(null);
     try {
-      await authApi.changePassword({ currentPassword, newPassword });
+      await authApi.changePassword({ currentPassword: hasPassword ? currentPassword : null, newPassword });
       reset(EMPTY);
-      setResult({ ok: true, message: "Cambiamos tu contraseña y cerramos tus otras sesiones." });
+      setResult({
+        ok: true,
+        message: hasPassword
+          ? "Cambiamos tu contraseña y cerramos tus otras sesiones."
+          : "Creamos tu contraseña. Ya podés ingresar también con tu email.",
+      });
+      // Actualiza hasPassword en la página
+      if (!hasPassword) router.refresh();
     } catch (e) {
       setResult({ ok: false, message: applyApiErrors(e, setError) });
     }
@@ -41,12 +55,14 @@ export function ChangePasswordForm() {
     <Box component="form" onSubmit={onSubmit} noValidate>
       <Stack spacing={2.5}>
         {result && <Alert severity={result.ok ? "success" : "error"}>{result.message}</Alert>}
-        <FormPasswordField
-          name="currentPassword"
-          control={control}
-          label="Contraseña actual"
-          autoComplete="current-password"
-        />
+        {hasPassword && (
+          <FormPasswordField
+            name="currentPassword"
+            control={control}
+            label="Contraseña actual"
+            autoComplete="current-password"
+          />
+        )}
         <FormPasswordField
           name="newPassword"
           control={control}
@@ -62,7 +78,7 @@ export function ChangePasswordForm() {
         />
         <Box>
           <Button type="submit" variant="contained" loading={formState.isSubmitting}>
-            Cambiar contraseña
+            {hasPassword ? "Cambiar contraseña" : "Crear contraseña"}
           </Button>
         </Box>
       </Stack>

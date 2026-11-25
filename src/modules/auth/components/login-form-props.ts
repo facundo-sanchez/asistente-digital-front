@@ -3,4 +3,6 @@ export interface LoginFormProps {
   next: string;
   /** La sesión anterior expiró o fue cerrada. */
   expired?: boolean;
+  /** Error a mostrar al entrar (ej. falló el login con Google). */
+  initialError?: string;
 }

@@ -24,10 +24,15 @@ export default async function ProfilePage() {
         <ProfileForm user={user} />
       </Paper>
       <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Contraseña
+        <Typography variant="h6" sx={{ mb: user.hasPassword ? 2 : 1 }}>
+          {user.hasPassword ? "Contraseña" : "Crear contraseña"}
         </Typography>
-        <ChangePasswordForm />
+        {!user.hasPassword && (
+          <Typography color="text.secondary" sx={{ mb: 2 }}>
+            Hoy ingresás con Google. Si creás una contraseña, también vas a poder entrar con tu email.
+          </Typography>
+        )}
+        <ChangePasswordForm hasPassword={user.hasPassword} />
       </Paper>
     </Stack>
   );
