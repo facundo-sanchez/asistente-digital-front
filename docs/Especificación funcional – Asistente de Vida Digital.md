@@ -80,7 +80,7 @@ Resumen general
 
 ### **Finanzas** 
 
-Facturas y obligaciones 
+Facturas, obligaciones y tarjetas de crédito 
 
 ### **Documentos** 
 
@@ -674,6 +674,126 @@ ChatGPT - Contenido compartido
 
 **Importante:** El sistema debe distinguir entre una obligación estimada y una factura efectivamente recibida. No debe generar pagos confirmados a partir de predicciones. 
 
+## **CU-015 – Administrar tarjetas de crédito y resúmenes** 
+
+**Actor:** Usuario / Motor de IA. 
+
+**Objetivo:** Registrar las tarjetas de crédito y sus resúmenes mensuales para controlar el total a pagar y su vencimiento. 
+
+### **Precondiciones:** 
+
+- El usuario inició sesión. 
+
+- Existe un servicio de categoría *Tarjeta de crédito* (emisor/banco), o el usuario puede crearlo durante el flujo. 
+
+### **Flujo principal:** 
+
+**1.** El usuario registra una tarjeta: emisor, marca (Visa, Mastercard, Amex, etc.), últimos 4 dígitos, día de cierre, día de vencimiento y, opcionalmente, límite de compra. 
+
+**2.** El sistema asocia la tarjeta a un servicio de categoría *Tarjeta de crédito*. 
+
+**3.** El usuario carga el resumen (PDF) o el sistema lo detecta por email (CU-003 / CU-004). 
+
+**4.** La IA identifica los datos del resumen: 
+
+   - Fecha de cierre y período. 
+
+   - Fecha de vencimiento. 
+
+   - Próximo cierre y próximo vencimiento. 
+
+   - Total a pagar en pesos. 
+
+   - Total a pagar en dólares. 
+
+   - Pago mínimo. 
+
+**5.** El sistema presenta los datos extraídos. 
+
+**6.** El usuario revisa y confirma. 
+
+**7.** El sistema registra el resumen y genera la obligación de pago: una por cada moneda con saldo (pesos y/o dólares). 
+
+### **Flujos alternativos:** 
+
+- Ya existe un resumen confirmado para la misma tarjeta y fecha de vencimiento: el sistema advierte el duplicado. 
+
+- El email del emisor no adjunta el PDF y solo informa los totales en el cuerpo (por ejemplo, BBVA: vencimiento, saldo en pesos, saldo en dólares, pago mínimo y "Número de cuenta ****NNNN"): el sistema registra el resumen con esos datos (sin fecha de cierre ni consumos), identifica la tarjeta por los últimos 4 dígitos de la cuenta y notifica al usuario que puede subir el PDF para ver los consumos. El sistema no sigue el link "Descargar resumen" del email. 
+
+- Los últimos 4 dígitos no corresponden a ninguna tarjeta registrada: el sistema propone crearla. 
+
+- El documento no puede interpretarse: el usuario completa los datos manualmente. 
+
+**Resultado:** Resumen registrado y obligación de pago generada con su vencimiento. 
+
+## **CU-016 – Registrar y categorizar consumos de tarjeta** 
+
+**Actor:** Usuario / Motor de IA. 
+
+**Objetivo:** Conocer el detalle de cada compra incluida en un resumen de tarjeta. 
+
+### **Flujo principal:** 
+
+**1.** Al procesar un resumen, la IA extrae cada movimiento: 
+
+   - Fecha. 
+
+   - Descripción y comercio. 
+
+   - Importe y moneda. 
+
+   - Cuota (por ejemplo, 3 de 12) e importe original de la compra. 
+
+   - Tipo: compra, cuota, devolución, comisión o cargo, impuesto, interés. 
+
+**2.** El sistema normaliza el nombre del comercio. 
+
+**3.** Propone una categoría (supermercado, combustible, gastronomía, etc.), priorizando las reglas definidas por el usuario. 
+
+**4.** El sistema vincula las cuotas de una misma compra entre distintos resúmenes. 
+
+**5.** El usuario revisa los movimientos, corrige categorías y puede indicar que la corrección se aplique siempre a ese comercio. 
+
+**6.** El usuario puede agregar, editar o eliminar movimientos manualmente. 
+
+**7.** El sistema verifica que la suma de los movimientos coincida con el total del resumen e informa la diferencia, si la hay. 
+
+**Resultado:** Consumos del resumen registrados y categorizados. 
+
+**Regla importante:** los consumos de un resumen sin confirmar no se incluyen en informes ni totales. 
+
+## **CU-017 – Consultar el informe de compras con tarjeta** 
+
+**Actor:** Usuario. 
+
+**Objetivo:** Analizar en qué, dónde y cuánto se gasta con tarjeta de crédito. 
+
+### **Flujo principal:** 
+
+**1.** El usuario ingresa al informe de tarjetas. 
+
+**2.** Selecciona período, una o varias tarjetas y moneda. 
+
+**3.** El sistema presenta: 
+
+   - Total gastado por moneda. 
+
+   - Gasto por categoría. 
+
+   - Evolución mensual. 
+
+   - Gasto por tarjeta. 
+
+   - Principales comercios. 
+
+   - Cuotas pendientes: cuánto resta pagar y en cuántos meses. 
+
+**4.** El usuario puede acceder al detalle de movimientos de cada agrupación. 
+
+**Resultado:** El usuario obtiene una visión clara de sus consumos con tarjeta. 
+
+**Importante:** los importes en pesos y en dólares se informan por separado y no se convierten automáticamente. Todos los totales se calculan en el backend. 
+
 # **6. Reglas de negocio** 
 
 Las siguientes reglas deberán respetarse independientemente del módulo que las implemente. 
@@ -707,6 +827,11 @@ ChatGPT - Contenido compartido
 |RN-013|Los documentos y datos extraídos deben validarse antes de generar registros definitivos.|
 |RN-014|Los registros de distintos usuarios deben permanecer aislados.|
 |RN-015|El sistema debe registrar las operaciones relevantes para auditoría.|
+|RN-016|Un resumen de tarjeta pertenece a una única tarjeta y no puede confirmarse dos veces para la misma fecha de vencimiento.|
+|RN-017|Los consumos de resúmenes sin confirmar no forman parte de informes ni totales.|
+|RN-018|Los importes en distintas monedas se informan por separado; no se convierten automáticamente.|
+|RN-019|La categoría asignada por el usuario prevalece sobre la propuesta por la IA y se recuerda para el mismo comercio cuando el usuario lo indica.|
+|RN-020|Las cuotas de una misma compra se vinculan entre resúmenes para calcular las cuotas pendientes.|
 
 
 
@@ -812,6 +937,9 @@ ChatGPT - Contenido compartido
 |Recurrencia|Configuración de obligaciones periódicas.|
 |ProcesamientoDocumento|Seguimiento de extracción, validación y errores de IA.|
 |Auditoría|Historial de operaciones relevantes.|
+|Tarjeta|Tarjeta de crédito del usuario, asociada a un servicio del emisor.|
+|Resumen de tarjeta|Resumen mensual: cierre, vencimiento, totales por moneda y pago mínimo.|
+|Consumo de tarjeta|Movimiento de un resumen: compra, cuota, devolución, cargo, impuesto o interés.|
 
 
 
@@ -828,6 +956,8 @@ Propongo dividir el producto en cuatro etapas.
    - Registro y autenticación. Dashboard. 
 
    - Servicios y proveedores. Carga manual de facturas. Gestión de obligaciones. Registro de pagos. Repositorio documental. Recordatorios. 
+
+   - Tarjetas de crédito: alta de tarjetas y carga de resúmenes (totales y vencimiento) con su obligación de pago. 
 
 - 2 **Fase 2 – Automatización documental** 
 
@@ -847,6 +977,10 @@ ChatGPT - Contenido compartido
 
    - Identificación de servicios recurrentes. 
 
+   - Extracción y categorización de consumos de resúmenes de tarjeta. 
+
+   - Informe de compras con tarjeta y cuotas pendientes. 
+
 - 3 **Fase 3 – Integraciones externas** 
 
    - Gmail OAuth. Detección automática de facturas. 
@@ -863,7 +997,7 @@ ChatGPT - Contenido compartido
 
 El MVP se considerará funcional cuando se cumplan las siguientes condiciones: 
 
-Un usuario puede registrarse e iniciar sesión. Puede registrar servicios y proveedores. Puede cargar facturas PDF e imágenes. El sistema puede extraer información de los documentos. Puede corregir y confirmar los datos extraídos. Puede consultar sus obligaciones pendientes. Puede registrar pagos. Puede consultar documentos asociados a cada obligación. Recibe notificaciones de próximos vencimientos. No puede acceder a información de otros usuarios. Puede consultar un dashboard con información actualizada. Puede consultar el historial de sus operaciones. 
+Un usuario puede registrarse e iniciar sesión. Puede registrar servicios y proveedores. Puede cargar facturas PDF e imágenes. El sistema puede extraer información de los documentos. Puede corregir y confirmar los datos extraídos. Puede consultar sus obligaciones pendientes. Puede registrar pagos. Puede consultar documentos asociados a cada obligación. Recibe notificaciones de próximos vencimientos. No puede acceder a información de otros usuarios. Puede consultar un dashboard con información actualizada. Puede consultar el historial de sus operaciones. Puede registrar sus tarjetas de crédito y los resúmenes con su vencimiento. 
 
 https://chatgpt.com/s/t_6b05a51849f081919b394ef55c8bc2e8 
 
@@ -879,7 +1013,7 @@ Para evitar que el proyecto crezca demasiado antes de validar su utilidad, dejar
 
 - Ejecución automática de pagos. 
 
-- Conexión bancaria directa. 
+- Conexión bancaria directa (la información de tarjetas proviene de los resúmenes, no de una conexión con el banco). 
 
 - Integración con todos los proveedores del mercado. 
 

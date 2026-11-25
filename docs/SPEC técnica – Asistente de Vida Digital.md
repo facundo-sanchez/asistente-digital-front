@@ -174,6 +174,7 @@ ChatGPT - Contenido compartido
 ├── obligation/
 ├── payment/
 ├── asset/
+├── card/
 ├── notification/
 ├── integration/
 ├── ai/
@@ -272,6 +273,7 @@ ChatGPT - Contenido compartido
 |AI|Extracción documental y procesamiento inteligente|
 |Assistant|Consultas conversacionales|
 |Audit|Trazabilidad de operaciones|
+|Card|Tarjetas de crédito, resúmenes, consumos e informe de compras|
 
 
 
@@ -468,6 +470,38 @@ Conversaciones.
 - Ejecución controlada de herramientas. 
 
 Esta separación permite reutilizar los servicios de IA sin acoplarlos al asistente conversacional. 
+
+### **4.9. Card** 
+
+Administra tarjetas de crédito, sus resúmenes mensuales y los consumos incluidos en cada resumen (CU-015, CU-016, CU-017). 
+
+Responsabilidades: 
+
+- Registrar tarjetas (marca, últimos 4 dígitos, días de cierre y vencimiento, límite). 
+
+- Registrar resúmenes con totales por moneda (pesos y dólares) y pago mínimo. 
+
+- Generar las obligaciones de pago del resumen al confirmarlo (una por moneda con saldo, tipo `CREDIT_CARD_PAYMENT`). 
+
+- Registrar y categorizar consumos: compras, cuotas, devoluciones, cargos, impuestos e intereses. 
+
+- Vincular las cuotas de una misma compra entre resúmenes (`purchase_group_id`). 
+
+- Recordar la categoría elegida por el usuario para cada comercio. 
+
+- Calcular el informe de compras y las cuotas pendientes. 
+
+Decisiones: 
+
+- Una tarjeta siempre pertenece a un servicio de categoría `CREDIT_CARD`, cuyo proveedor es el emisor. Así se reutilizan la detección por email (reglas con `document_type = CARD_STATEMENT`) y las obligaciones. 
+
+- El resumen no se registra como factura (`invoices`): tiene estructura propia (dos monedas, pago mínimo, movimientos). 
+
+- Los importes de los consumos se guardan con signo, tal como figuran en el resumen: positivo = cargo, negativo = crédito (devolución, pago, bonificación). 
+
+- Los pagos del resumen anterior (`PAYMENT`) no cuentan como gasto. 
+
+- No hay conexión con bancos: la información proviene del resumen (manual o detectado por email). 
 
 # **5. Modelo de datos** 
 
@@ -849,6 +883,113 @@ ChatGPT - Contenido compartido
 
 Los registros de auditoría no deberán incluir tokens, contraseñas ni contenido documental sensible. 
 
+### **cards** 
+
+|**Campo**|**Tipo**|**Descripción**|
+|---|---|---|
+|id|UUID|Identificador|
+|user_id|UUID|Usuario|
+|service_id|UUID|Servicio `CREDIT_CARD` del emisor|
+|name|VARCHAR(100)|Ej. "Visa Galicia"|
+|brand|VARCHAR(30)|VISA, MASTERCARD, AMEX, CABAL, NARANJA, DINERS, OTHER|
+|last_four|CHAR(4) NULL|Últimos 4 dígitos de la tarjeta|
+|account_last_four|CHAR(4) NULL|Últimos 4 dígitos del número de cuenta (BBVA informa la cuenta, no la tarjeta)|
+|holder_name|VARCHAR(150) NULL|Titular|
+|additional|BOOLEAN|Tarjeta adicional|
+|closing_day|SMALLINT NULL|Día de cierre habitual (1-31)|
+|due_day|SMALLINT NULL|Día de vencimiento habitual (1-31)|
+|credit_limit|NUMERIC(19,4) NULL|Límite de compra|
+|currency|CHAR(3)|Moneda principal (ARS)|
+|active|BOOLEAN|Estado|
+|created_at / updated_at|TIMESTAMPTZ||
+
+Única por usuario + marca + últimos 4 dígitos (cuando se informan). 
+
+### **card_statements** 
+
+|**Campo**|**Tipo**|**Descripción**|
+|---|---|---|
+|id|UUID|Identificador|
+|user_id|UUID|Usuario|
+|card_id|UUID|Tarjeta|
+|document_id|UUID NULL|PDF del resumen|
+|extraction_result_id|UUID NULL|Propuesta de la IA|
+|obligation_id|UUID NULL|Obligación de pago en moneda local|
+|obligation_usd_id|UUID NULL|Obligación de pago en dólares|
+|period_start|DATE NULL|Inicio del período|
+|closing_date|DATE NULL|Fecha de cierre (falta si el resumen llegó por email sin PDF)|
+|due_date|DATE|Vencimiento|
+|next_closing_date / next_due_date|DATE NULL|Próximo cierre y vencimiento|
+|currency|CHAR(3)|Moneda local del resumen (ARS)|
+|total_amount|NUMERIC(19,4)|Total en moneda local|
+|total_amount_usd|NUMERIC(19,4)|Total en dólares|
+|minimum_payment|NUMERIC(19,4) NULL|Pago mínimo (moneda local)|
+|status|VARCHAR(30)|PENDING_VALIDATION, CONFIRMED, REJECTED|
+|source|VARCHAR(30)|MANUAL, AI_EXTRACTION, GMAIL|
+|confirmed_at|TIMESTAMPTZ NULL||
+|created_at / updated_at|TIMESTAMPTZ||
+
+Un solo resumen confirmado por tarjeta y fecha de vencimiento (RN-016). `source_message_id` guarda el id del email de origen y evita registrar dos veces el mismo email. Si falta `closing_date`, las vistas usan `due_date` para ubicar el mes. 
+
+### **Resúmenes de tarjeta detectados en el cuerpo del email** 
+
+Algunos emisores no adjuntan el PDF. Caso real **BBVA** (asunto *"Ya podés descargar tu resumen de tarjeta Mastercard BBVA"*): el cuerpo informa *Número de cuenta \*\*\*\*NNNN*, *Fecha de vencimiento* (dd-MM-yyyy), *Saldo en pesos*, *Saldo en dólares* y *Pago mínimo* (formato 1.234,56), y el PDF se descarga desde un link que exige login. 
+
+- `provider_email_rules.extraction_mode = EMAIL_BODY` y `body_fields` (JSONB) definen una regex por campo (grupo 1 = valor) y su formato (`dd-MM-yyyy`, `es-AR`). No interviene la IA. 
+
+- Las regex se aplican sobre el texto del email sin HTML y con los espacios normalizados (incluido el espacio duro U+00A0, que `\s` de Java no reconoce). 
+
+- La tarjeta se identifica por `cards.account_last_four`. Si no hay coincidencia, se propone crear la tarjeta. 
+
+- Se crea el resumen con `source = GMAIL`, sin cierre ni consumos, en `PENDING_VALIDATION`, y una notificación `CARD_STATEMENT_AVAILABLE` invita a subir el PDF para cargar los consumos. 
+
+- **El sistema no sigue links de los emails** (requieren sesión del home banking; riesgo de phishing y SSRF, §7.4). 
+
+### **card_transactions** 
+
+|**Campo**|**Tipo**|**Descripción**|
+|---|---|---|
+|id|UUID|Identificador|
+|user_id|UUID|Usuario|
+|card_id|UUID|Tarjeta|
+|statement_id|UUID|Resumen al que pertenece|
+|transaction_date|DATE|Fecha del movimiento (en cuotas, la fecha de compra)|
+|description|VARCHAR(255)|Texto tal como figura en el resumen|
+|merchant_name|VARCHAR(150) NULL|Comercio normalizado|
+|category|VARCHAR(40)|Categoría de gasto|
+|category_source|VARCHAR(20)|AI, RULE, USER|
+|transaction_type|VARCHAR(30)|PURCHASE, INSTALLMENT, REFUND, FEE, TAX, INTEREST, PAYMENT, ADJUSTMENT|
+|amount|NUMERIC(19,4)|Con signo: positivo = cargo, negativo = crédito|
+|currency|CHAR(3)|ARS / USD|
+|installment_number / installment_total|SMALLINT NULL|Cuota N de M|
+|original_amount|NUMERIC(19,4) NULL|Importe total de la compra en cuotas|
+|purchase_group_id|UUID NULL|Agrupa las cuotas de una misma compra|
+|reference|VARCHAR(100) NULL|Nro. de cupón / comprobante|
+|confidence_score|NUMERIC(5,4) NULL|Confianza de la extracción|
+|created_at / updated_at|TIMESTAMPTZ||
+
+Categorías de gasto: SUPERMARKET, RESTAURANTS, FUEL, TRANSPORT, HEALTH, EDUCATION, ENTERTAINMENT, TRAVEL, CLOTHING, HOME, TECHNOLOGY, SERVICES, SUBSCRIPTIONS, TAXES_FEES, OTHER. 
+
+### **card_merchant_rules** 
+
+|**Campo**|**Tipo**|**Descripción**|
+|---|---|---|
+|id|UUID|Identificador|
+|user_id|UUID|Usuario|
+|merchant_name|VARCHAR(150)|Comercio normalizado|
+|category|VARCHAR(40)|Categoría a aplicar|
+|created_at / updated_at|TIMESTAMPTZ||
+
+Única por usuario + comercio (RN-019). 
+
+### **Vistas del informe** 
+
+- `v_card_spending`: consumos de resúmenes confirmados (RN-017), sin pagos del resumen, con el mes de facturación (`billing_month`, según la fecha de cierre). Base de todos los totales del informe. 
+
+- `v_card_pending_installments`: última cuota registrada de cada compra en cuotas, con las cuotas restantes, el importe restante y la fecha de cierre estimada del resumen que incluirá la última cuota. 
+
+Ambas devuelven importes por moneda, sin conversión (RN-018). 
+
 ## **5.2. Entidades adicionales para la IA y el asistente** 
 
 Se incorporarán cuando se implemente la fase de asistente conversacional: 
@@ -1136,6 +1277,69 @@ ChatGPT - Contenido compartido
 
 
 La comunicación podrá utilizar streaming mediante SSE cuando se implemente la respuesta progresiva del asistente. 
+
+## **6.11. Tarjetas de crédito** 
+
+|**Método**|**Endpoint**|**Descripción**|
+|---|---|---|
+|GET|`/cards`|Listar tarjetas|
+|POST|`/cards`|Registrar tarjeta|
+|GET|`/cards/{id}`|Consultar tarjeta|
+|PUT|`/cards/{id}`|Actualizar tarjeta|
+|DELETE|`/cards/{id}`|Desactivar tarjeta|
+|GET|`/cards/{id}/statements`|Resúmenes de una tarjeta|
+|POST|`/card-statements`|Registrar resumen (manual)|
+|GET|`/card-statements/{id}`|Consultar resumen|
+|PUT|`/card-statements/{id}`|Corregir resumen|
+|POST|`/card-statements/{id}/confirm`|Confirmar resumen y generar obligaciones|
+|POST|`/card-statements/{id}/reject`|Rechazar propuesta|
+|GET|`/card-statements/{id}/reconciliation`|Diferencia entre total del resumen y suma de consumos, por moneda|
+|GET|`/card-statements/{id}/transactions`|Consumos del resumen|
+|POST|`/card-statements/{id}/transactions`|Agregar consumo manual|
+|PUT|`/card-transactions/{id}`|Editar consumo|
+|PATCH|`/card-transactions/{id}/category`|Recategorizar (opcional: aplicar al comercio)|
+|DELETE|`/card-transactions/{id}`|Eliminar consumo|
+|GET|`/card-merchant-rules`|Reglas de categoría por comercio|
+|DELETE|`/card-merchant-rules/{id}`|Eliminar regla|
+|GET|`/cards/report`|Informe de compras|
+|GET|`/cards/installments/pending`|Cuotas pendientes|
+
+Filtros del informe: 
+
+```
+GET /api/v1/cards/report?from=2026-06-01&to=2026-11-30&cardId=UUID&currency=ARS
+```
+
+Ejemplo de respuesta (valores ilustrativos): 
+
+```
+{
+  "from": "2026-06-01",
+  "to": "2026-11-30",
+  "totals": [
+    { "currency": "ARS", "total": 1850000.00, "count": 142 },
+    { "currency": "USD", "total": 85.40, "count": 6 }
+  ],
+  "byCategory": [
+    { "category": "SUPERMARKET", "currency": "ARS", "total": 620000.00, "count": 38 }
+  ],
+  "byMonth": [
+    { "month": "2026-11-01", "currency": "ARS", "total": 315000.00, "count": 24 }
+  ],
+  "byCard": [
+    { "cardId": "…", "cardName": "Visa Galicia", "currency": "ARS", "total": 1200000.00, "count": 90 }
+  ],
+  "topMerchants": [
+    { "merchant": "SUPERMERCADO X", "currency": "ARS", "total": 410000.00, "count": 20 }
+  ],
+  "pendingInstallments": [ … ],
+  "pendingInstallmentsTotals": [
+    { "currency": "ARS", "total": 540000.00, "count": 5 }
+  ]
+}
+```
+
+Los totales se calculan en PostgreSQL / Java. El frontend solo los presenta. 
 
 ## **6.10. Respuestas y errores** 
 
@@ -1553,6 +1757,45 @@ ChatGPT - Contenido compartido
 
 Los valores son ilustrativos. 
 
+Para un resumen de tarjeta (`documentType: CARD_STATEMENT`) el esquema incluye los movimientos: 
+
+```
+{
+  "documentType": "CARD_STATEMENT",
+  "issuer": "Banco Galicia",
+  "brand": "VISA",
+  "lastFour": "1234",
+  "closingDate": "2026-11-27",
+  "dueDate": "2026-12-09",
+  "nextClosingDate": "2026-12-26",
+  "nextDueDate": "2027-01-08",
+  "totalAmount": 315000.00,
+  "totalAmountUsd": 12.99,
+  "minimumPayment": 45000.00,
+  "transactions": [
+    {
+      "date": "2026-11-03",
+      "description": "SUPERMERCADO X SUC 12",
+      "amount": 25400.00,
+      "currency": "ARS",
+      "installmentNumber": null,
+      "installmentTotal": null
+    },
+    {
+      "date": "2026-08-15",
+      "description": "TIENDA Y C.03/06",
+      "amount": 18000.00,
+      "currency": "ARS",
+      "installmentNumber": 3,
+      "installmentTotal": 6
+    }
+  ],
+  "confidence": { "totalAmount": 0.99, "dueDate": 0.98, "transactions": 0.90 }
+}
+```
+
+La suma de los movimientos debe coincidir con los totales del resumen; si no coincide, el resumen queda en revisión (`REQUIRES_REVIEW`) y se informa la diferencia. 
+
 ### **7. Validación de negocio** 
 
 El backend valida: 
@@ -1779,6 +2022,7 @@ src/
 │       ├── payments/
 │       ├── documents/
 │       ├── assets/
+│       ├── cards/
 ```
 
 https://chatgpt.com/s/t_6b05a365a9988191944654b2d3190fcc 
@@ -1805,6 +2049,7 @@ ChatGPT - Contenido compartido
 │   ├── obligations/
 │   ├── documents/
 │   ├── payments/
+│   ├── cards/
 │   └── assistant/
 │
 ├── lib/
@@ -1861,6 +2106,7 @@ ChatGPT - Contenido compartido
 |Integraciones|Gmail y conexiones|
 |Notificaciones|Alertas y preferencias|
 |Asistente|Chat conversacional|
+|Tarjetas|Tarjetas, resúmenes, consumos e informe de compras|
 
 
 
@@ -2215,8 +2461,10 @@ La implementación se realizará progresivamente.
 |3|Documentos y almacenamiento|Alta|
 |4|Facturas y obligaciones|Alta|
 |5|Pagos y dashboard|Alta|
+|5.1|Tarjetas de crédito y resúmenes (totales y vencimiento)|Alta|
 |6|Notificaciones|Alta|
 |7|Procesamiento documental con IA|Alta|
+|7.1|Consumos de tarjeta e informe de compras|Alta|
 |8|Integración Gmail|Media|
 |9|Asistente conversacional|Media|
 |10|Bienes y gestión familiar|Futura|
