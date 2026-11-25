@@ -25,7 +25,7 @@ No empezaría con microservicios. El dominio todavía está evolucionando y conv
 |Persistencia|PostgreSQL|Datos relacionales|
 |ORM|Hibernate ORM + Panache|Persistencia|
 |Migraciones|Flyway|Evolución del esquema|
-|Autenticación|Better Auth|Sesiones y autenticación|
+|Autenticación|JWT propio (SmallRye JWT) + BFF Next.js|Sesiones y autenticación|
 |Integración externa|Google Gmail API|Recepción de documentos|
 |IA|LLM mediante proveedor<br>intercambiable|Interpretación documental y<br>asistente|
 |Procesamiento<br>documental|Apache Tika + OCR|Extracción de contenido|
@@ -291,7 +291,7 @@ Responsabilidades:
 
 - Estado de la cuenta. 
 
-La autenticación y las sesiones estarán administradas por Better Auth. Quarkus validará la identidad y resolverá el contexto del usuario. 
+La autenticación y las sesiones las administra este backend con JWT propio (ver §7.1). Quarkus valida la identidad y resuelve el contexto del usuario. 
 
 ### **4.2. Service** 
 
@@ -538,7 +538,7 @@ https://chatgpt.com/s/t_6b05a365a9988191944654b2d3190fcc
 
 ChatGPT - Contenido compartido 
 
-Nota: Better Auth puede mantener su propio esquema de usuarios, sesiones y cuentas. Si se comparte PostgreSQL, se deberá establecer un único modelo de identidad y una correspondencia inequívoca entre su ID y `users.id` . No se deben duplicar credenciales ni contraseñas en Quarkus. 
+Nota: `users` guarda el hash bcrypt de la contraseña (`password_hash`) y el `google_subject` para el login con Google. Los tokens de un solo uso (verificación, reseteo, refresh) van en `user_tokens`, solo su hash. 
 
 ### **providers** 
 
@@ -1111,7 +1111,19 @@ Manejo uniforme de errores mediante Problem Details.
 
 
 
-La autenticación se realizará por Better Auth y no se expondrán endpoints de contraseñas en Quarkus. 
+|Método|Endpoint|Descripción|
+|---|---|---|
+|POST|`/auth/register`|Crear cuenta (deja la sesión iniciada)|
+|POST|`/auth/login`|Iniciar sesión|
+|POST|`/auth/refresh`|Renovar la sesión (refresh rotativo)|
+|POST|`/auth/logout`|Cerrar sesión|
+|POST|`/auth/verify-email`|Confirmar email|
+|POST|`/auth/resend-verification`|Reenviar el email de verificación|
+|POST|`/auth/forgot-password`|Pedir enlace de reseteo (202 siempre)|
+|POST|`/auth/reset-password`|Definir contraseña nueva|
+|PUT|`/users/me/password`|Cambiar contraseña|
+
+Ver §7.1. Las preferencias de notificación están en §6.8. 
 
 ## **6.2. Servicios** 
 
@@ -1387,55 +1399,48 @@ La seguridad es uno de los aspectos más importantes del proyecto porque se admi
 
 ## **7.1. Autenticación** 
 
-Se utilizará Better Auth en Next.js. 
+> **Decisión (24/11/2026):** la autenticación la implementa el **backend (Quarkus) con JWT propio**. Better Auth queda descartado para el MVP: agregaba un segundo modelo de usuarios y un token intermedio entre Next.js y Quarkus. 
 
-Responsabilidades: 
+Responsabilidades del backend (`/auth`, `/users/me`): 
 
-- Registro. 
+- Registro con email y contraseña (bcrypt, costo 12). 
 
-Login. 
+- Login, refresh y logout. 
 
-- Login social. 
+- Verificación de email y recupero de contraseña con tokens de un solo uso (en la base se guarda solo su SHA-256). 
 
-- Sesiones. 
+- Perfil y cambio de contraseña. 
 
-- Logout. 
+- Login con Google: pendiente. 
 
-- Gestión de cuentas. 
+### **Tokens** 
 
-Quarkus será responsable de validar la identidad de cada solicitud. 
+|**Token**|**Formato**|**Vida**|**Dónde vive**|
+|---|---|---|---|
+|Access token|JWT RS256 (iss, aud, sub = id de usuario, groups = rol)|15 min|Cookie httpOnly del BFF|
+|Refresh token|Opaco, 256 bits, de un solo uso (rotativo)|30 días|Cookie httpOnly del BFF; en la base solo su hash|
 
-### **Modelo recomendado** 
+- Cada refresh invalida el token usado y emite uno nuevo. Si un token ya usado se presenta de nuevo pasados 30 s, se asume robo y se cierran **todas** las sesiones del usuario. 
 
-Next.js actuará como Backend for Frontend (BFF) para la autenticación: 
+- Reseteo y cambio de contraseña cierran las demás sesiones. 
 
-**1.** El usuario inicia sesión. 
+- El login no revela si un email existe: mismo mensaje y mismo costo de verificación. El recupero de contraseña responde siempre 202. 
 
-**2.** Better Auth crea y mantiene la sesión. 
+- Las claves de firma no van en el repositorio en producción (`JWT_PRIVATE_KEY_LOCATION` / `JWT_PUBLIC_KEY_LOCATION`). 
 
-**3.** Next.js recibe la solicitud de la aplicación. 
+### **BFF (Next.js)** 
 
-**4.** Next.js verifica la sesión. 
+El navegador nunca recibe los tokens: 
 
-**5.** El BFF comunica la identidad autenticada a Quarkus mediante un token firmado de corta duración. 
+**1.** Los route handlers `/api/auth/*` llaman al backend y guardan los tokens en cookies `httpOnly`, `SameSite=Lax` y `Secure` (configurable con `COOKIE_SECURE`). 
 
-https://chatgpt.com/s/t_6b05a365a9988191944654b2d3190fcc 
+**2.** `/api/backend/[...path]` reenvía las llamadas del navegador agregando `Authorization: Bearer`. Si el access token venció, renueva con el refresh token y reintenta una vez. Bloquea las rutas del backend que devuelven tokens. 
 
-23/45 
+**3.** `proxy.ts` hace el chequeo optimista en cada navegación: sin sesión redirige a `/login?next=...` (solo rutas internas, sin open redirect), y con el access token vencido lo renueva en el mismo request. 
 
-24/11/26, 11:48 a.m. 
+**4.** Los Server Components consultan `/users/me`; si el backend rechaza la sesión, se borran las cookies y se vuelve al login. 
 
-ChatGPT - Contenido compartido 
-
-**6.** Quarkus valida firma, emisor, audiencia, expiración y usuario. 
-
-**7.** El backend aplica las reglas de autorización. 
-
-No se confiará en un `userId` enviado libremente desde el frontend. 
-
-Para este esquema se recomienda utilizar JWT firmado con claves asimétricas o un mecanismo de identidad equivalente, con rotación de claves y audiencia específica para la API. 
-
-**Importante:** Better Auth y Quarkus no deben asumir automáticamente que comparten sesiones. La emisión y validación del token entre ambos componentes debe implementarse y documentarse explícitamente. 
+**5.** Quarkus valida firma, emisor, audiencia y expiración de cada solicitud. El usuario se toma del claim `sub`, nunca de un parámetro del cliente. 
 
 ## **7.2. Autorización** 
 
@@ -2477,7 +2482,7 @@ La implementación se realizará progresivamente.
 
 Repositorios. 
 
-Docker. PostgreSQL. Flyway. Better Auth. Quarkus. 
+Docker. PostgreSQL. Flyway. Autenticación JWT. Quarkus. 
 
 - Contratos REST. 
 
@@ -2554,7 +2559,7 @@ ChatGPT - Contenido compartido
 |Identificadores|UUID|
 |---|---|
 |API|REST versionada|
-|Autenticación|Better Auth + validación de identidad en Quarkus|
+|Autenticación|JWT propio en Quarkus + BFF Next.js con cookies httpOnly|
 |Procesamiento|Workers + Transactional Outbox|
 |Mensajería inicial|PostgreSQL|
 |Archivos|Object Storage|
@@ -2566,7 +2571,7 @@ ChatGPT - Contenido compartido
 
 ### **Decisiones que requieren definición antes de producción** 
 
-**1. Identidad:** definir formalmente cómo Better Auth emitirá la identidad verificable que consumirá Quarkus. 
+**1. Identidad:** ~~definir cómo Better Auth emitirá la identidad~~ Resuelto: JWT propio (§7.1). Pendiente: login con Google y gestión de claves de firma en producción. 
 
 **2. Google:** completar el proceso de autorización y verificación de permisos de Gmail. 
 

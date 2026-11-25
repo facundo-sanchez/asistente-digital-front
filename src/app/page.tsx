@@ -1,17 +1,7 @@
+import { redirect } from "next/navigation";
+import { HOME_PATH } from "@/lib/config";
 
-interface PageProps {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+/** La raíz lleva al inicio de la app (el proxy manda al login si no hay sesión). */
+export default function RootPage() {
+  redirect(HOME_PATH);
 }
-
-const HomePage = async ({ searchParams }: PageProps) => {
-  const params = await searchParams;
-
-
-  return (
-    <>
-      home
-    </>
-  );
-};
-
-export default HomePage;

@@ -1,18 +1,19 @@
 import type { NextConfig } from "next";
 
+/**
+ * basePath configurable por entorno (NEXT_PUBLIC_BASE_PATH, se lee en build).
+ * Vacío = la app vive en la raíz del dominio.
+ */
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || undefined;
+
 const nextConfig: NextConfig = {
-  /* config options here */
-  output:"standalone",
-  basePath: "/mi-balance",
+  output: "standalone",
+  basePath,
+  // Si hay basePath, "/" del dominio lleva a la app
   async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/mi-balance",
-        permanent: false,
-        basePath: false,
-      },
-    ];
+    return basePath
+      ? [{ source: "/", destination: basePath, permanent: false, basePath: false }]
+      : [];
   },
 };
 
