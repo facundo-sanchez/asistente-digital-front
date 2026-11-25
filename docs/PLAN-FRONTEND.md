@@ -84,8 +84,10 @@
 
 ## Fase 3 – Servicios y proveedores (CU-001) 🔗
 
-- [ ] Tipos `Service`, `Provider` y `ServiceCategory`
-- [ ] API: `GET/POST/PUT/DELETE /services`, `PATCH /services/{id}/status`, `GET /providers`
+> Se desarrolla en 5 partes: ver [MODULO-02-SERVICIOS.md](./MODULO-02-SERVICIOS.md).
+
+- [x] Tipos `Service`, `Provider` y `ServiceCategory`
+- [~] API: `GET/POST/PUT/DELETE /services`, `PATCH /services/{id}/status`, `GET /providers` (proveedores hecho en 2.1)
 - [ ] Listado de servicios con filtros (categoría, activo/inactivo)
 - [ ] Formulario de alta y edición: categoría, proveedor, referencia de cliente y periodicidad
 - [ ] Campo "Nro. de socio / suministro" destacado, con ayuda de dónde encontrarlo en la factura (es lo que asocia las facturas del email al servicio)
