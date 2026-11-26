@@ -8,4 +8,6 @@ export interface InvoiceFormProps {
   services: ServiceOption[];
   /** Alta desde un servicio: arranca con él elegido y al cancelar vuelve a él. */
   defaultService?: ServiceOption;
+  /** Documentos del usuario para adjuntar el PDF. */
+  documents: ServiceOption[];
 }

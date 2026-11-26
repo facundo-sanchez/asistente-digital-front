@@ -4,7 +4,7 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import ArrowBackOutlined from "@mui/icons-material/ArrowBackOutlined";
-import type { InvoiceResponse } from "@/types/api";
+import type { DocumentResponse, InvoiceResponse } from "@/types/api";
 import { ButtonLink } from "@/components/common/ButtonLink";
 import { TextLink } from "@/components/common/TextLink";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -12,6 +12,7 @@ import { Panel } from "@/components/layout/Panel";
 import { firstParam, type SearchParams } from "@/lib/search-params";
 import { serverGet } from "@/lib/server/server-get";
 import { isUuid } from "@/lib/uuid";
+import { DocumentPreview } from "@/modules/documents/components/DocumentPreview";
 import { InvoiceDetails } from "@/modules/invoices/components/InvoiceDetails";
 import { InvoiceRejectAction } from "@/modules/invoices/components/InvoiceRejectAction";
 
@@ -27,6 +28,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
   if (!isUuid(id)) notFound();
   const invoice = await serverGet<InvoiceResponse>(`/invoices/${id}`);
   if (!invoice) notFound();
+  const document = invoice.documentId ? await serverGet<DocumentResponse>(`/documents/${invoice.documentId}`) : null;
   const updated = firstParam((await searchParams).updated) === "1";
   const rejected = invoice.status === "REJECTED";
   // Con pagos en su vencimiento no se edita ni anula (el backend también lo impide)
@@ -63,6 +65,11 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
       <Panel title="Datos de la factura">
         <InvoiceDetails invoice={invoice} />
       </Panel>
+      {document && (
+        <Panel title="Archivo" action={<ButtonLink href={`/documents/${document.id}`} variant="outlined">Ver documento</ButtonLink>}>
+          <DocumentPreview document={document} />
+        </Panel>
+      )}
     </Stack>
   );
 }

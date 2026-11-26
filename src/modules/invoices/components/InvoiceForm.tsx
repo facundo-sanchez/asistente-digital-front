@@ -16,6 +16,7 @@ import type { InvoiceRequest } from "@/types/api";
 import { FormTextField } from "@/components/forms/FormTextField";
 import { applyApiErrors } from "@/lib/api/form-errors";
 import { OBLIGATION_CURRENCIES, parseAmount } from "@/modules/obligations/validation";
+import { DocumentPicker } from "@/modules/documents/components/DocumentPicker";
 import { invoicesApi } from "../api";
 import { invoiceSchema, type InvoiceFormValues } from "../validation";
 import { InvoiceDuplicateWarning } from "./InvoiceDuplicateWarning";
@@ -32,6 +33,7 @@ function toRequest(values: InvoiceFormValues): InvoiceRequest {
     totalAmount: parseAmount(values.totalAmount)!,
     currency: values.currency,
     paymentCode: values.paymentCode || null,
+    documentId: values.documentId || null,
   };
 }
 
@@ -39,7 +41,7 @@ function toRequest(values: InvoiceFormValues): InvoiceRequest {
  * Cargar una factura a mano (CU-002). Al guardar queda confirmada, genera su vencimiento
  * y lleva a él, listo para pagar.
  */
-export function InvoiceForm({ invoice, services, defaultService }: InvoiceFormProps) {
+export function InvoiceForm({ invoice, services, defaultService, documents }: InvoiceFormProps) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const { control, handleSubmit, setError, formState } = useForm<InvoiceFormValues>({
@@ -54,6 +56,7 @@ export function InvoiceForm({ invoice, services, defaultService }: InvoiceFormPr
           totalAmount: String(invoice.totalAmount).replace(".", ","),
           currency: invoice.currency as InvoiceFormValues["currency"],
           paymentCode: invoice.paymentCode ?? "",
+          documentId: invoice.documentId ?? "",
         }
       : {
           // Sin servicio elegido el campo arranca vacío (DefaultValues admite undefined, no null)
@@ -65,6 +68,7 @@ export function InvoiceForm({ invoice, services, defaultService }: InvoiceFormPr
           totalAmount: "",
           currency: "ARS",
           paymentCode: "",
+          documentId: "",
         },
   });
   const [watchedService, watchedNumber, watchedPeriod, watchedAmount] = useWatch({
@@ -154,6 +158,21 @@ export function InvoiceForm({ invoice, services, defaultService }: InvoiceFormPr
           label="Código de pago (opcional)"
           helperText="El código de barras o el de Pago Mis Cuentas / Link, para tenerlo a mano al pagar."
           slotProps={{ htmlInput: { autoComplete: "off" } }}
+        />
+
+        <Controller
+          name="documentId"
+          control={control}
+          render={({ field }) => (
+            <DocumentPicker
+              label="Archivo de la factura (opcional)"
+              value={field.value ?? ""}
+              onChange={field.onChange}
+              documents={documents}
+              uploadType="INVOICE"
+              serviceId={watchedService?.id}
+            />
+          )}
         />
 
         <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>

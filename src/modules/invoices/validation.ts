@@ -26,6 +26,8 @@ export const invoiceSchema = yup.object({
     .test("amount", "Ingresá un importe válido, ej. 48500,50", (value) => /^\d{1,15}([.,]\d{1,2})?$/.test(value ?? "")),
   currency: yup.string().oneOf(OBLIGATION_CURRENCIES).required(),
   paymentCode: yup.string().trim().max(200, "Hasta 200 caracteres").default(""),
+  /** Documento con el PDF o la foto ("" = ninguno). */
+  documentId: yup.string().default(""),
 });
 
 export type InvoiceFormValues = yup.InferType<typeof invoiceSchema>;
