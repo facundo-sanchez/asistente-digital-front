@@ -74,8 +74,16 @@ export function AssistantChat({
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: stay ? 0 : { xs: "calc(100dvh - 220px)", md: 560 }, flexGrow: 1, minWidth: 0 }}>
-      <Stack spacing={2.5} sx={{ flexGrow: 1, pb: 2 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minWidth: 0,
+        // En la burbuja ocupa el panel: los mensajes se desplazan y la caja queda abajo
+        ...(stay ? { height: "100%" } : { minHeight: { xs: "calc(100dvh - 220px)", md: 560 } }),
+      }}
+    >
+      <Stack spacing={2.5} sx={{ flexGrow: 1, pb: 2, ...(stay && { minHeight: 0, overflowY: "auto", px: 2, pt: 2 }) }}>
         {messages.length === 0 && (
           <Box sx={{ my: "auto", py: 4 }}>
             <Typography variant="h2" sx={{ fontSize: "1.25rem", mb: 0.5 }}>
@@ -121,7 +129,14 @@ export function AssistantChat({
           e.preventDefault();
           send(text);
         }}
-        sx={{ position: "sticky", bottom: 0, pt: 1.5, pb: "calc(env(safe-area-inset-bottom, 0px) + 4px)", bgcolor: "background.paper" }}
+        sx={{
+          position: "sticky",
+          bottom: 0,
+          pt: 1.5,
+          pb: stay ? 1.5 : "calc(env(safe-area-inset-bottom, 0px) + 4px)",
+          bgcolor: "inherit",
+          ...(stay && { px: 2, borderTop: 1, borderColor: "divider" }),
+        }}
       >
         <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
           <TextField
