@@ -7,6 +7,8 @@ import { DetailList } from "@/components/layout/DetailList";
 import { formatDate, formatDay } from "@/lib/dates";
 import { formatMoney } from "@/lib/money";
 import { OBLIGATION_TYPE_LABELS } from "@/lib/obligation-labels";
+import type { PaymentTarget } from "@/lib/wallets";
+import { PaymentCode } from "@/modules/invoices/components/PaymentCode";
 import { ObligationStatus } from "./ObligationStatus";
 
 const EMPTY = (
@@ -21,7 +23,16 @@ function money(amount: number | null, currency: string | null): ReactNode {
 }
 
 /** Datos de la obligación: estado, vencimiento, importes, servicio y notas. */
-export function ObligationDetails({ obligation, statementId }: { obligation: ObligationResponse; statementId?: string }) {
+export function ObligationDetails({
+  obligation,
+  statementId,
+  payment,
+}: {
+  obligation: ObligationResponse;
+  statementId?: string;
+  /** Código de pago de su factura y a dónde pagarla, si sigue sin pagar. */
+  payment?: { code: string; target: PaymentTarget | null } | null;
+}) {
   const rows: [string, ReactNode][] = [
     ["Estado", <ObligationStatus key="status" status={obligation.effectiveStatus} />],
     ["Vence", <span key="due" className="tabular-nums">{formatDate(obligation.dueDate)}</span>],
@@ -29,6 +40,9 @@ export function ObligationDetails({ obligation, statementId }: { obligation: Obl
     ["Servicio", obligation.serviceName ?? EMPTY],
     ...(obligation.invoiceId
       ? [["Factura", <TextLink key="invoice" href={`/invoices/${obligation.invoiceId}`}>Ver factura, código de pago y archivo</TextLink>] as [string, ReactNode]]
+      : []),
+    ...(payment
+      ? [["Código de pago", <PaymentCode key="code" code={payment.code} payable target={payment.target} />] as [string, ReactNode]]
       : []),
     ...(statementId
       ? [["Resumen", <TextLink key="statement" href={`/card-statements/${statementId}`}>Ver resumen de la tarjeta</TextLink>] as [string, ReactNode]]

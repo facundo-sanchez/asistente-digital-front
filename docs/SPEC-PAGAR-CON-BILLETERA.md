@@ -6,7 +6,7 @@
 **quiero** pagar una factura usando una billetera virtual que tenga configurada
 **para** no tener que buscar el código de pago ni dónde se paga.
 
-**Estado (26/11/2026):** hecho en `feature/pagar-billetera` (backend y front). Cambios al desarrollar: el link de pago va en el **servicio** (los proveedores del catálogo son de todos y no se editan), así que el botón dice "Pagar en {proveedor}" con el link del servicio; la billetera se guarda con `PUT /users/me/payment-wallet`; el front lee el servicio con `GET /services/{id}` en vez de sumar campos a la factura. El botón va solo en la factura, todavía no en Vencimientos.
+**Estado (26/11/2026):** hecho en `feature/pagar-billetera` (backend y front). Cambios al desarrollar: el link de pago va en el **servicio** (los proveedores del catálogo son de todos y no se editan), así que el botón dice "Pagar en {proveedor}" con el link del servicio; la billetera se guarda con `PUT /users/me/payment-wallet`; el front lee el servicio con `GET /services/{id}` en vez de sumar campos a la factura. El botón está en la factura y en su vencimiento (si la factura tiene código de pago). Los links de las billeteras son la página principal de cada una: ninguna publica una dirección pública de "pagar servicios".
 
 ## Alcance
 
@@ -78,5 +78,5 @@ Debajo del código aparece "Elegí tu billetera en el perfil para pagar desde ac
 
 ## Preguntas abiertas
 
-- ¿Mostrar el botón también en **Vencimientos** (obligaciones con código de pago), además de en la factura?
-- Los links de las billeteras hay que confirmarlos al desarrollar: pueden cambiar.
+- ~~¿Mostrar el botón también en Vencimientos?~~ Sí, hecho.
+- ~~Links de las billeteras~~ Verificados (responden); van a la página principal.

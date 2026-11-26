@@ -2,14 +2,13 @@ import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { InvoiceResponse } from "@/types/api";
-import { CopyButton } from "@/components/common/CopyButton";
-import type { PaymentTarget } from "@/lib/wallets";
 import { TextLink } from "@/components/common/TextLink";
+import type { PaymentTarget } from "@/lib/wallets";
 import { DetailList } from "@/components/layout/DetailList";
 import { formatDate } from "@/lib/dates";
 import { formatMoney } from "@/lib/money";
 import { ObligationStatus } from "@/modules/obligations/components/ObligationStatus";
-import { PayButton } from "./PayButton";
+import { PaymentCode } from "./PaymentCode";
 
 const EMPTY = (
   <Typography component="span" color="text.secondary">
@@ -31,18 +30,7 @@ export function InvoiceDetails({ invoice, payment }: { invoice: InvoiceResponse;
     [
       "Código de pago",
       invoice.paymentCode ? (
-        <Box key="code" component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-          <Box component="span" className="tabular-nums" sx={{ overflowWrap: "anywhere" }}>
-            {invoice.paymentCode}
-          </Box>
-          <CopyButton text={invoice.paymentCode} />
-          {payable && payment && <PayButton code={invoice.paymentCode} target={payment} />}
-          {payable && !payment && (
-            <TextLink href="/profile#billetera" sx={{ flexBasis: "100%", typography: "body2" }}>
-              Elegí tu billetera en el perfil para pagar desde acá
-            </TextLink>
-          )}
-        </Box>
+        <PaymentCode key="code" code={invoice.paymentCode} payable={payable} target={payment} />
       ) : (
         EMPTY
       ),
