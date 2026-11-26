@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import NextLink from "next/link";
+import Backdrop from "@mui/material/Backdrop";
 import Box from "@mui/material/Box";
 import Fab from "@mui/material/Fab";
 import Grow from "@mui/material/Grow";
@@ -35,6 +36,7 @@ export function AssistantBubble() {
 
   return (
     <Box data-noprint sx={{ display: { xs: "block", md: "none" } }}>
+      <Backdrop open={open} onClick={() => setOpen(false)} sx={{ zIndex: (theme) => theme.zIndex.modal - 1 }} />
       <Grow in={open} style={{ transformOrigin: "bottom right" }} timeout={180} unmountOnExit={false}>
         <Paper
           role="dialog"
@@ -45,7 +47,8 @@ export function AssistantBubble() {
             left: 12,
             right: 12,
             bottom: "calc(env(safe-area-inset-bottom, 0px) + 84px)",
-            height: "min(70dvh, 600px)",
+            // Hasta abajo de la barra superior (64px + margen)
+            top: "calc(env(safe-area-inset-top, 0px) + 72px)",
             zIndex: (theme) => theme.zIndex.modal,
             display: open ? "flex" : "none",
             flexDirection: "column",
