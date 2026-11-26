@@ -11,5 +11,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: "Tarjetas", href: "/cards", icon: "cards" },
   { label: "Vencimientos", href: "/obligations", icon: "obligations" },
   { label: "Documentos", href: "/documents", icon: "documents" },
+  { label: "Integraciones", href: "/integrations", icon: "integrations" },
   { label: "Mi perfil", href: "/profile", icon: "profile" },
 ];

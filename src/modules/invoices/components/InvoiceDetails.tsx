@@ -2,12 +2,13 @@ import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { InvoiceResponse } from "@/types/api";
-import { CopyButton } from "@/components/common/CopyButton";
 import { TextLink } from "@/components/common/TextLink";
+import type { PaymentTarget } from "@/lib/wallets";
 import { DetailList } from "@/components/layout/DetailList";
 import { formatDate } from "@/lib/dates";
 import { formatMoney } from "@/lib/money";
 import { ObligationStatus } from "@/modules/obligations/components/ObligationStatus";
+import { PaymentCode } from "./PaymentCode";
 
 const EMPTY = (
   <Typography component="span" color="text.secondary">
@@ -16,7 +17,9 @@ const EMPTY = (
 );
 
 /** Datos de la factura, el código de pago para copiar y el estado de su vencimiento. */
-export function InvoiceDetails({ invoice }: { invoice: InvoiceResponse }) {
+export function InvoiceDetails({ invoice, payment }: { invoice: InvoiceResponse; payment: PaymentTarget | null }) {
+  // RP-5: solo si hay código y el vencimiento sigue sin pagar
+  const payable = invoice.obligationStatus !== "PAID" && invoice.status !== "REJECTED";
   const rows: [string, ReactNode][] = [
     ["Servicio", invoice.serviceName],
     ["Número", invoice.invoiceNumber ? <span className="tabular-nums">{invoice.invoiceNumber}</span> : EMPTY],
@@ -27,12 +30,7 @@ export function InvoiceDetails({ invoice }: { invoice: InvoiceResponse }) {
     [
       "Código de pago",
       invoice.paymentCode ? (
-        <Box key="code" component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-          <Box component="span" className="tabular-nums" sx={{ overflowWrap: "anywhere" }}>
-            {invoice.paymentCode}
-          </Box>
-          <CopyButton text={invoice.paymentCode} />
-        </Box>
+        <PaymentCode key="code" code={invoice.paymentCode} payable={payable} target={payment} />
       ) : (
         EMPTY
       ),

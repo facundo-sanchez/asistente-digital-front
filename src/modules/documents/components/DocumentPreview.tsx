@@ -7,7 +7,7 @@ import type { DocumentResponse } from "@/types/api";
 import { documentFileUrl } from "../file-url";
 import { isSpreadsheet } from "../upload-rules";
 
-/** PDF embebido o imagen. Excel no tiene vista previa en el navegador: se ofrece descargarlo. */
+/** PDF o texto embebido, o imagen. Excel no tiene vista previa en el navegador: se ofrece descargarlo. */
 export function DocumentPreview({ document }: { document: DocumentResponse }) {
   const src = documentFileUrl(document.id, true);
   const name = document.title ?? document.originalFilename;
@@ -22,7 +22,8 @@ export function DocumentPreview({ document }: { document: DocumentResponse }) {
       </Stack>
     );
   }
-  if (document.mimeType === "application/pdf") {
+  // El texto es el cuerpo de un email importado de Gmail: el navegador lo muestra igual que un PDF.
+  if (document.mimeType === "application/pdf" || document.mimeType === "text/plain") {
     return (
       <Box
         component="iframe"

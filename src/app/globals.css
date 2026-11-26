@@ -61,3 +61,15 @@ input[inputmode="decimal"],
 input[inputmode="numeric"] {
   font-variant-numeric: tabular-nums;
 }
+
+/* Imprimir o guardar como PDF (ej. el resumen de tarjeta): solo el contenido, sin el menú ni la barra */
+@media print {
+  .MuiDrawer-root,
+  header,
+  [data-noprint] {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+}

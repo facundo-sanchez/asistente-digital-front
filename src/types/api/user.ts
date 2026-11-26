@@ -4,6 +4,14 @@ import type { CurrencyCode, ISODateTime, UUID } from "./common";
 export const USER_ROLES = ["USER", "ADMIN"] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
+export const PAYMENT_WALLETS = ["MERCADO_PAGO", "MODO", "CUENTA_DNI"] as const;
+export type PaymentWallet = (typeof PAYMENT_WALLETS)[number];
+
+/** PUT /users/me/payment-wallet */
+export interface PaymentWalletRequest {
+  paymentWallet: PaymentWallet | null;
+}
+
 /** GET /users/me */
 export interface UserResponse {
   id: UUID;
@@ -18,6 +26,8 @@ export interface UserResponse {
   locale: string;
   defaultCurrency: CurrencyCode;
   role: UserRole;
+  /** Billetera para pagar facturas; null si no eligió ninguna. */
+  paymentWallet: PaymentWallet | null;
   createdAt: ISODateTime;
 }
 

@@ -23,6 +23,8 @@ export interface InvoiceReviewResponse {
   invoice: ExtractedInvoice;
   /** Servicio del usuario por número de socio o proveedor (null si no se encontró). */
   suggestedServiceId: UUID | null;
+  /** Proveedor del catálogo si la factura llegó por email (para registrar el servicio que falta). */
+  suggestedProviderId: UUID | null;
   warnings: string[];
   /** La factura creada, si ya se confirmó. */
   invoiceId: UUID | null;

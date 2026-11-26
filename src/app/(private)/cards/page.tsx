@@ -30,6 +30,19 @@ export default async function CardsPage() {
       <Alert severity="info" variant="outlined">
         El cierre y el vencimiento los fija el banco cada mes: los cargás con cada resumen.
       </Alert>
+      {active.length > 0 && (
+        <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: "wrap" }}>
+          <ButtonLink href="/cards/report" variant="outlined">
+            Informe de consumos
+          </ButtonLink>
+          <ButtonLink href="/cards/installments" variant="outlined">
+            Cuotas pendientes
+          </ButtonLink>
+          <ButtonLink href="/cards/rules" variant="text">
+            Rubros por comercio
+          </ButtonLink>
+        </Stack>
+      )}
       <Panel title="Tus tarjetas" description={`${active.length} ${active.length === 1 ? "activa" : "activas"}`}>
         {active.length > 0 ? (
           <CardsTable cards={active} />

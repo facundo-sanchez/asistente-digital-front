@@ -4,5 +4,6 @@ import type { NotificationResponse } from "@/types/api";
 export function notificationHref(notification: NotificationResponse): string {
   if (notification.obligationId) return `/obligations/${notification.obligationId}`;
   if (notification.documentId) return `/documents/${notification.documentId}`;
+  if (notification.integrationId) return "/integrations";
   return "/notifications";
 }
