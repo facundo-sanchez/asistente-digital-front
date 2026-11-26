@@ -32,7 +32,9 @@ export default async function ObligationPage({ params, searchParams }: { params:
   if (!obligation) notFound();
   const receipts = (documents?.content ?? []).map((d) => ({ id: d.id, name: d.title ?? d.originalFilename }));
   const query = await searchParams;
-  const notice = firstParam(query.created) === "1"
+  const notice = firstParam(query.invoice) === "1"
+    ? "Cargamos la factura y creamos su vencimiento. Cuando la pagues, registrá el pago acá."
+    : firstParam(query.created) === "1"
     ? "Registramos el vencimiento."
     : firstParam(query.updated) === "1"
       ? "Guardamos los cambios."

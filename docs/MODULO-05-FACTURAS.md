@@ -28,7 +28,7 @@
 
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 5.1 | Cargar una factura (genera su vencimiento) y listado | `feature/facturas-1-carga` | — | [ ] |
+| 5.1 | Cargar una factura (genera su vencimiento) y listado | `feature/facturas-1-carga` | — | [x] |
 | 5.2 | Aviso de facturas repetidas | `feature/facturas-2-duplicados` | 5.1 | [ ] |
 | 5.3 | Detalle, edición y anulación | `feature/facturas-3-detalle` | 5.1 | [ ] |
 | 5.4 | PDF de la factura y facturas dentro del servicio y del vencimiento | `feature/facturas-4-enlaces` | 5.3 | [ ] |
@@ -42,17 +42,19 @@ Orden recomendado: 5.1 → 5.2 → 5.3 → 5.4. Con 5.1 el módulo ya es usable.
 **Objetivo:** el usuario carga la factura de luz de diciembre y aparece su vencimiento, listo para pagar.
 
 ### Backend
-- [ ] `InvoiceRepository` (puerto + adaptador Panache).
-- [ ] `RegisterInvoiceUseCase`: servicio del usuario (RN-003), documento del usuario si viene, ARS o USD, emisión ≤ vencimiento; guarda la factura `CONFIRMED` y crea su vencimiento en la misma transacción.
-- [ ] `POST /invoices` → 201 con la factura y el id de su vencimiento.
-- [ ] `GET /invoices?query&serviceId&status&from&to&page&size` (búsqueda por número; período por vencimiento; más nuevas primero). Incluye `serviceName`.
-- [ ] Tests: servicio ajeno, documento ajeno, fechas, vencimiento generado, aislamiento.
+- [x] `InvoiceRepository` (puerto + adaptador Panache).
+- [x] `RegisterInvoiceUseCase`: servicio del usuario (RN-003), documento del usuario si viene, ARS o USD, emisión ≤ vencimiento; guarda la factura `CONFIRMED` y crea su vencimiento en la misma transacción.
+- [x] `POST /invoices` → 201 con la factura y el id de su vencimiento.
+- [x] `GET /invoices?query&serviceId&status&from&to&page&size` (búsqueda por número; período por vencimiento; más nuevas primero). Incluye `serviceName`.
+- [x] Tests: servicio ajeno, documento ajeno, fechas, vencimiento generado, aislamiento.
 
 ### Frontend
-- [ ] "Facturas" en el riel. `/invoices`: tabla (servicio con su tinte, número y período, vencimiento, importe, estado del vencimiento), filtros en la URL, paginación, estados vacío y cargando.
-- [ ] `/invoices/new`: servicio (obligatorio), número, período, emisión, vencimiento, importe y moneda, código de pago. Al guardar lleva al vencimiento generado.
+- [x] "Facturas" en el riel. `/invoices`: tabla (servicio con su tinte, número y período, vencimiento, importe, estado del vencimiento), filtros en la URL, paginación, estados vacío y cargando.
+- [x] `/invoices/new`: servicio (obligatorio), número, período, emisión, vencimiento, importe y moneda, código de pago. Al guardar lleva al vencimiento generado.
 
 **Listo cuando:** se carga la factura de "Luz casa" de diciembre y en Vencimientos aparece «Luz casa · factura 2026-12» con su importe.
+
+**Hecho (25/11/2026):** `InvoiceRepository`, `InvoiceDraftValidator` (servicio y documento del usuario, ARS o USD, emisión ≤ vencimiento, número repetido del servicio → 409; lo reusa la edición de la 5.3), `RegisterInvoiceUseCase` (confirmada + vencimiento en la misma transacción), `InvoiceQueryUseCase` (servicio y vencimiento de la página en dos consultas; `ObligationRepository.findByInvoices`). `POST /invoices`, `GET /invoices` (número, servicio, estado, período), `GET /invoices/{id}`; la respuesta trae `serviceName`, `obligationId` y `obligationStatus`. Front: "Facturas" en el riel, `/invoices` (tabla con número y período, vencimiento, importe y estado del vencimiento; filtros en la URL), `/invoices/new` (también con `?serviceId=`); al guardar lleva al vencimiento con aviso. Adelantado de la 5.2: el número repetido ya responde 409 con mensaje claro. Verificado contra la base. 5 tests de backend y 4 de front nuevos.
 
 ---
 

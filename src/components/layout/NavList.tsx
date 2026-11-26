@@ -10,6 +10,7 @@ import ListItemText from "@mui/material/ListItemText";
 import HomeOutlined from "@mui/icons-material/HomeOutlined";
 import PersonOutlined from "@mui/icons-material/PersonOutlined";
 import ReceiptLongOutlined from "@mui/icons-material/ReceiptLongOutlined";
+import RequestQuoteOutlined from "@mui/icons-material/RequestQuoteOutlined";
 import EventOutlined from "@mui/icons-material/EventOutlined";
 import FolderOutlined from "@mui/icons-material/FolderOutlined";
 import type { NavItem } from "./nav-item";
@@ -18,6 +19,7 @@ import { NAV_ITEMS } from "./nav-items";
 const ICONS: Record<NavItem["icon"], ReactNode> = {
   dashboard: <HomeOutlined />,
   services: <ReceiptLongOutlined />,
+  invoices: <RequestQuoteOutlined />,
   obligations: <EventOutlined />,
   documents: <FolderOutlined />,
   profile: <PersonOutlined />,

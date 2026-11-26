@@ -18,7 +18,7 @@
 | 2 | **Proveedores + Servicios** ⭐ | `feature/servicios-<n>-*` (5 partes, ver [MODULO-02-SERVICIOS.md](./MODULO-02-SERVICIOS.md)) | Primer CRUD completo (repositorio, caso de uso, resource, tests) | Listado, alta/edición, detalle | 1 | [x] 5/5 partes, sin PR |
 | 3 | **Documentos** | `feature/documentos-<n>-*` (5 partes + 1 opcional, ver [MODULO-03-DOCUMENTOS.md](./MODULO-03-DOCUMENTOS.md)) | Carga a storage (MinIO), descarga | Repositorio documental, carga de archivos | 1 | [x] 5/5 partes (3.6 opcional) |
 | 4 | **Obligaciones + Pagos** | `feature/obligaciones-<n>-*` (6 partes, ver [MODULO-04-OBLIGACIONES-PAGOS.md](./MODULO-04-OBLIGACIONES-PAGOS.md)) | Vista `v_obligations`, pagos parciales | Tabla con filtros, registro de pago | 2, 3 | [x] 6/6 partes |
-| 5 | **Facturas** (carga manual) | `feature/facturas-<n>-*` (4 partes, ver [MODULO-05-FACTURAS.md](./MODULO-05-FACTURAS.md)) | Confirmar factura genera la obligación | Carga manual y validación | 2, 3, 4 | [ ] |
+| 5 | **Facturas** (carga manual) | `feature/facturas-<n>-*` (4 partes, ver [MODULO-05-FACTURAS.md](./MODULO-05-FACTURAS.md)) | Confirmar factura genera la obligación | Carga manual y validación | 2, 3, 4 | [~] 1/4 partes |
 | 6 | **Tarjetas y resúmenes** | `feature/tarjetas` | Tarjetas, resumen y obligaciones ARS/USD | Tarjetas y carga de resumen | 2, 4 | [ ] |
 | 7 | **Dashboard** | `feature/dashboard` | Resumen y próximos vencimientos | KPIs y gráficos | 4, 5, 6 | [ ] |
 | 8 | **Notificaciones** | `feature/notificaciones` | Scheduler, preferencias | Campana, preferencias | 4 | [ ] |
