@@ -13,11 +13,13 @@ import Stack from "@mui/material/Stack";
 import { BILLING_FREQUENCIES, SERVICE_CATEGORIES, type ServiceRequest, type ServiceResponse } from "@/types/api";
 import { FormTextField } from "@/components/forms/FormTextField";
 import { applyApiErrors } from "@/lib/api/form-errors";
+import { safeNextPath } from "@/lib/config";
 import { BILLING_FREQUENCY_LABELS } from "@/lib/billing-frequencies";
 import { CATEGORY_LABELS } from "@/lib/service-categories";
 import { ProviderAutocomplete } from "@/modules/providers/components/ProviderAutocomplete";
 import { servicesApi } from "../api";
 import { DuplicateWarning } from "./DuplicateWarning";
+import type { ServiceFormProps } from "./service-form-props";
 import { serviceSchema, type ServiceFormValues } from "../validation";
 
 /** Proveedor y categoría arrancan vacíos: los completa el usuario (o el proveedor elegido). */
@@ -67,19 +69,30 @@ function toFormValues(service: ServiceResponse): DefaultValues<ServiceFormValues
   };
 }
 
+/** Alta con el proveedor ya elegido: categoría y nombre salen del proveedor. */
+function fromPreset(preset: NonNullable<ServiceFormProps["preset"]>): DefaultValues<ServiceFormValues> {
+  return {
+    ...EMPTY,
+    provider: preset.provider,
+    category: preset.provider.category,
+    name: preset.provider.name,
+    customerReference: preset.customerReference,
+  };
+}
+
 /**
  * Alta (CU-001) o edición de un servicio, según venga service. Al guardar lleva al
  * detalle del servicio.
  */
-export function ServiceForm({ service }: { service?: ServiceResponse }) {
+export function ServiceForm({ service, preset, next }: ServiceFormProps) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const { control, handleSubmit, setError, setValue, getValues, formState } = useForm<ServiceFormValues>({
     resolver: yupResolver(serviceSchema),
-    defaultValues: service ? toFormValues(service) : EMPTY,
+    defaultValues: service ? toFormValues(service) : preset ? fromPreset(preset) : EMPTY,
   });
   const [watchedProvider, watchedReference] = useWatch({ control, name: ["provider", "customerReference"] });
-  const cancelHref = service ? `/services/${service.id}` : "/services";
+  const cancelHref = service ? `/services/${service.id}` : next ? safeNextPath(next) : "/services";
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
@@ -89,7 +102,7 @@ export function ServiceForm({ service }: { service?: ServiceResponse }) {
         router.push(`/services/${service.id}?updated=1`);
       } else {
         const created = await servicesApi.create(toRequest(values));
-        router.push(`/services/${created.id}?created=1`);
+        router.push(next ? safeNextPath(next) : `/services/${created.id}?created=1`);
       }
       router.refresh();
     } catch (e) {

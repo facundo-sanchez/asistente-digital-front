@@ -36,8 +36,8 @@ Que el usuario no tenga que bajar ni subir nada: conecta su Gmail una vez y las 
 |---|---|---|---|---|
 | 10.1 | Conectar y desconectar Gmail: pantalla Integraciones, OAuth, tokens cifrados | `feature/gmail-1-2` (junto con 10.2) | — | [~] |
 | 10.2 | Sincronización: busca por reglas, guarda los adjuntos (o el texto del email) y los manda a la IA | `feature/gmail-1-2` | 10.1 | [~] |
-| 10.3 | Resumen sin PDF en el cuerpo (BBVA) y facturas de proveedores sin servicio | `feature/gmail-3-4` (junto con 10.4) | 10.2 | [ ] |
-| 10.4 | "Detectado en tu correo", reconexión y avisos | `feature/gmail-3-4` | 10.2 | [ ] |
+| 10.3 | Resumen sin PDF en el cuerpo (BBVA) y facturas de proveedores sin servicio | `feature/gmail-3-4` (junto con 10.4) | 10.2 | [~] |
+| 10.4 | "Detectado en tu correo", reconexión y avisos | `feature/gmail-3-4` | 10.2 | [~] |
 
 Orden recomendado: 10.1 → 10.2 → 10.3 → 10.4. Con 10.1 y 10.2 las facturas ya llegan solas.
 
@@ -78,23 +78,29 @@ Orden recomendado: 10.1 → 10.2 → 10.3 → 10.4. Con 10.1 y 10.2 las facturas
 
 ## Parte 10.3 – Resúmenes en el cuerpo y proveedores sin servicio
 
+> Cambió respecto del plan original: el email (adjunto o texto) ya entra a la IA desde 10.2, así que el resumen de BBVA sin PDF llega a la revisión de resúmenes como cualquier otro y la tarjeta se busca por los últimos 4 de la cuenta. Acá quedó pulir esas revisiones.
+
 ### Backend
-- [ ] Resumen que solo informa totales en el cuerpo (BBVA): se registra el resumen con vencimiento y saldos en pesos y dólares (`PENDING_VALIDATION`, sin consumos), identificando la tarjeta por los últimos 4 de la cuenta, y aviso `CARD_STATEMENT_AVAILABLE` ("Subí el PDF para ver los consumos").
-- [ ] Factura de un proveedor del catálogo sin servicio registrado (o con nro. de cliente desconocido): el documento queda importado y el aviso propone crear o vincular el servicio.
+- [x] `EmailOriginRepository`: si un documento llegó por Gmail, de qué proveedor y con qué servicio se asoció.
+- [x] Revisión de factura: usa el servicio que asoció Gmail; si no hay, avisa que es de un proveedor sin servicio y devuelve `suggestedProviderId`.
+- [x] Revisión de resumen: si llegó por email sin consumos, avisa que trae solo los totales.
 
 ### Frontend
-- [ ] En el resumen detectado por email: totales, vencimiento y botón para subir el PDF.
-- [ ] Desde el aviso, alta del servicio con el proveedor y el nro. de cliente ya completos.
+- [x] En la revisión de factura: "Registralo acá" lleva al alta de servicio con el proveedor y el nro. de cliente completos, y al guardar vuelve a la revisión.
 
-**Listo cuando:** el email de BBVA crea el resumen con su vencimiento y su tarjeta, y aparece en Vencimientos.
+**Listo cuando:** el email de BBVA crea el resumen con su vencimiento y su tarjeta, y una factura de un proveedor sin servicio se registra sin tipear el proveedor.
+
+**Hecho, falta la prueba con una cuenta real (26/11/2026).** Queda afuera: subir después el PDF de un resumen que llegó sin consumos para sumarle los movimientos (hoy sería otro resumen con el mismo vencimiento).
 
 ---
 
 ## Parte 10.4 – Detectado en tu correo y reconexión
 
 ### Frontend
-- [ ] En el detalle de la integración: lista de mensajes procesados (remitente, asunto, fecha y resultado: importado, descartado, duplicado, falló) con enlace al documento.
-- [ ] "Sincronizar ahora" y última sincronización.
-- [ ] Aviso y banner de "Reconectá Gmail" cuando Google revoca o vence el permiso (`REAUTH_REQUIRED` → aviso `INTEGRATION_DISCONNECTED`).
+- [x] En el detalle de la integración: lista de mensajes procesados (remitente, asunto, fecha y resultado: importado, descartado, duplicado, falló) con enlace al documento.
+- [x] "Sincronizar ahora" y última sincronización.
+- [x] Aviso y banner de "Reconectá Gmail" cuando Google revoca o vence el permiso (`REAUTH_REQUIRED` → aviso `INTEGRATION_DISCONNECTED`).
 
 **Listo cuando:** veo qué emails se importaron y, si revoco el permiso desde Google, la app me pide reconectar.
+
+**Hecho, falta la prueba con una cuenta real (26/11/2026):** `GET /integrations/{id}/emails` y panel "Detectado en tu correo" en Integraciones (asunto con enlace al documento, remitente, fecha y resultado: importado, ya estaba, no es factura, falló y se reintenta). Al pasar a `REAUTH_REQUIRED` se avisa una vez (`INTEGRATION_DISCONNECTED`, en la campana y por email según preferencias; el aviso lleva a Integraciones, donde está "Volver a conectar Gmail").

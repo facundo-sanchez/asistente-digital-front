@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
-import type { IntegrationResponse } from "@/types/api";
+import type { DetectedEmailResponse, IntegrationResponse, PageResponse } from "@/types/api";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Panel } from "@/components/layout/Panel";
 import { firstParam, type SearchParams } from "@/lib/search-params";
 import { serverGet } from "@/lib/server/server-get";
 import { ConnectGmail } from "@/modules/integrations/components/ConnectGmail";
+import { DetectedEmails } from "@/modules/integrations/components/DetectedEmails";
 import { GmailAccount } from "@/modules/integrations/components/GmailAccount";
 
 export const metadata: Metadata = { title: "Integraciones" };
@@ -23,9 +24,14 @@ export default async function IntegrationsPage({ searchParams }: { searchParams:
   const result = RESULTS[firstParam((await searchParams).gmail) ?? ""];
   const integrations = (await serverGet<IntegrationResponse[]>("/integrations")) ?? [];
   const gmail = integrations.filter((i) => i.provider === "GMAIL");
+  const detected = await Promise.all(
+    gmail.map((i) =>
+      serverGet<PageResponse<DetectedEmailResponse>>(`/integrations/${i.id}/emails?size=20`).then((page) => page?.content ?? []),
+    ),
+  );
 
   return (
-    <Stack spacing={4} sx={{ maxWidth: 820 }}>
+    <Stack spacing={4} sx={{ maxWidth: 900 }}>
       <PageHeader title="Integraciones" description="Conectá tu correo y las facturas de tus servicios se cargan solas." />
       {result && <Alert severity={result.severity}>{result.text}</Alert>}
       <Panel title="Gmail" description="Facturas de luz, gas, internet y resúmenes de tarjeta que te llegan por email.">
@@ -39,6 +45,15 @@ export default async function IntegrationsPage({ searchParams }: { searchParams:
           </Stack>
         )}
       </Panel>
+      {gmail.map((integration, index) => (
+        <Panel
+          key={integration.id}
+          title="Detectado en tu correo"
+          description={`Los últimos 20 correos de tus proveedores en ${integration.externalAccountId} y qué hicimos con cada uno.`}
+        >
+          <DetectedEmails emails={detected[index]} />
+        </Panel>
+      ))}
     </Stack>
   );
 }

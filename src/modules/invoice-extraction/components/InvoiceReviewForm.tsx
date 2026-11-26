@@ -21,10 +21,20 @@ import { invoiceExtractionsApi } from "../api";
 import type { InvoiceReviewProps } from "./invoice-review-props";
 
 /** La misma validación que la carga manual, con el servicio como id (select) en vez de autocompletado. */
-const reviewSchema = invoiceSchema.omit(["service", "documentId"]).shape({ serviceId: yup.string().required("Elegí el servicio de la factura") });
+const reviewSchema = invoiceSchema
+  .omit(["service", "documentId"])
+  .shape({ serviceId: yup.string().required("Elegí el servicio de la factura") });
 type ReviewValues = yup.InferType<typeof reviewSchema>;
 
 const dateSlot = { inputLabel: { shrink: true } };
+
+/** Alta del servicio que falta; al guardar vuelve a esta revisión. */
+function newServiceHref(extractionId: string, providerId: string | null, customerReference: string | null): string {
+  const params = new URLSearchParams({ next: `/invoice-extractions/${extractionId}` });
+  if (providerId) params.set("providerId", providerId);
+  if (customerReference) params.set("customerReference", customerReference);
+  return `/services/new?${params}`;
+}
 
 /** Los datos de la factura leídos por la IA, editables, para confirmarla. */
 export function InvoiceReviewForm({ review, services }: InvoiceReviewProps) {
@@ -89,24 +99,38 @@ export function InvoiceReviewForm({ review, services }: InvoiceReviewProps) {
           </Alert>
         ))}
 
-        <FormTextField<ReviewValues> name="serviceId" control={control} label="Servicio" select required
-          helperText={i.provider ? `La IA leyó: ${i.provider}${i.customerReference ? ` · cliente ${i.customerReference}` : ""}` : undefined}>
+        <FormTextField<ReviewValues>
+          name="serviceId"
+          control={control}
+          label="Servicio"
+          select
+          required
+          helperText={i.provider ? `La IA leyó: ${i.provider}${i.customerReference ? ` · cliente ${i.customerReference}` : ""}` : undefined}
+        >
           {services.map((service) => (
             <MenuItem key={service.id} value={service.id}>
               {service.name}
             </MenuItem>
           ))}
         </FormTextField>
-        {services.length === 0 && (
+        {(services.length === 0 || (!review.suggestedServiceId && review.suggestedProviderId)) && (
           <Alert severity="info">
-            No tenés servicios registrados. <NextLink href="/services/new">Registrá el servicio</NextLink> y volvé a esta revisión desde el documento.
+            {services.length === 0 ? "No tenés servicios registrados. " : "¿Es un servicio nuevo? "}
+            <NextLink href={newServiceHref(review.extractionId, review.suggestedProviderId, i.customerReference)}>Registralo acá</NextLink>
+            {review.suggestedProviderId ? " con el proveedor y el nro. de cliente ya completos" : ""}: después volvés a esta revisión.
           </Alert>
         )}
 
         <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
           <FormTextField<ReviewValues> name="invoiceNumber" control={control} label="Número (opcional)" />
           <FormTextField<ReviewValues> name="billingPeriod" control={control} label="Período (opcional)" />
-          <FormTextField<ReviewValues> name="totalAmount" control={control} label="Importe" required slotProps={{ htmlInput: { inputMode: "decimal" } }} />
+          <FormTextField<ReviewValues>
+            name="totalAmount"
+            control={control}
+            label="Importe"
+            required
+            slotProps={{ htmlInput: { inputMode: "decimal" } }}
+          />
           <FormTextField<ReviewValues> name="currency" control={control} label="Moneda" select>
             {OBLIGATION_CURRENCIES.map((currency) => (
               <MenuItem key={currency} value={currency}>
@@ -119,7 +143,12 @@ export function InvoiceReviewForm({ review, services }: InvoiceReviewProps) {
         </Box>
         <FormTextField<ReviewValues> name="paymentCode" control={control} label="Código de pago (opcional)" />
 
-        <InvoiceDuplicateWarning serviceId={serviceId || undefined} invoiceNumber={number ?? ""} billingPeriod={period ?? ""} totalAmount={amount ?? ""} />
+        <InvoiceDuplicateWarning
+          serviceId={serviceId || undefined}
+          invoiceNumber={number ?? ""}
+          billingPeriod={period ?? ""}
+          totalAmount={amount ?? ""}
+        />
 
         <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
           <Button type="submit" variant="contained" size="large" loading={formState.isSubmitting} disabled={rejecting}>
