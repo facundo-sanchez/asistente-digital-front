@@ -45,7 +45,7 @@ function toRequest(values: ObligationFormValues): ObligationRequest {
 }
 
 /** Alta (CU-005) o edición de una obligación, según venga obligation. Al guardar lleva al detalle. */
-export function ObligationForm({ obligation, services }: ObligationFormProps) {
+export function ObligationForm({ obligation, services, defaultService }: ObligationFormProps) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const { control, handleSubmit, setError, formState } = useForm<ObligationFormValues>({
@@ -60,9 +60,9 @@ export function ObligationForm({ obligation, services }: ObligationFormProps) {
           dueDate: obligation.dueDate,
           description: obligation.description ?? "",
         }
-      : EMPTY,
+      : { ...EMPTY, service: defaultService ?? null },
   });
-  const cancelHref = obligation ? `/obligations/${obligation.id}` : "/obligations";
+  const cancelHref = obligation ? `/obligations/${obligation.id}` : defaultService ? `/services/${defaultService.id}` : "/obligations";
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);

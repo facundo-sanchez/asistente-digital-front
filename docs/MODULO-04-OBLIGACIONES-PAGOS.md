@@ -36,7 +36,7 @@
 | 4.2 | Detalle, edición y cancelación | `feature/obligaciones-1-2` | 4.1 | [x] |
 | 4.3 | Registrar un pago (total o parcial) | `feature/obligaciones-3-pago` | 4.2 | [x] |
 | 4.4 | Historial de pagos, anulación y corrección | `feature/obligaciones-4-historial` | 4.3 | [x] |
-| 4.5 | Vencimientos dentro del servicio | `feature/obligaciones-5-en-servicio` | 4.1 | [ ] |
+| 4.5 | Vencimientos dentro del servicio | `feature/obligaciones-5-en-servicio` | 4.1 | [x] |
 | 4.6 | Vencimientos que se repiten (alquiler, seguros) | `feature/obligaciones-6-recurrentes` | 4.2 | [ ] |
 
 Orden: 4.1 → 4.2 → 4.3 → 4.4 → 4.5 → 4.6. Con 4.1 a 4.3 el módulo ya es usable.
@@ -117,9 +117,11 @@ Orden: 4.1 → 4.2 → 4.3 → 4.4 → 4.5 → 4.6. Con 4.1 a 4.3 el módulo ya 
 ## Parte 4.5 – Vencimientos dentro del servicio
 
 ### Frontend (backend cubierto por el filtro `serviceId`)
-- [ ] En `/services/[id]`, el panel "Facturas y vencimientos" muestra las obligaciones del servicio y "Nuevo vencimiento" que ya lo deja asociado.
+- [x] En `/services/[id]`, el panel "Facturas y vencimientos" muestra las obligaciones del servicio y "Nuevo vencimiento" que ya lo deja asociado.
 
 **Listo cuando:** desde el detalle de "Luz casa" se carga un vencimiento y aparece en su panel.
+
+**Hecho (25/11/2026):** `ServiceObligationsPanel` (panel "Vencimientos", últimos 10 de cualquier estado, enlace a todos) reemplaza el panel vacío del servicio; `/obligations/new?serviceId=…` arranca con el servicio elegido y "Cancelar" vuelve a él. Verificado: panel vacío, con un vencimiento y alta desde el servicio.
 
 ---
 

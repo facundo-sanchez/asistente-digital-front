@@ -6,4 +6,6 @@ export interface ObligationFormProps {
   obligation?: ObligationResponse;
   /** Servicios del usuario para asociar la obligación. */
   services: ServiceOption[];
+  /** Alta desde un servicio: arranca asociada a él y al cancelar vuelve a él. */
+  defaultService?: ServiceOption;
 }
