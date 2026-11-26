@@ -19,7 +19,7 @@ Que el usuario no tenga que entrar a mirar: la app le avisa lo que vence, lo que
 
 | Tema | Decisión | Por qué |
 |---|---|---|
-| Cuándo se generan | Una tarea cada hora; a cada usuario le toca cuando en su zona son las 8 (o más tarde, si se perdió esa hora) | RN-012: el "faltan 3 días" se cuenta con el día del usuario, y el aviso llega a una hora razonable |
+| Cuándo se generan | Una tarea cada hora; a cada usuario le toca cuando en su zona son las 9 (o más tarde, si se perdió esa hora) | RN-012: el "faltan 3 días" se cuenta con el día del usuario, y el aviso llega a una hora razonable |
 | Duplicados | La clave `OBLIGATION_DUE:{id}:{días}:{canal}` (única en la base) evita avisar dos veces lo mismo, aunque la tarea corra de nuevo | Ya está en el diseño de la tabla |
 | Qué se avisa | Vence en 7, 3, 1 y 0 días (lo que el usuario elija); se venció (una vez, al día siguiente); documento vence en 30 y 7 días; la IA terminó de leer un archivo (al momento) | Lo que el Inicio ya muestra, ahora sin entrar |
 | Pagado | Un vencimiento pagado o cancelado no avisa | Sería ruido |
@@ -44,14 +44,14 @@ Orden recomendado: 8.1 → 8.2 → 8.3 → 8.4. Con 8.1 y 8.2 los avisos ya apar
 ## Parte 8.1 – Generar avisos
 
 ### Backend
-- [x] `NotificationJob` (cada hora) → `GenerateNotificationsUseCase`: para cada usuario al que le tocan las 8, vencimientos que vencen en los días configurados, vencidos de ayer y documentos que vencen en 30 y 7 días; guarda uno por clave (si ya existe, nada).
+- [x] `NotificationJob` (cada hora) → `GenerateNotificationsUseCase`: para cada usuario al que le tocan las 9, vencimientos que vencen en los días configurados, vencidos de ayer y documentos que vencen en 30 y 7 días; guarda uno por clave (si ya existe, nada).
 - [x] Al terminar la lectura de la IA, un aviso "Tu resumen/factura está listo para revisar" con el enlace a la revisión.
 - [x] `GET /notifications?unread=` (paginado, últimos 30 días), `PATCH /notifications/{id}/read`, `POST /notifications/read-all`, `GET /notifications/unread-count`.
 - [x] Tests: días según la zona del usuario, sin duplicados al correr dos veces, pagado/cancelado no avisa, aislamiento.
 
 **Listo cuando:** un vencimiento a 3 días genera un solo aviso aunque la tarea corra varias veces.
 
-**Hecho, falta la prueba contra la base (26/11/2026):** `GenerateNotificationsUseCase` por umbral (faltan 2 días → aviso "3 días o menos"; si la tarea no corrió un día, al siguiente sale el umbral que corresponde), vencidos de los últimos 7 días una sola vez, documentos a 30 y 7 días, y "La IA leyó…" desde `ProcessingWorker` (tipo `DOCUMENT_DETECTED`, sin migración). `NotificationJob` a las :05 de cada hora. `NotificationQueryUseCase` + `NotificationResource` (listar, `unread-count`, leer, `read-all`). `UserRepository.findActive`. Tests: umbrales, sin duplicados, antes de las 8 no avisa, aislamiento.
+**Hecho, falta la prueba contra la base (26/11/2026):** `GenerateNotificationsUseCase` por umbral (faltan 2 días → aviso "3 días o menos"; si la tarea no corrió un día, al siguiente sale el umbral que corresponde), vencidos de los últimos 7 días una sola vez, documentos a 30 y 7 días, y "La IA leyó…" desde `ProcessingWorker` (tipo `DOCUMENT_DETECTED`, sin migración). `NotificationJob` a las :05 de cada hora. `NotificationQueryUseCase` + `NotificationResource` (listar, `unread-count`, leer, `read-all`). `UserRepository.findActive`. Tests: umbrales, sin duplicados, antes de las 9 no avisa, aislamiento.
 
 ---
 
@@ -91,4 +91,4 @@ Orden recomendado: 8.1 → 8.2 → 8.3 → 8.4. Con 8.1 y 8.2 los avisos ya apar
 
 **Listo cuando:** dos vencimientos el mismo día llegan en un solo email y un SMTP caído se reintenta.
 
-**Hecho, falta la prueba contra la base (26/11/2026):** la generación deja los de email en `PENDING`; `EmailDigestJob` (cada 5 minutos) junta los pendientes por usuario en un solo email de texto con un enlace a cada cosa. Como todos se generan en la corrida de las 8, sale uno por día. Si falla: reintento a los 2, 4, 8 y 16 minutos y `FAILED` al quinto intento; un usuario inactivo los deja `CANCELLED`.
+**Hecho, falta la prueba contra la base (26/11/2026):** la generación deja los de email en `PENDING`; `EmailDigestJob` (cada 5 minutos) junta los pendientes por usuario en un solo email de texto con un enlace a cada cosa. Como todos se generan en la corrida de las 9, sale uno por día. Si falla: reintento a los 2, 4, 8 y 16 minutos y `FAILED` al quinto intento; un usuario inactivo los deja `CANCELLED`.
