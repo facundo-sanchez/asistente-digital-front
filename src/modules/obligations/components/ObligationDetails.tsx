@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { ObligationResponse } from "@/types/api";
+import { TextLink } from "@/components/common/TextLink";
 import { DetailList } from "@/components/layout/DetailList";
 import { formatDate, formatDay } from "@/lib/dates";
 import { formatMoney } from "@/lib/money";
@@ -26,6 +27,9 @@ export function ObligationDetails({ obligation }: { obligation: ObligationRespon
     ["Vence", <span key="due" className="tabular-nums">{formatDate(obligation.dueDate)}</span>],
     ["Tipo", OBLIGATION_TYPE_LABELS[obligation.obligationType]],
     ["Servicio", obligation.serviceName ?? EMPTY],
+    ...(obligation.invoiceId
+      ? [["Factura", <TextLink key="invoice" href={`/invoices/${obligation.invoiceId}`}>Ver factura, código de pago y archivo</TextLink>] as [string, ReactNode]]
+      : []),
     ["Importe", money(obligation.amount, obligation.currency)],
     ["Pagado", money(obligation.paidAmount, obligation.currency)],
     ["Saldo", money(obligation.balance, obligation.currency)],

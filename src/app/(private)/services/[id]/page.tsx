@@ -15,6 +15,7 @@ import { isUuid } from "@/lib/uuid";
 import { ServiceDetails } from "@/modules/services/components/ServiceDetails";
 import { ServiceStatusAction } from "@/modules/services/components/ServiceStatusAction";
 import { ButtonLink } from "@/components/common/ButtonLink";
+import { ServiceInvoicesPanel } from "@/modules/invoices/components/ServiceInvoicesPanel";
 import { ServiceObligationsPanel } from "@/modules/obligations/components/ServiceObligationsPanel";
 import { ServiceDocumentsPanel } from "@/modules/documents/components/ServiceDocumentsPanel";
 
@@ -60,6 +61,7 @@ export default async function ServicePage({ params, searchParams }: { params: Pr
         <ServiceDetails service={service} />
       </Panel>
       <ServiceDocumentsPanel serviceId={service.id} />
+      <ServiceInvoicesPanel serviceId={service.id} />
       <ServiceObligationsPanel serviceId={service.id} />
     </Stack>
   );

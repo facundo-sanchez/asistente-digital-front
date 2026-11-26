@@ -28,10 +28,10 @@
 
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 5.1 | Cargar una factura (genera su vencimiento) y listado | `feature/facturas-1-carga` | — | [ ] |
-| 5.2 | Aviso de facturas repetidas | `feature/facturas-2-duplicados` | 5.1 | [ ] |
-| 5.3 | Detalle, edición y anulación | `feature/facturas-3-detalle` | 5.1 | [ ] |
-| 5.4 | PDF de la factura y facturas dentro del servicio y del vencimiento | `feature/facturas-4-enlaces` | 5.3 | [ ] |
+| 5.1 | Cargar una factura (genera su vencimiento) y listado | `feature/facturas-1-carga` | — | [x] |
+| 5.2 | Aviso de facturas repetidas | `feature/facturas-2-duplicados` | 5.1 | [x] |
+| 5.3 | Detalle, edición y anulación | `feature/facturas-3-detalle` | 5.1 | [x] |
+| 5.4 | PDF de la factura y facturas dentro del servicio y del vencimiento | `feature/facturas-4-enlaces` | 5.3 | [x] |
 
 Orden recomendado: 5.1 → 5.2 → 5.3 → 5.4. Con 5.1 el módulo ya es usable.
 
@@ -42,59 +42,67 @@ Orden recomendado: 5.1 → 5.2 → 5.3 → 5.4. Con 5.1 el módulo ya es usable.
 **Objetivo:** el usuario carga la factura de luz de diciembre y aparece su vencimiento, listo para pagar.
 
 ### Backend
-- [ ] `InvoiceRepository` (puerto + adaptador Panache).
-- [ ] `RegisterInvoiceUseCase`: servicio del usuario (RN-003), documento del usuario si viene, ARS o USD, emisión ≤ vencimiento; guarda la factura `CONFIRMED` y crea su vencimiento en la misma transacción.
-- [ ] `POST /invoices` → 201 con la factura y el id de su vencimiento.
-- [ ] `GET /invoices?query&serviceId&status&from&to&page&size` (búsqueda por número; período por vencimiento; más nuevas primero). Incluye `serviceName`.
-- [ ] Tests: servicio ajeno, documento ajeno, fechas, vencimiento generado, aislamiento.
+- [x] `InvoiceRepository` (puerto + adaptador Panache).
+- [x] `RegisterInvoiceUseCase`: servicio del usuario (RN-003), documento del usuario si viene, ARS o USD, emisión ≤ vencimiento; guarda la factura `CONFIRMED` y crea su vencimiento en la misma transacción.
+- [x] `POST /invoices` → 201 con la factura y el id de su vencimiento.
+- [x] `GET /invoices?query&serviceId&status&from&to&page&size` (búsqueda por número; período por vencimiento; más nuevas primero). Incluye `serviceName`.
+- [x] Tests: servicio ajeno, documento ajeno, fechas, vencimiento generado, aislamiento.
 
 ### Frontend
-- [ ] "Facturas" en el riel. `/invoices`: tabla (servicio con su tinte, número y período, vencimiento, importe, estado del vencimiento), filtros en la URL, paginación, estados vacío y cargando.
-- [ ] `/invoices/new`: servicio (obligatorio), número, período, emisión, vencimiento, importe y moneda, código de pago. Al guardar lleva al vencimiento generado.
+- [x] "Facturas" en el riel. `/invoices`: tabla (servicio con su tinte, número y período, vencimiento, importe, estado del vencimiento), filtros en la URL, paginación, estados vacío y cargando.
+- [x] `/invoices/new`: servicio (obligatorio), número, período, emisión, vencimiento, importe y moneda, código de pago. Al guardar lleva al vencimiento generado.
 
 **Listo cuando:** se carga la factura de "Luz casa" de diciembre y en Vencimientos aparece «Luz casa · factura 2026-12» con su importe.
+
+**Hecho (25/11/2026):** `InvoiceRepository`, `InvoiceDraftValidator` (servicio y documento del usuario, ARS o USD, emisión ≤ vencimiento, número repetido del servicio → 409; lo reusa la edición de la 5.3), `RegisterInvoiceUseCase` (confirmada + vencimiento en la misma transacción), `InvoiceQueryUseCase` (servicio y vencimiento de la página en dos consultas; `ObligationRepository.findByInvoices`). `POST /invoices`, `GET /invoices` (número, servicio, estado, período), `GET /invoices/{id}`; la respuesta trae `serviceName`, `obligationId` y `obligationStatus`. Front: "Facturas" en el riel, `/invoices` (tabla con número y período, vencimiento, importe y estado del vencimiento; filtros en la URL), `/invoices/new` (también con `?serviceId=`); al guardar lleva al vencimiento con aviso. Adelantado de la 5.2: el número repetido ya responde 409 con mensaje claro. Verificado contra la base. 5 tests de backend y 4 de front nuevos.
 
 ---
 
 ## Parte 5.2 – Aviso de facturas repetidas (RN-005)
 
 ### Backend
-- [ ] `GET /invoices/duplicates?serviceId&invoiceNumber&billingPeriod&totalAmount`: facturas confirmadas del servicio con el mismo número, o del mismo período e importe.
-- [ ] `POST /invoices` con número repetido → 409 con el mensaje claro (además del índice único).
-- [ ] Tests: mismo número, mismo período e importe, otro servicio no cuenta.
+- [x] `GET /invoices/duplicates?serviceId&invoiceNumber&billingPeriod&totalAmount`: facturas confirmadas del servicio con el mismo número, o del mismo período e importe.
+- [x] `POST /invoices` con número repetido → 409 con el mensaje claro (además del índice único).
+- [x] Tests: mismo número, mismo período e importe, otro servicio no cuenta.
 
 ### Frontend
-- [ ] Aviso en el formulario mientras se completa (como el de servicios repetidos), con enlace a la factura existente.
+- [x] Aviso en el formulario mientras se completa (como el de servicios repetidos), con enlace a la factura existente.
 
 **Listo cuando:** al cargar dos veces la misma factura se avisa antes de guardar y la segunda no se confirma.
+
+**Hecho (26/11/2026):** `GET /invoices/duplicates` (mismo número, o mismo período e importe; `excludeId` al editar) e `InvoiceDuplicateWarning` en el formulario. Verificado: tests y e2e OK.
 
 ---
 
 ## Parte 5.3 – Detalle, edición y anulación
 
 ### Backend
-- [ ] `GET /invoices/{id}` (404 si es de otro usuario).
-- [ ] `PUT /invoices/{id}`: mismas validaciones; copia importe, moneda, vencimiento y servicio a su vencimiento; no si el vencimiento tiene pagos.
-- [ ] `POST /invoices/{id}/reject`: anula la factura y cancela su vencimiento (no si tiene pagos).
-- [ ] Tests: editar con pagos (400), anular cancela el vencimiento, ajena (404).
+- [x] `GET /invoices/{id}` (404 si es de otro usuario).
+- [x] `PUT /invoices/{id}`: mismas validaciones; copia importe, moneda, vencimiento y servicio a su vencimiento; no si el vencimiento tiene pagos.
+- [x] `POST /invoices/{id}/reject`: anula la factura y cancela su vencimiento (no si tiene pagos).
+- [x] Tests: editar con pagos (400), anular cancela el vencimiento, ajena (404).
 
 ### Frontend
-- [ ] `/invoices/[id]`: datos, código de pago (con botón copiar), vencimiento generado con su estado y acceso a pagar; Editar y Anular (con confirmación).
-- [ ] `/invoices/[id]/edit`.
+- [x] `/invoices/[id]`: datos, código de pago (con botón copiar), vencimiento generado con su estado y acceso a pagar; Editar y Anular (con confirmación).
+- [x] `/invoices/[id]/edit`.
 
 **Listo cuando:** se corrige el importe de una factura y su vencimiento muestra el nuevo; al anular otra, su vencimiento queda "Cancelada".
+
+**Hecho (26/11/2026):** `ManageInvoiceUseCase` (`update` copia título, servicio, importe, moneda y fecha al vencimiento; `reject` anula y cancela el vencimiento; ambos no si hay pagos). `Invoice.reject` ahora admite anular una confirmada. Front: `/invoices/[id]` (datos, código de pago con `CopyButton`, estado del vencimiento y enlace), `/invoices/[id]/edit` (reusa `InvoiceForm`), "Anular" con confirmación. Verificado: tests y e2e OK.
 
 ---
 
 ## Parte 5.4 – PDF y facturas dentro del servicio y del vencimiento
 
 ### Backend
-- [ ] (cubierto) `documentId` en alta y edición; filtro `serviceId` del listado.
+- [x] (cubierto) `documentId` en alta y edición; filtro `serviceId` del listado.
 
 ### Frontend
-- [ ] En el alta: elegir el PDF entre los documentos o subirlo ahí mismo (queda asociado al servicio).
-- [ ] En el detalle de la factura: vista previa del PDF.
-- [ ] En `/services/[id]`: panel "Facturas" con las últimas del servicio y "Cargar factura" que ya lo deja elegido.
-- [ ] En `/obligations/[id]`: si viene de una factura, enlace a ella y a su PDF.
+- [x] En el alta: elegir el PDF entre los documentos o subirlo ahí mismo (queda asociado al servicio).
+- [x] En el detalle de la factura: vista previa del PDF.
+- [x] En `/services/[id]`: panel "Facturas" con las últimas del servicio y "Cargar factura" que ya lo deja elegido.
+- [x] En `/obligations/[id]`: si viene de una factura, enlace a ella y a su PDF.
 
 **Listo cuando:** desde "Luz casa" se carga una factura con su PDF, se ve en el panel del servicio y desde su vencimiento se abre el PDF.
+
+**Hecho (26/11/2026):** `DocumentPicker` (elegir un documento o subirlo ahí mismo como Factura del servicio) en el formulario; vista previa del archivo en el detalle de la factura; `ServiceInvoicesPanel` en el servicio; fila "Factura" en el detalle del vencimiento. Verificado: tests y e2e OK.

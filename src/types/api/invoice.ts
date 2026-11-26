@@ -1,4 +1,5 @@
 /** Backend: org.acme.invoice.infrastructure.rest.dto */
+import type { EffectiveObligationStatus } from "./obligation";
 import type {
   CurrencyCode,
   Decimal,
@@ -22,9 +23,12 @@ export const INVOICE_SOURCES = [
 ] as const;
 export type InvoiceSource = (typeof INVOICE_SOURCES)[number];
 
+/** GET /invoices, /invoices/{id}, POST /invoices */
 export interface InvoiceResponse {
   id: UUID;
   serviceId: UUID;
+  /** Nombre del servicio. */
+  serviceName: string | null;
   documentId: UUID | null;
   extractionResultId: UUID | null;
   invoiceNumber: string | null;
@@ -40,6 +44,10 @@ export interface InvoiceResponse {
   /** 0 a 1. Referencia técnica, no garantía de exactitud. */
   confidenceScore: Decimal | null;
   confirmedAt: ISODateTime | null;
+  /** Vencimiento que generó la factura (null si no generó). */
+  obligationId: UUID | null;
+  /** Estado de ese vencimiento: pendiente, pagado, vencido… */
+  obligationStatus: EffectiveObligationStatus | null;
   createdAt: ISODateTime;
   updatedAt: ISODateTime;
 }
