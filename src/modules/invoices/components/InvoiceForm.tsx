@@ -3,7 +3,7 @@
 import { useState } from "react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Alert from "@mui/material/Alert";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -18,6 +18,7 @@ import { applyApiErrors } from "@/lib/api/form-errors";
 import { OBLIGATION_CURRENCIES, parseAmount } from "@/modules/obligations/validation";
 import { invoicesApi } from "../api";
 import { invoiceSchema, type InvoiceFormValues } from "../validation";
+import { InvoiceDuplicateWarning } from "./InvoiceDuplicateWarning";
 import type { InvoiceFormProps } from "./invoice-form-props";
 
 /** Del formulario al contrato del backend: los textos vacíos viajan como null. */
@@ -54,6 +55,10 @@ export function InvoiceForm({ services, defaultService }: InvoiceFormProps) {
       currency: "ARS",
       paymentCode: "",
     },
+  });
+  const [watchedService, watchedNumber, watchedPeriod, watchedAmount] = useWatch({
+    control,
+    name: ["service", "invoiceNumber", "billingPeriod", "totalAmount"],
   });
   const cancelHref = defaultService ? `/services/${defaultService.id}` : "/invoices";
 
@@ -118,6 +123,13 @@ export function InvoiceForm({ services, defaultService }: InvoiceFormProps) {
           <FormTextField<InvoiceFormValues> name="issueDate" control={control} label="Emitida (opcional)" type="date" slotProps={{ inputLabel: { shrink: true } }} />
           <FormTextField<InvoiceFormValues> name="dueDate" control={control} label="Vence" type="date" required slotProps={{ inputLabel: { shrink: true } }} />
         </Box>
+
+        <InvoiceDuplicateWarning
+          serviceId={watchedService?.id}
+          invoiceNumber={watchedNumber ?? ""}
+          billingPeriod={watchedPeriod ?? ""}
+          totalAmount={watchedAmount ?? ""}
+        />
 
         <FormTextField<InvoiceFormValues>
           name="paymentCode"
