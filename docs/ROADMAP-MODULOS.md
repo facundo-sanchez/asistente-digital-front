@@ -20,7 +20,7 @@
 | 4 | **Obligaciones + Pagos** | `feature/obligaciones-<n>-*` (6 partes, ver [MODULO-04-OBLIGACIONES-PAGOS.md](./MODULO-04-OBLIGACIONES-PAGOS.md)) | Vista `v_obligations`, pagos parciales | Tabla con filtros, registro de pago | 2, 3 | [x] 6/6 partes |
 | 5 | **Facturas** (carga manual) | `feature/facturas-<n>-*` (4 partes, ver [MODULO-05-FACTURAS.md](./MODULO-05-FACTURAS.md)) | Confirmar factura genera la obligación | Carga manual y validación | 2, 3, 4 | [x] 4/4 partes |
 | 6 | **Tarjetas y resúmenes** | `feature/tarjetas-<n>-*` (4 partes, ver [MODULO-06-TARJETAS.md](./MODULO-06-TARJETAS.md)) | Tarjetas, resumen y obligaciones ARS/USD | Tarjetas y carga de resumen | 2, 4 | [x] 4/4 partes |
-| 7 | **Dashboard** | `feature/dashboard` | Resumen y próximos vencimientos | KPIs y gráficos | 4, 5, 6 | [ ] |
+| 7 | **Dashboard** | `feature/dashboard-<n>-*` (5 partes, ver [MODULO-07-DASHBOARD.md](./MODULO-07-DASHBOARD.md)) | Resumen y próximos vencimientos | KPIs y gráficos | 4, 5, 6 | [ ] |
 | 8 | **Notificaciones** | `feature/notificaciones` | Scheduler, preferencias | Campana, preferencias | 4 | [ ] |
 | 9 | **IA documental** | `feature/ia-<n>-*` (5 partes, ver [MODULO-09-IA-DOCUMENTAL.md](./MODULO-09-IA-DOCUMENTAL.md)) | Cola de procesamiento, Gemini, extracción de resúmenes (Excel, PDF, imagen) y facturas, movimientos con cuotas | Subir con "Leer con IA", estado del procesamiento, pantalla de revisión y confirmación | 3, 5, 6 | [x] 5/5 partes |
 | 10 | **Gmail** (incluye BBVA) | `feature/gmail` | OAuth, lectura de emails, reglas por proveedor | Conexión, "detectado en tu correo" | 6, 9 | [ ] |
