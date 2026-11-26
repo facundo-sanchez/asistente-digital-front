@@ -9,6 +9,7 @@ import type { UserResponse } from "@/types/api";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { ColorModeToggle } from "@/components/theme/ColorModeToggle";
 import { NavList } from "./NavList";
+import { NotificationBell } from "@/modules/notifications/components/NotificationBell";
 import { UserMenu } from "./UserMenu";
 
 const RAIL_WIDTH = 248;
@@ -87,6 +88,7 @@ export function AppShell({ user, children }: { user: Pick<UserResponse, "name" |
           </Box>
           <Box sx={{ flexGrow: 1 }} />
           <ColorModeToggle />
+          <NotificationBell />
           <UserMenu user={user} />
         </Box>
 

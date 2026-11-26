@@ -1,6 +1,7 @@
 /** Backend: org.acme.obligation.infrastructure.rest.dto */
 import type {
   BillingFrequency,
+  ServiceCategory,
   CurrencyCode,
   Decimal,
   ISODate,
@@ -52,6 +53,8 @@ export interface ObligationResponse {
   serviceId: UUID | null;
   /** Nombre del servicio asociado (null si no tiene). */
   serviceName: string | null;
+  /** Categoría del servicio (da su color en las listas; null si no tiene). */
+  serviceCategory: ServiceCategory | null;
   invoiceId: UUID | null;
   assetId: UUID | null;
   recurrenceId: UUID | null;

@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import Stack from "@mui/material/Stack";
+import type { NotificationPreferenceResponse } from "@/types/api";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Panel } from "@/components/layout/Panel";
 import { requireUser } from "@/lib/server/dal";
+import { serverGet } from "@/lib/server/server-get";
+import { NotificationPreferencesForm } from "@/modules/notifications/components/NotificationPreferencesForm";
 import { ChangePasswordForm } from "@/modules/user/components/ChangePasswordForm";
 import { EmailVerificationBanner } from "@/modules/user/components/EmailVerificationBanner";
 import { ProfileForm } from "@/modules/user/components/ProfileForm";
@@ -11,13 +14,22 @@ export const metadata: Metadata = { title: "Mi perfil" };
 
 export default async function ProfilePage() {
   const user = await requireUser();
+  const preferences = await serverGet<NotificationPreferenceResponse[]>("/notification-preferences");
   return (
     <Stack spacing={4} sx={{ maxWidth: 720 }}>
-      <PageHeader title="Mi perfil" description="Tus datos y cómo querés ver fechas y montos." />
+      <PageHeader title="Mi perfil" description="Tus datos, tus avisos y cómo querés ver fechas y montos." />
       {!user.emailVerified && <EmailVerificationBanner email={user.email} />}
       <Panel title="Datos personales">
         <ProfileForm user={user} />
       </Panel>
+      {preferences && (
+        <Panel
+          title="Avisos"
+          description={`Qué te avisamos y cuándo. Los avisos por email llegan juntos, en un solo email por día, a ${user.email}.`}
+        >
+          <NotificationPreferencesForm initial={preferences} />
+        </Panel>
+      )}
       <Panel
         title={user.hasPassword ? "Contraseña" : "Crear contraseña"}
         description={
