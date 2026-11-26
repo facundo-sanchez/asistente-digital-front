@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { requireUser } from "@/lib/server/dal";
 import type { DashboardSpendingResponse, DashboardSummaryResponse, ObligationResponse, PageResponse } from "@/types/api";
 import { serverGet } from "@/lib/server/server-get";
+import { ActivityPanel } from "@/modules/dashboard/components/ActivityPanel";
 import { ExpiringDocumentsPanel } from "@/modules/dashboard/components/ExpiringDocumentsPanel";
 import { KpiRow } from "@/modules/dashboard/components/KpiRow";
 import { MonthPanel } from "@/modules/dashboard/components/MonthPanel";
@@ -60,6 +61,7 @@ export default async function DashboardPage() {
         </Box>
       )}
       {spending && <SpendingPanel spending={spending} />}
+      {summary && <ActivityPanel activity={summary.activity} timeZone={user.timezone} />}
     </Stack>
   );
 }

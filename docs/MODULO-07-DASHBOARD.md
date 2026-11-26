@@ -36,7 +36,7 @@ Al entrar, el usuario ve en un vistazo cómo está: cuánto vence este mes y cu�
 | 7.2 | Próximos vencimientos y vencidos (con el color del servicio) | `feature/dashboard-1-2` | 7.1 | [~] |
 | 7.3 | Para revisar y documentos por vencer | `feature/dashboard-3-4` (junto con 7.4) | 7.1 | [~] |
 | 7.4 | Gráficos: pagado por mes (últimos 6) y por categoría del mes | `feature/dashboard-3-4` | 7.1 | [~] |
-| 7.5 | Últimas actividades | `feature/dashboard-5-actividad` | 7.1 | [ ] |
+| 7.5 | Últimas actividades | `feature/dashboard-5` | 7.1 | [~] |
 
 Orden recomendado: 7.1 → 7.2 → 7.3 → 7.4 → 7.5. Con 7.1 y 7.2 el Inicio ya es útil.
 
@@ -102,9 +102,11 @@ Orden recomendado: 7.1 → 7.2 → 7.3 → 7.4 → 7.5. Con 7.1 y 7.2 el Inicio 
 ## Parte 7.5 – Últimas actividades
 
 ### Backend
-- [ ] En `GET /dashboard`: los últimos 10 movimientos del usuario (pagos, facturas, resúmenes, documentos) con fecha, texto y enlace.
+- [x] En `GET /dashboard`: los últimos 10 movimientos del usuario (pagos, facturas, resúmenes, documentos) con fecha, texto y enlace.
 
 ### Frontend
-- [ ] Lista "Últimas actividades" con enlace a cada cosa.
+- [x] Lista "Últimas actividades" con enlace a cada cosa.
 
 **Listo cuando:** registrar un pago aparece primero en la lista.
+
+**Hecho, falta la prueba contra la base (26/11/2026):** `ActivityRepository` con un `UNION ALL` sobre pagos vigentes, facturas, resúmenes y documentos no borrados, ordenado por `created_at`. Front: `ActivityPanel` (tipo, fecha y hora en la zona del usuario, importe y enlace); se oculta si no hay nada.

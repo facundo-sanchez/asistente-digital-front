@@ -31,6 +31,19 @@ export interface DashboardSummaryResponse {
   toReview: PendingReviewResponse[];
   /** Documentos que vencen en los próximos 30 días. */
   expiringDocuments: ExpiringDocumentResponse[];
+  /** Lo último registrado (10 como mucho), lo más nuevo primero. */
+  activity: DashboardActivityResponse[];
+}
+
+/** linkId: el vencimiento del pago, la tarjeta del resumen, o la propia factura/documento. */
+export interface DashboardActivityResponse {
+  kind: "PAYMENT" | "INVOICE" | "STATEMENT" | "DOCUMENT";
+  id: UUID;
+  linkId: UUID;
+  title: string;
+  amount: Decimal | null;
+  currency: CurrencyCode | null;
+  at: ISODateTime;
 }
 
 export interface PendingReviewResponse {
