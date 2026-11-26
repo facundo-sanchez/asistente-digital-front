@@ -29,7 +29,7 @@
 
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 6.1 | Tarjetas: alta, listado, detalle, edición y baja | `feature/tarjetas-1-tarjetas` | — | [ ] |
+| 6.1 | Tarjetas: alta, listado, detalle, edición y baja | `feature/tarjetas-1-tarjetas` | — | [x] |
 | 6.2 | Cargar un resumen (genera los vencimientos en pesos y dólares) | `feature/tarjetas-2-resumen` | 6.1 | [ ] |
 | 6.3 | Detalle, edición y anulación del resumen | `feature/tarjetas-3-detalle` | 6.2 | [ ] |
 | 6.4 | Resúmenes dentro de la tarjeta, el servicio y el vencimiento | `feature/tarjetas-4-enlaces` | 6.3 | [ ] |
@@ -43,16 +43,18 @@ Orden recomendado: 6.1 → 6.2 → 6.3 → 6.4. Con 6.1 y 6.2 el módulo ya es u
 **Objetivo:** el usuario registra su "Visa Galicia terminada en 1234".
 
 ### Backend
-- [ ] `CardRepository` y casos de uso: alta y edición (servicio del usuario de categoría *Tarjetas*, últimos 4 numéricos, marca + últimos 4 sin repetir → 409), activar/desactivar. Los días de cierre y vencimiento de la tabla no se usan (los fija el banco en cada resumen).
-- [ ] `GET /cards?active=`, `GET /cards/{id}`, `POST /cards`, `PUT /cards/{id}`, `PATCH /cards/{id}/status`. Incluye `serviceName`.
-- [ ] Tests: servicio ajeno o de otra categoría, repetida, aislamiento.
+- [x] `CardRepository` y casos de uso: alta y edición (servicio del usuario de categoría *Tarjetas*, últimos 4 numéricos, marca + últimos 4 sin repetir → 409), activar/desactivar. Los días de cierre y vencimiento de la tabla no se usan (los fija el banco en cada resumen).
+- [x] `GET /cards?active=`, `GET /cards/{id}`, `POST /cards`, `PUT /cards/{id}`, `PATCH /cards/{id}/status`. Incluye `serviceName`.
+- [x] Tests: servicio ajeno o de otra categoría, repetida, aislamiento.
 
 ### Frontend
-- [ ] "Tarjetas" en el riel. `/cards`: tarjetas como lista (nombre, marca, terminación, banco, estado).
-- [ ] `/cards/new` y `/cards/[id]/edit`: servicio emisor, nombre, marca, últimos 4, titular, adicional, límite.
-- [ ] `/cards/[id]`: datos y Desactivar / Reactivar.
+- [x] "Tarjetas" en el riel. `/cards`: tarjetas como lista (nombre, marca, terminación, banco, estado).
+- [x] `/cards/new` y `/cards/[id]/edit`: servicio emisor, nombre, marca, últimos 4, titular, adicional, límite.
+- [x] `/cards/[id]`: datos y Desactivar / Reactivar.
 
 **Listo cuando:** se registra una Visa del servicio "Galicia" y una segunda tarjeta con la misma marca y terminación se rechaza.
+
+**Hecho (26/11/2026):** `CardRepository`, `ManageCardUseCase` (servicio del usuario de categoría Tarjetas, marca + terminación sin repetir → 409, baja lógica) y `CardResource`. `CardRequest`/`CardResponse` sin días de cierre y vencimiento; la respuesta trae `serviceName`. Front: "Tarjetas" en el riel, `/cards` (activas y dadas de baja), `/cards/new` (también `?serviceId=`), `/cards/[id]`, `/cards/[id]/edit`; aviso si no hay servicios de Tarjetas. Verificado: tests y e2e OK.
 
 ---
 

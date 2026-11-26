@@ -73,6 +73,8 @@ export interface CardResponse {
   id: UUID;
   /** Servicio CREDIT_CARD del emisor. */
   serviceId: UUID;
+  /** Nombre del servicio del emisor (ej. "Galicia"). */
+  serviceName: string | null;
   name: string;
   brand: CardBrand;
   /** Últimos 4 de la tarjeta. */
@@ -81,8 +83,6 @@ export interface CardResponse {
   accountLastFour: string | null;
   holderName: string | null;
   additional: boolean;
-  closingDay: number | null;
-  dueDay: number | null;
   creditLimit: Decimal | null;
   currency: CurrencyCode;
   active: boolean;
@@ -90,7 +90,7 @@ export interface CardResponse {
   updatedAt: ISODateTime;
 }
 
-/** POST /cards, PUT /cards/{id} */
+/** POST /cards, PUT /cards/{id}. Cierre y vencimiento no van: los fija el banco en cada resumen. */
 export interface CardRequest {
   serviceId: UUID;
   name: string;
@@ -101,13 +101,12 @@ export interface CardRequest {
   accountLastFour?: string | null;
   holderName?: string | null;
   additional?: boolean | null;
-  /** 1 a 31. */
-  closingDay?: number | null;
-  /** 1 a 31. */
-  dueDay?: number | null;
   creditLimit?: Decimal | null;
-  /** Por defecto ARS. */
-  currency?: CurrencyCode | null;
+}
+
+/** PATCH /cards/{id}/status */
+export interface CardStatusRequest {
+  active: boolean;
 }
 
 // ----------------------------------------------------------------------------
