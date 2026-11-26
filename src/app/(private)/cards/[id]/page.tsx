@@ -13,6 +13,7 @@ import { CARD_BRAND_LABELS } from "@/lib/card-brands";
 import { firstParam, type SearchParams } from "@/lib/search-params";
 import { serverGet } from "@/lib/server/server-get";
 import { isUuid } from "@/lib/uuid";
+import { CardStatementsPanel } from "@/modules/card-statements/components/CardStatementsPanel";
 import { CardDetails } from "@/modules/cards/components/CardDetails";
 import { CardStatusAction } from "@/modules/cards/components/CardStatusAction";
 
@@ -51,6 +52,7 @@ export default async function CardPage({ params, searchParams }: { params: Promi
         />
       </Box>
       {notice && <Alert severity="success">{notice}</Alert>}
+      <CardStatementsPanel card={card} />
       <Panel title="Datos de la tarjeta">
         <CardDetails card={card} />
       </Panel>

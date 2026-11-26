@@ -30,9 +30,9 @@
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
 | 6.1 | Tarjetas: alta, listado, detalle, edición y baja | `feature/tarjetas-1-tarjetas` | — | [x] |
-| 6.2 | Cargar un resumen (genera los vencimientos en pesos y dólares) | `feature/tarjetas-2-resumen` | 6.1 | [ ] |
-| 6.3 | Detalle, edición y anulación del resumen | `feature/tarjetas-3-detalle` | 6.2 | [ ] |
-| 6.4 | Resúmenes dentro de la tarjeta, el servicio y el vencimiento | `feature/tarjetas-4-enlaces` | 6.3 | [ ] |
+| 6.2 | Cargar un resumen (genera los vencimientos en pesos y dólares) | `feature/tarjetas-2-resumen` | 6.1 | [x] |
+| 6.3 | Detalle, edición y anulación del resumen | `feature/tarjetas-3-detalle` | 6.2 | [x] |
+| 6.4 | Resúmenes dentro de la tarjeta, el servicio y el vencimiento | `feature/tarjetas-4-enlaces` | 6.3 | [x] |
 
 Orden recomendado: 6.1 → 6.2 → 6.3 → 6.4. Con 6.1 y 6.2 el módulo ya es usable.
 
@@ -61,35 +61,41 @@ Orden recomendado: 6.1 → 6.2 → 6.3 → 6.4. Con 6.1 y 6.2 el módulo ya es u
 ## Parte 6.2 – Cargar un resumen
 
 ### Backend
-- [ ] `CardStatementRepository` y `RegisterCardStatementUseCase`: tarjeta del usuario, vencimiento ≥ cierre, importes ≥ 0, PDF del usuario; confirmado y con sus vencimientos (pesos y dólares según saldo) en la misma transacción; repetido → 409.
-- [ ] `POST /cards/{id}/statements`, `GET /cards/{id}/statements`.
-- [ ] Tests: dos monedas → dos vencimientos, solo pesos → uno, repetido, tarjeta ajena.
+- [x] `CardStatementRepository` y `RegisterCardStatementUseCase`: tarjeta del usuario, vencimiento ≥ cierre, importes ≥ 0, PDF del usuario; confirmado y con sus vencimientos (pesos y dólares según saldo) en la misma transacción; repetido → 409.
+- [x] `POST /card-statements` (la tarjeta va en el cuerpo), `GET /cards/{id}/statements`.
+- [x] Tests: dos monedas → dos vencimientos, solo pesos → uno, repetido, tarjeta ajena.
 
 ### Frontend
-- [ ] `/cards/[id]/statements/new`: cierre, vencimiento, total en pesos, total en dólares, pago mínimo, próximos cierre y vencimiento, PDF (elegir o subir, como en facturas). Al guardar lleva a la tarjeta.
+- [x] `/cards/[id]/statements/new`: cierre, vencimiento, total en pesos, total en dólares, pago mínimo, próximos cierre y vencimiento, PDF (elegir o subir, como en facturas). Al guardar lleva a la tarjeta.
 
 **Listo cuando:** se carga el resumen de diciembre con $ 250.000 y US$ 40 y aparecen dos vencimientos «Visa Galicia · resumen 2026-12».
+
+**Hecho (26/11/2026, junto con la 6.3):** `CardStatementRepository`, `CardStatementDraftValidator` (tarjeta del usuario y activa al cargar, cierre ≤ vencimiento, documento del usuario, RN-016 → 409), `StatementObligations` (un vencimiento por moneda con saldo: crea, actualiza o cancela; «Visa Galicia · resumen 2026-12» y «… · dólares») y `ManageCardStatementUseCase`. Front: `/cards/[id]/statements/new` con `StatementForm` (fechas y totales del banco, PDF con `DocumentPicker`). Verificado: tests y e2e OK.
 
 ---
 
 ## Parte 6.3 – Detalle, edición y anulación del resumen
 
 ### Backend
-- [ ] `GET /card-statements/{id}`, `PUT /card-statements/{id}` (copia los cambios a sus vencimientos; crea o cancela el de dólares si cambia el saldo en USD), `POST /card-statements/{id}/reject`. No si algún vencimiento tiene pagos.
-- [ ] Tests: editar agrega dólares, anular cancela los dos, con pagos (400).
+- [x] `GET /card-statements/{id}`, `PUT /card-statements/{id}` (copia los cambios a sus vencimientos; crea o cancela el de dólares si cambia el saldo en USD), `POST /card-statements/{id}/reject`. No si algún vencimiento tiene pagos.
+- [x] Tests: editar agrega dólares, anular cancela los dos, con pagos (400).
 
 ### Frontend
-- [ ] `/card-statements/[id]`: datos, vencimientos con su estado y acceso a pagar, PDF; Editar y Anular.
+- [x] `/card-statements/[id]`: datos, vencimientos con su estado y acceso a pagar, PDF; Editar y Anular.
 
 **Listo cuando:** se corrige el total en pesos de un resumen y su vencimiento muestra el nuevo; al anular otro, sus vencimientos quedan cancelados.
+
+**Hecho (26/11/2026):** `GET/PUT /card-statements/{id}`, `POST /card-statements/{id}/reject`, `GET /card-statements?obligationId=`. `CardStatement.reject` admite anular uno confirmado. Front: `/card-statements/[id]` (totales con el estado de cada vencimiento y acceso a pagar, PDF), `/card-statements/[id]/edit`, Anular. Verificado: tests y e2e OK.
 
 ---
 
 ## Parte 6.4 – Resúmenes dentro de la tarjeta, el servicio y el vencimiento
 
 ### Frontend (backend cubierto)
-- [ ] En `/cards/[id]`: últimos resúmenes con totales, "Cargar resumen" y el próximo cierre y vencimiento del último resumen (informativo).
-- [ ] En `/services/[id]` de un servicio *Tarjetas*: panel con sus tarjetas.
-- [ ] En `/obligations/[id]`: si viene de un resumen, enlace a él.
+- [x] En `/cards/[id]`: últimos resúmenes con totales, "Cargar resumen" y el próximo cierre y vencimiento del último resumen (informativo).
+- [x] En `/services/[id]` de un servicio *Tarjetas*: panel con sus tarjetas.
+- [x] En `/obligations/[id]`: si viene de un resumen, enlace a él.
 
 **Listo cuando:** desde la tarjeta se carga un resumen, aparece en su lista y desde su vencimiento se llega al resumen.
+
+**Hecho (26/11/2026):** `CardStatementsPanel` en la tarjeta (con el próximo cierre y vencimiento del último resumen), `ServiceCardsPanel` en los servicios de Tarjetas, fila "Resumen" en el vencimiento. Verificado: e2e OK.

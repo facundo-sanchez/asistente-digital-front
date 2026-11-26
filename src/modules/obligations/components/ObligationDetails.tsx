@@ -21,7 +21,7 @@ function money(amount: number | null, currency: string | null): ReactNode {
 }
 
 /** Datos de la obligación: estado, vencimiento, importes, servicio y notas. */
-export function ObligationDetails({ obligation }: { obligation: ObligationResponse }) {
+export function ObligationDetails({ obligation, statementId }: { obligation: ObligationResponse; statementId?: string }) {
   const rows: [string, ReactNode][] = [
     ["Estado", <ObligationStatus key="status" status={obligation.effectiveStatus} />],
     ["Vence", <span key="due" className="tabular-nums">{formatDate(obligation.dueDate)}</span>],
@@ -29,6 +29,9 @@ export function ObligationDetails({ obligation }: { obligation: ObligationRespon
     ["Servicio", obligation.serviceName ?? EMPTY],
     ...(obligation.invoiceId
       ? [["Factura", <TextLink key="invoice" href={`/invoices/${obligation.invoiceId}`}>Ver factura, código de pago y archivo</TextLink>] as [string, ReactNode]]
+      : []),
+    ...(statementId
+      ? [["Resumen", <TextLink key="statement" href={`/card-statements/${statementId}`}>Ver resumen de la tarjeta</TextLink>] as [string, ReactNode]]
       : []),
     ["Importe", money(obligation.amount, obligation.currency)],
     ["Pagado", money(obligation.paidAmount, obligation.currency)],
