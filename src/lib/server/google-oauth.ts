@@ -9,13 +9,20 @@ import type { CookieWriter } from "./cookie-writer";
 import type { GoogleOAuthState } from "./google-oauth-state";
 import { COOKIE_SECURE } from "./session-cookies";
 
-const STATE_COOKIE = "adv_google_oauth";
+/** Nombre y ruta de la cookie de un intento: la del login y la de conectar Gmail no se pisan. */
+export interface OAuthCookie {
+  name: string;
+  path: string;
+}
+
+/** Solo la reciben las rutas /api/auth/google/*. */
+export const LOGIN_OAUTH: OAuthCookie = { name: "adv_google_oauth", path: `${BASE_PATH}/api/auth/google` };
+
+/** Solo la reciben las rutas /api/integrations/gmail/*. */
+export const GMAIL_OAUTH: OAuthCookie = { name: "adv_gmail_oauth", path: `${BASE_PATH}/api/integrations/gmail` };
 
 /** Tiempo para elegir la cuenta en Google y volver. */
 const STATE_MAX_AGE_SECONDS = 10 * 60;
-
-/** Solo la reciben las rutas /api/auth/google/*. */
-const STATE_COOKIE_PATH = `${BASE_PATH}/api/auth/google`;
 
 export function createGoogleOAuthState(next: string | null): GoogleOAuthState {
   return {
@@ -30,17 +37,20 @@ export function codeChallengeOf(codeVerifier: string): string {
   return createHash("sha256").update(codeVerifier).digest("base64url");
 }
 
-export function saveGoogleOAuthState(cookies: CookieWriter, value: GoogleOAuthState): void {
-  cookies.set(STATE_COOKIE, JSON.stringify(value), cookieOptions(STATE_MAX_AGE_SECONDS));
+export function saveGoogleOAuthState(cookies: CookieWriter, value: GoogleOAuthState, cookie: OAuthCookie = LOGIN_OAUTH): void {
+  cookies.set(cookie.name, JSON.stringify(value), cookieOptions(cookie, STATE_MAX_AGE_SECONDS));
 }
 
-export function clearGoogleOAuthState(cookies: CookieWriter): void {
-  cookies.set(STATE_COOKIE, "", cookieOptions(0));
+export function clearGoogleOAuthState(cookies: CookieWriter, cookie: OAuthCookie = LOGIN_OAUTH): void {
+  cookies.set(cookie.name, "", cookieOptions(cookie, 0));
 }
 
 /** Lee la cookie del intento en curso. null si no existe o fue alterada. */
-export function readGoogleOAuthState(cookies: { get(name: string): { value: string } | undefined }): GoogleOAuthState | null {
-  const raw = cookies.get(STATE_COOKIE)?.value;
+export function readGoogleOAuthState(
+  cookies: { get(name: string): { value: string } | undefined },
+  cookie: OAuthCookie = LOGIN_OAUTH,
+): GoogleOAuthState | null {
+  const raw = cookies.get(cookie.name)?.value;
   if (!raw) return null;
   try {
     const value = JSON.parse(raw) as Partial<GoogleOAuthState>;
@@ -59,7 +69,7 @@ export function stateMatches(expected: string, received: string | null): boolean
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-function cookieOptions(maxAge: number) {
+function cookieOptions(cookie: OAuthCookie, maxAge: number) {
   // Lax: el navegador la envía en la redirección de vuelta desde Google (GET de nivel superior)
-  return { httpOnly: true, secure: COOKIE_SECURE, sameSite: "lax" as const, path: STATE_COOKIE_PATH, maxAge };
+  return { httpOnly: true, secure: COOKIE_SECURE, sameSite: "lax" as const, path: cookie.path, maxAge };
 }

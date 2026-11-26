@@ -24,7 +24,7 @@ Que el usuario no tenga que bajar ni subir nada: conecta su Gmail una vez y las 
 | Desde cuándo | El usuario elige: solo los nuevos, últimos 3, 6 o 12 meses | Cargar el historial es útil, pero que no sea obligatorio |
 | Tokens | Cifrados con AES-GCM y una clave del `.env` (`INTEGRATIONS_KEY`), nunca al log ni al front | Son credenciales de su correo |
 | Cliente de Gmail | Llamadas HTTP directas a la API de Gmail (`java.net.http`), sin la librería de Google | Son 3 endpoints; no vale sumar una dependencia grande |
-| Qué pasa con cada adjunto | Se guarda en Documentos (origen Gmail) y entra a la cola de la IA; la propuesta aparece en "Para revisar" y en la campana | Reusa todo el módulo 9; el usuario siempre confirma |
+| Qué pasa con cada email | Si trae el PDF (o foto, o Excel), se guarda el adjunto; si la factura viene en el cuerpo (Camuzzi, Coopelectric, Personal), se guarda el texto del email. Los dos van a Documentos (origen Gmail) y a la cola de la IA; la propuesta aparece en "Para revisar" y en la campana | Reusa todo el módulo 9 y no hace falta mantener expresiones por proveedor para los importes; el usuario siempre confirma |
 | Consentimiento IA (RN-007) | Conectar Gmail incluye aceptar que los adjuntos detectados se lean con IA (se dice en la pantalla previa) | Sin eso no hay automatización |
 | Cada cuánto | Cada 15 minutos, y un botón "Sincronizar ahora" | Suficiente para facturas; no gasta cuota de la API |
 | Desconectar | Revoca el permiso en Google y borra los tokens; los documentos importados quedan (RN-011) | Lo que ya se cargó es del usuario |
@@ -34,8 +34,8 @@ Que el usuario no tenga que bajar ni subir nada: conecta su Gmail una vez y las 
 
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 10.1 | Conectar y desconectar Gmail: pantalla Integraciones, OAuth, tokens cifrados | `feature/gmail-1-2` (junto con 10.2) | — | [ ] |
-| 10.2 | Sincronización: busca por reglas, guarda los adjuntos y los manda a la IA | `feature/gmail-1-2` | 10.1 | [ ] |
+| 10.1 | Conectar y desconectar Gmail: pantalla Integraciones, OAuth, tokens cifrados | `feature/gmail-1-2` (junto con 10.2) | — | [~] |
+| 10.2 | Sincronización: busca por reglas, guarda los adjuntos (o el texto del email) y los manda a la IA | `feature/gmail-1-2` | 10.1 | [~] |
 | 10.3 | Resumen sin PDF en el cuerpo (BBVA) y facturas de proveedores sin servicio | `feature/gmail-3-4` (junto con 10.4) | 10.2 | [ ] |
 | 10.4 | "Detectado en tu correo", reconexión y avisos | `feature/gmail-3-4` | 10.2 | [ ] |
 
@@ -46,29 +46,33 @@ Orden recomendado: 10.1 → 10.2 → 10.3 → 10.4. Con 10.1 y 10.2 las facturas
 ## Parte 10.1 – Conectar Gmail
 
 ### Backend
-- [ ] `POST /integrations/gmail/authorization` (URL de Google con `gmail.readonly`, PKCE y state) y `POST /integrations/gmail` (canjea el código, guarda la integración con la cuenta de Gmail y los tokens cifrados, y "desde cuándo").
-- [ ] `GET /integrations` (estado, cuenta, última sincronización) y `DELETE /integrations/{id}` (revoca en Google, borra tokens, queda `DISCONNECTED`).
-- [ ] Renovación del token de acceso con el refresh token; si Google lo rechaza, `REAUTH_REQUIRED`.
-- [ ] Tests: cifrado ida y vuelta, state/PKCE, aislamiento.
+- [x] `POST /integrations/gmail/authorization` (URL de Google con `gmail.readonly`, PKCE y state) y `POST /integrations/gmail` (canjea el código, guarda la integración con la cuenta de Gmail y los tokens cifrados, y "desde cuándo").
+- [x] `GET /integrations` (estado, cuenta, última sincronización) y `DELETE /integrations/{id}` (revoca en Google, borra tokens, queda `DISCONNECTED`).
+- [x] Renovación del token de acceso con el refresh token; si Google lo rechaza, `REAUTH_REQUIRED`.
+- [x] Tests: cifrado ida y vuelta, state/PKCE, aislamiento.
 
 ### Frontend
-- [ ] Ítem "Integraciones" en el menú; pantalla con Gmail (conectar / conectado como … / desconectar con confirmación).
-- [ ] Pantalla previa: qué se lee (solo correos de tus proveedores), que no se envía nada y que los adjuntos se leen con IA; elegir desde cuándo.
-- [ ] Ruta de vuelta de Google en el BFF y resultado (conectado / cancelado / error).
+- [x] Ítem "Integraciones" en el menú; pantalla con Gmail (conectar / conectado como … / desconectar con confirmación).
+- [x] Pantalla previa: qué se lee (solo correos de tus proveedores), que no se envía nada y que los adjuntos se leen con IA; elegir desde cuándo.
+- [x] Ruta de vuelta de Google en el BFF y resultado (conectado / cancelado / error).
 
 **Listo cuando:** conecto mi Gmail, veo "Conectado como …" y al desconectar el permiso desaparece en mi cuenta de Google.
+
+**Hecho, falta la prueba con una cuenta real (26/11/2026):** `ConnectGmailUseCase` (URL con `gmail.readonly`, `access_type=offline` y PKCE; canje, cuenta por `/profile`, reconectar la misma cuenta la reactiva), `GmailAccess` (renueva el token con margen; si Google lo rechaza, `REAUTH_REQUIRED`), `AesGcmTokenCipher` (AES-256-GCM, clave `INTEGRATIONS_KEY`), `GmailApiClient` por HTTP. BFF: `/api/integrations/gmail` (state + PKCE en una cookie propia, "desde cuándo") y su callback. Front: ítem "Integraciones" en el menú, explicación previa, elegir desde cuándo, cuenta conectada, "Revisar ahora" y desconectar con confirmación. **Para probarlo hace falta** `INTEGRATIONS_KEY` en el `.env` y, en Google Cloud, habilitar la API de Gmail, registrar `FRONTEND_URL/api/integrations/gmail/callback` y cargar la cuenta como usuario de prueba.
 
 ---
 
 ## Parte 10.2 – Sincronización
 
 ### Backend
-- [ ] `GmailSyncJob` cada 15 minutos (y `POST /integrations/{id}/sync`): arma la búsqueda con los remitentes de `provider_email_rules` desde la última sincronización (o desde "desde cuándo"), recorre los mensajes y aplica la regla del proveedor (asunto, nombre del adjunto).
-- [ ] Cada adjunto que coincide: se guarda en Documentos (origen `GMAIL`, tipo según la regla), se asocia al servicio por el nro. de cliente cuando se puede y se encola para la IA. Cada mensaje queda en `integration_processed_items` (no se procesa dos veces).
-- [ ] Mismo archivo ya subido (checksum): `DUPLICATE`, sin crear otro documento.
-- [ ] Tests con un Gmail simulado: coincide/no coincide, sin duplicados al sincronizar dos veces, el cursor avanza.
+- [x] `GmailSyncJob` cada 15 minutos (y `POST /integrations/{id}/sync`): arma la búsqueda con los remitentes de `provider_email_rules` desde la última sincronización (o desde "desde cuándo"), recorre los mensajes y aplica la regla del proveedor (asunto, nombre del adjunto).
+- [x] Cada adjunto que coincide: se guarda en Documentos (origen `GMAIL`, tipo según la regla), se asocia al servicio por el nro. de cliente cuando se puede y se encola para la IA. Cada mensaje queda en `integration_processed_items` (no se procesa dos veces).
+- [x] Mismo archivo ya subido (checksum): `DUPLICATE`, sin crear otro documento.
+- [x] Tests con un Gmail simulado: coincide/no coincide, sin duplicados al sincronizar dos veces, el cursor avanza.
 
 **Listo cuando:** me llega la factura de luz por email y en unos minutos está en "Para revisar".
+
+**Hecho, falta la prueba con una cuenta real (26/11/2026):** `GmailSyncUseCase`: búsqueda `from:(remitentes y dominios de las reglas) after:` desde la última revisión (con un día de margen), "desde cuándo" o la conexión; la regla coincide por dirección exacta o dominio/subdominio del proveedor (un dominio parecido no pasa) y por asunto. Adjunto legible → `importFile`; sin adjunto y regla `EMAIL_BODY` → el texto del email (`text/plain`, que `AiInputs` le pasa a la IA como texto). Servicio: por el nro. de cliente del email o, si no, el único servicio activo del proveedor. Cada mensaje queda en `integration_processed_items` (importado, descartado, duplicado o falló). Hasta 50 mensajes por revisión. `GmailSyncJob` cada 15 minutos.
 
 ---
 

@@ -4,20 +4,10 @@ import type { ISODate, ISODateTime, UUID } from "./common";
 export const INTEGRATION_PROVIDERS = ["GMAIL", "PROVIDER_API"] as const;
 export type IntegrationProvider = (typeof INTEGRATION_PROVIDERS)[number];
 
-export const INTEGRATION_STATUSES = [
-  "ACTIVE",
-  "REAUTH_REQUIRED",
-  "ERROR",
-  "DISCONNECTED",
-] as const;
+export const INTEGRATION_STATUSES = ["ACTIVE", "REAUTH_REQUIRED", "ERROR", "DISCONNECTED"] as const;
 export type IntegrationStatus = (typeof INTEGRATION_STATUSES)[number];
 
-export const PROCESSED_ITEM_RESULTS = [
-  "IMPORTED",
-  "DISCARDED",
-  "DUPLICATE",
-  "FAILED",
-] as const;
+export const PROCESSED_ITEM_RESULTS = ["IMPORTED", "DISCARDED", "DUPLICATE", "FAILED"] as const;
 export type ProcessedItemResult = (typeof PROCESSED_ITEM_RESULTS)[number];
 
 /** GET /integrations, /integrations/{id} */
@@ -35,15 +25,29 @@ export interface IntegrationResponse {
   updatedAt: ISODateTime;
 }
 
-/** POST /integrations/gmail/connect */
+/** POST /integrations/gmail: lo manda el BFF a la vuelta de Google. */
 export interface GmailConnectRequest {
+  code: string;
+  codeVerifier: string;
   /** Importar correos desde esta fecha. null = solo nuevos. */
-  syncFrom?: ISODate | null;
+  syncFrom: ISODate | null;
 }
 
-/** Respuesta de /integrations/gmail/connect: redirigir al usuario a esta URL. */
+/** POST /integrations/gmail/authorization (state y PKCE los genera el BFF). */
+export interface GmailAuthorizationRequest {
+  state: string;
+  codeChallenge: string;
+}
+
+/** Respuesta de /integrations/gmail/authorization: redirigir al usuario a esta URL. */
 export interface AuthorizationUrlResponse {
   authorizationUrl: string;
+}
+
+/** POST /integrations/{id}/sync */
+export interface SyncResponse {
+  imported: number;
+  integration: IntegrationResponse | null;
 }
 
 /** "Detectado en tu correo". */
