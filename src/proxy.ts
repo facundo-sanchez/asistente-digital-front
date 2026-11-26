@@ -5,7 +5,8 @@
  */
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { GUEST_ONLY_PATHS, HOME_PATH, PUBLIC_PATHS } from "@/lib/config";
+import { GUEST_ONLY_PATHS, HOME_PATH, PUBLIC_PATHS, withBasePath } from "@/lib/config";
+import { publicOrigin } from "@/lib/server/public-origin";
 import { refreshSession } from "@/lib/server/backend";
 import {
   ACCESS_COOKIE,
@@ -18,12 +19,10 @@ function matches(pathname: string, paths: readonly string[]): boolean {
   return paths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
-/** Redirección que conserva el basePath (nextUrl.clone lo incluye al serializar). */
+/** Redirección con el basePath y el origen con el que llegó el navegador (no la dirección interna del servidor). */
 function redirectTo(request: NextRequest, pathname: string, next?: string): NextResponse {
-  const url = request.nextUrl.clone();
-  url.pathname = pathname;
-  url.search = next ? `?next=${encodeURIComponent(next)}` : "";
-  return NextResponse.redirect(url);
+  const search = next ? `?next=${encodeURIComponent(next)}` : "";
+  return NextResponse.redirect(new URL(withBasePath(pathname) + search, publicOrigin(request)));
 }
 
 export async function proxy(request: NextRequest) {
@@ -56,7 +55,7 @@ export async function proxy(request: NextRequest) {
     }
     if (result.status === "rotated") {
       // Otro pedido (ej. un prefetch) ya renovó: se repite con las cookies que dejó, sin borrarlas
-      return NextResponse.redirect(request.nextUrl);
+      return NextResponse.redirect(new URL(withBasePath(pathname) + search, publicOrigin(request)));
     }
   }
 

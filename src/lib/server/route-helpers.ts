@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { AuthResponse, SessionUserResponse } from "@/types/api";
 import { withBasePath } from "@/lib/config";
 import { backendFetch, unavailableError } from "./backend";
+import { publicOrigin } from "./public-origin";
 import { setSessionCookies } from "./session-cookies";
 
 export async function readJson(request: Request): Promise<unknown> {
@@ -30,7 +31,7 @@ export async function passthrough(res: Response): Promise<NextResponse> {
  * en los route handlers, request.nextUrl no lo trae.
  */
 export function redirectTo(request: NextRequest, pathWithQuery: string): NextResponse {
-  return NextResponse.redirect(new URL(withBasePath(pathWithQuery), request.nextUrl.origin));
+  return NextResponse.redirect(new URL(withBasePath(pathWithQuery), publicOrigin(request)));
 }
 
 export function unavailable(): NextResponse {
