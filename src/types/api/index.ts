@@ -18,3 +18,4 @@ export * from "./assistant";
 export * from "./audit";
 export * from "./statement-extraction";
 export * from "./invoice-extraction";
+export * from "./dashboard";
