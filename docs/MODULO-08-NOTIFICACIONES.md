@@ -32,7 +32,7 @@ Que el usuario no tenga que entrar a mirar: la app le avisa lo que vence, lo que
 
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 8.1 | Generación de avisos en la app + `GET /notifications`, marcar leída y todas leídas | `feature/notificaciones-1-2` (junto con 8.2) | — | [ ] |
+| 8.1 | Generación de avisos en la app + `GET /notifications`, marcar leída y todas leídas | `feature/notificaciones-1-2` (junto con 8.2) | — | [~] |
 | 8.2 | Campana en la barra con las no leídas y pantalla de avisos | `feature/notificaciones-1-2` | 8.1 | [ ] |
 | 8.3 | Preferencias: qué avisos, cuántos días antes y por qué canal | `feature/notificaciones-3-4` (junto con 8.4) | 8.1 | [ ] |
 | 8.4 | Email diario con los avisos del día | `feature/notificaciones-3-4` | 8.3 | [ ] |
@@ -44,12 +44,14 @@ Orden recomendado: 8.1 → 8.2 → 8.3 → 8.4. Con 8.1 y 8.2 los avisos ya apar
 ## Parte 8.1 – Generar avisos
 
 ### Backend
-- [ ] `NotificationScheduler` (cada hora) → `GenerateNotificationsUseCase`: para cada usuario al que le tocan las 8, vencimientos que vencen en los días configurados, vencidos de ayer y documentos que vencen en 30 y 7 días; guarda uno por clave (si ya existe, nada).
-- [ ] Al terminar la lectura de la IA, un aviso "Tu resumen/factura está listo para revisar" con el enlace a la revisión.
-- [ ] `GET /notifications?unread=` (paginado, últimos 30 días), `PATCH /notifications/{id}/read`, `POST /notifications/read-all`, `GET /notifications/unread-count`.
-- [ ] Tests: días según la zona del usuario, sin duplicados al correr dos veces, pagado/cancelado no avisa, aislamiento.
+- [x] `NotificationJob` (cada hora) → `GenerateNotificationsUseCase`: para cada usuario al que le tocan las 8, vencimientos que vencen en los días configurados, vencidos de ayer y documentos que vencen en 30 y 7 días; guarda uno por clave (si ya existe, nada).
+- [x] Al terminar la lectura de la IA, un aviso "Tu resumen/factura está listo para revisar" con el enlace a la revisión.
+- [x] `GET /notifications?unread=` (paginado, últimos 30 días), `PATCH /notifications/{id}/read`, `POST /notifications/read-all`, `GET /notifications/unread-count`.
+- [x] Tests: días según la zona del usuario, sin duplicados al correr dos veces, pagado/cancelado no avisa, aislamiento.
 
 **Listo cuando:** un vencimiento a 3 días genera un solo aviso aunque la tarea corra varias veces.
+
+**Hecho, falta la prueba contra la base (26/11/2026):** `GenerateNotificationsUseCase` por umbral (faltan 2 días → aviso "3 días o menos"; si la tarea no corrió un día, al siguiente sale el umbral que corresponde), vencidos de los últimos 7 días una sola vez, documentos a 30 y 7 días, y "La IA leyó…" desde `ProcessingWorker` (tipo `DOCUMENT_DETECTED`, sin migración). `NotificationJob` a las :05 de cada hora. `NotificationQueryUseCase` + `NotificationResource` (listar, `unread-count`, leer, `read-all`). `UserRepository.findActive`. Tests: umbrales, sin duplicados, antes de las 8 no avisa, aislamiento.
 
 ---
 
