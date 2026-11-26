@@ -5,14 +5,17 @@ import { useRouter } from "next/navigation";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
+import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import SendRounded from "@mui/icons-material/SendRounded";
+import StopRounded from "@mui/icons-material/StopRounded";
 import type { MessageResponse } from "@/types/api";
 import { ApiError } from "@/lib/api/api-error";
-import { assistantApi } from "../api";
+import { assistantApi, streamAnswer } from "../api";
+import { toolStatus } from "../tool-status";
 import { ChatMessage } from "./ChatMessage";
 import { ThinkingDots } from "./ThinkingDots";
 
@@ -41,37 +44,75 @@ export function AssistantChat({
   const [messages, setMessages] = useState(initial);
   const [text, setText] = useState("");
   const [thinking, setThinking] = useState(false);
+  /** Texto que va llegando y qué está consultando, mientras responde. */
+  const [partial, setPartial] = useState("");
+  const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /** La pregunta que falló, para reintentarla. */
+  const [failed, setFailed] = useState<string | null>(null);
+  const abort = useRef<AbortController | null>(null);
   const end = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     end.current?.scrollIntoView({ block: "end" });
-  }, [messages, thinking]);
+  }, [messages, thinking, partial]);
 
-  const send = async (content: string) => {
+  /** retry: la pregunta ya está en pantalla (y guardada); el backend no la repite. */
+  const send = async (content: string, retry = false) => {
     const question = content.trim();
     if (!question || thinking) return;
     setError(null);
+    setFailed(null);
     setText("");
     setThinking(true);
-    setMessages((current) => [
-      ...current,
-      { id: `local-${Date.now()}`, role: "USER", content: question, metadata: {}, createdAt: new Date().toISOString() },
-    ]);
+    setPartial("");
+    setStatus(null);
+    if (!retry) {
+      setMessages((current) => [
+        ...current,
+        { id: `local-${Date.now()}`, role: "USER", content: question, metadata: {}, createdAt: new Date().toISOString() },
+      ]);
+    }
+    const controller = new AbortController();
+    abort.current = controller;
+    let answered = false;
     try {
       const id = conversationId ?? (await assistantApi.create()).id;
       setConversationId(id);
-      const answer = await assistantApi.send(id, question);
-      setMessages((current) => [...current, answer]);
+      await streamAnswer(
+        id,
+        question,
+        (event) => {
+          if (event.type === "tool") setStatus(toolStatus(event.text));
+          if (event.type === "text") setPartial((current) => current + (event.text ?? ""));
+          if (event.type === "error") throw new Error(event.text ?? "");
+          if (event.type === "done" && event.message) {
+            answered = true;
+            const message = event.message;
+            setMessages((current) => [...current, message]);
+          }
+        },
+        controller.signal,
+      );
+      if (!answered) throw new Error("");
       if (!stay && !conversationId) router.replace(`/assistant?c=${id}`);
       else if (!stay) router.refresh();
     } catch (e) {
-      setError(e instanceof ApiError && e.status < 500 ? e.message : "No pude responder ahora, probá de nuevo en un rato.");
-      setText(question);
+      if (controller.signal.aborted) return;
+      const known = (e instanceof ApiError && e.status < 500) || (e instanceof Error && !(e instanceof ApiError) && e.message);
+      setError(known ? (e as Error).message : "No pude responder ahora, probá de nuevo en un rato.");
+      // Con el límite por hora no tiene sentido reintentar ya
+      if (!(e instanceof ApiError && e.status === 429)) setFailed(question);
     } finally {
       setThinking(false);
+      setPartial("");
+      setStatus(null);
+      abort.current = null;
     }
   };
+
+  // Detener deja de mostrar la respuesta; el servidor la termina y queda en la conversación
+  const stop = () => abort.current?.abort();
 
   return (
     <Box
@@ -118,8 +159,36 @@ export function AssistantChat({
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}
-        {thinking && <ThinkingDots />}
-        {error && <Alert severity="error">{error}</Alert>}
+        {thinking && partial && (
+          <ChatMessage
+            message={{ id: "partial", role: "ASSISTANT", content: partial, metadata: {}, createdAt: "" }}
+            streaming
+          />
+        )}
+        {thinking && !partial && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <ThinkingDots />
+            {status && (
+              <Typography variant="body2" color="text.secondary" aria-live="polite">
+                {status}
+              </Typography>
+            )}
+          </Box>
+        )}
+        {error && (
+          <Alert
+            severity="error"
+            action={
+              failed && (
+                <Button color="inherit" size="small" onClick={() => send(failed, true)}>
+                  Reintentar
+                </Button>
+              )
+            }
+          >
+            {error}
+          </Alert>
+        )}
         <div ref={end} />
       </Stack>
 
@@ -154,9 +223,15 @@ export function AssistantChat({
             placeholder="Preguntá por tus vencimientos, gastos o documentos…"
             slotProps={{ htmlInput: { maxLength: 4000, "aria-label": "Tu consulta" } }}
           />
-          <IconButton type="submit" color="primary" aria-label="Enviar" disabled={!text.trim() || thinking} sx={{ mb: 0.5 }}>
-            <SendRounded />
-          </IconButton>
+          {thinking ? (
+            <IconButton aria-label="Detener la respuesta" onClick={stop} sx={{ mb: 0.5 }}>
+              <StopRounded />
+            </IconButton>
+          ) : (
+            <IconButton type="submit" color="primary" aria-label="Enviar" disabled={!text.trim()} sx={{ mb: 0.5 }}>
+              <SendRounded />
+            </IconButton>
+          )}
         </Box>
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.75 }}>
           Las respuestas salen de tus datos, pero pueden tener errores: revisá los links.

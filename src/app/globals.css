@@ -76,6 +76,16 @@
   animation: chat-enter 200ms ease-out both;
 }
 
+.chat-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: thinking-pulse 1s steps(1) infinite;
+}
+
 .thinking-dot {
   animation: thinking-pulse 1.2s ease-in-out infinite both;
 }
@@ -87,7 +97,8 @@
     animation: none;
   }
 
-  .thinking-dot {
+  .thinking-dot,
+  .chat-cursor {
     animation: none;
     opacity: 0.6;
   }

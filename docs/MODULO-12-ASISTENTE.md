@@ -4,7 +4,7 @@
 > Al terminar una parte: marcar `[x]`, cambiar su estado en la tabla y anotar la fecha.
 > Visión general: [ROADMAP-MODULOS.md](./ROADMAP-MODULOS.md). Caso de uso: CU-008. SPEC técnica: 4.8 (módulo `assistant`), 6.9 (API), 9.5 (herramientas controladas). Criterio de código: simple, sin abstracciones de más.
 
-**Estado (26/11/2026):** 12.1 y 12.2 hechas en `feature/asistente-1-2` (backend y front), con tests; falta probarlas con Gemini real. Cambios: se usó el esqueleto del módulo que ya existía (la respuesta trae `metadata.references` y `metadata.tools`); las sugerencias de la conversación vacía y el título con la primera pregunta se adelantaron de 12.3; `monthTotal(month)` quedó como `monthSummary()` (el mes actual) y `serviceSpending` como `servicePayments()`.
+**Estado (26/11/2026):** las 4 partes hechas (12.1–12.2 en `feature/asistente-1-2`, 12.3–12.4 en `feature/asistente-3-4`) (backend y front), con tests; falta probarlas con Gemini real (sobre todo el streaming con herramientas). En el celular el asistente es una burbuja flotante en toda la app. Detener deja de mostrar la respuesta, pero el servidor la termina y la guarda. Los errores de Gemini responden 503 y la cuota 429. Cambios: se usó el esqueleto del módulo que ya existía (la respuesta trae `metadata.references` y `metadata.tools`); las sugerencias de la conversación vacía y el título con la primera pregunta se adelantaron de 12.3; `monthTotal(month)` quedó como `monthSummary()` (el mes actual) y `serviceSpending` como `servicePayments()`.
 
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
@@ -37,8 +37,8 @@ Preguntarle a la app en lenguaje natural por tus datos: "¿Qué vence esta seman
 |---|---|---|---|---|
 | 12.1 | Conversaciones y chat básico (sin datos) | `feature/asistente-1-2` (junto con 12.2) | — | [~] |
 | 12.2 | Herramientas: responde con tus datos y con links | `feature/asistente-1-2` | 12.1 | [~] |
-| 12.3 | Respuesta progresiva (SSE), título automático y sugerencias | `feature/asistente-3-4` (junto con 12.4) | 12.2 | [ ] |
-| 12.4 | Límites y cuidado: cuota por hora, errores del modelo, auditoría | `feature/asistente-3-4` | 12.2 | [ ] |
+| 12.3 | Respuesta progresiva (SSE), título automático y sugerencias | `feature/asistente-3-4` (junto con 12.4) | 12.2 | [~] |
+| 12.4 | Límites y cuidado: cuota por hora, errores del modelo, auditoría | `feature/asistente-3-4` | 12.2 | [~] |
 
 ---
 
@@ -93,13 +93,13 @@ Herramientas de solo lectura; cada una llama al caso de uso existente con el usu
 ## Parte 12.3 – Respuesta progresiva, título y sugerencias
 
 ### Backend
-- [ ] `POST /assistant/conversations/{id}/messages/stream` por SSE: va mandando el texto a medida que llega; al final, un evento con las referencias.
-- [ ] Título de la conversación: la primera pregunta recortada a 60 caracteres (sin otra llamada al modelo).
+- [x] `POST /assistant/conversations/{id}/messages/stream` por SSE: va mandando el texto a medida que llega; al final, un evento con las referencias.
+- [x] Título de la conversación: la primera pregunta recortada a 60 caracteres (sin otra llamada al modelo).
 
 ### Frontend
-- [ ] El BFF reenvía el SSE tal cual (ya transmite el cuerpo por partes).
-- [ ] El texto aparece mientras se escribe; botón "Detener".
-- [ ] Conversación vacía: 4 sugerencias de CU-008 ("¿Qué vence esta semana?", "¿Cuánto tengo que pagar este mes?", "¿Qué facturas no pagué?", "¿Cuánto gasté con la tarjeta este mes?").
+- [x] El BFF reenvía el SSE tal cual (ya transmite el cuerpo por partes).
+- [x] El texto aparece mientras se escribe; botón "Detener".
+- [x] Conversación vacía: 4 sugerencias de CU-008 ("¿Qué vence esta semana?", "¿Cuánto tengo que pagar este mes?", "¿Qué facturas no pagué?", "¿Cuánto gasté con la tarjeta este mes?").
 
 **Listo cuando:** la respuesta empieza a verse en menos de 2 segundos y las sugerencias funcionan con un toque.
 
@@ -108,14 +108,14 @@ Herramientas de solo lectura; cada una llama al caso de uso existente con el usu
 ## Parte 12.4 – Límites y cuidado
 
 ### Backend
-- [ ] Cuota: 30 mensajes por usuario por hora; al pasarla, 429 con "Llegaste al límite de consultas, probá en un rato".
-- [ ] Errores del modelo (cuota de Gemini, timeout): la pregunta queda guardada y el chat muestra "No pude responder, probá de nuevo" con reintento.
-- [ ] `metadata` de cada respuesta: herramientas usadas y tokens, para ver el costo.
-- [ ] Tests: cuota por hora, error del modelo no pierde la pregunta.
+- [x] Cuota: 30 mensajes por usuario por hora; al pasarla, 429 con "Llegaste al límite de consultas, probá en un rato".
+- [x] Errores del modelo (cuota de Gemini, timeout): la pregunta queda guardada y el chat muestra "No pude responder, probá de nuevo" con reintento.
+- [x] `metadata` de cada respuesta: herramientas usadas y tokens, para ver el costo.
+- [x] Tests: cuota por hora, error del modelo no pierde la pregunta.
 
 ### Frontend
-- [ ] Mensajes de error y reintento en el chat.
-- [ ] Aviso fijo y discreto: "Las respuestas salen de tus datos, pero pueden tener errores: revisá los links".
+- [x] Mensajes de error y reintento en el chat.
+- [x] Aviso fijo y discreto: "Las respuestas salen de tus datos, pero pueden tener errores: revisá los links".
 
 **Listo cuando:** con Gemini caído, la app avisa y deja reintentar sin perder la pregunta.
 

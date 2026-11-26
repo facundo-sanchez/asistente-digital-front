@@ -43,6 +43,8 @@ async function handler(request: NextRequest, { params }: Context) {
   const hasBody = !["GET", "HEAD"].includes(method);
   const rawBody = hasBody ? await request.arrayBuffer() : null;
   const contentType = request.headers.get("Content-Type");
+  // Solo se reenvía el pedido de SSE; para todo lo demás el backend responde JSON
+  const accept = request.headers.get("Accept")?.includes("text/event-stream") ? "text/event-stream" : undefined;
   const target = `/${path}${request.nextUrl.search}`;
 
   let accessToken = request.cookies.get(ACCESS_COOKIE)?.value;
@@ -57,6 +59,7 @@ async function handler(request: NextRequest, { params }: Context) {
       rawBody: rawBody && rawBody.byteLength > 0 ? rawBody : null,
       contentType,
       accessToken: token,
+      accept,
     });
 
   const renew = async (token: string) => {

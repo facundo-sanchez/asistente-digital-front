@@ -22,7 +22,8 @@ function Rich({ text }: { text: string }) {
 }
 
 /** La pregunta va en una burbuja a la derecha; la respuesta, a todo el ancho y con sus registros como links. */
-export function ChatMessage({ message }: { message: MessageResponse }) {
+/** streaming: la respuesta que todavía está llegando (con cursor al final). */
+export function ChatMessage({ message, streaming = false }: { message: MessageResponse; streaming?: boolean }) {
   if (message.role === "USER") {
     return (
       <Box className="chat-enter" sx={{ display: "flex", justifyContent: "flex-end" }}>
@@ -44,12 +45,14 @@ export function ChatMessage({ message }: { message: MessageResponse }) {
     );
   }
   const references = readReferences(message.metadata);
+  const blocks = answerBlocks(message.content);
   return (
-    <Box className="chat-enter" sx={{ maxWidth: "65ch", "& p, & ul": { my: 0.75 }, "& ul": { pl: 2.5 } }}>
-      {answerBlocks(message.content).map((block, i) =>
+    <Box className={streaming ? undefined : "chat-enter"} aria-busy={streaming} sx={{ maxWidth: "65ch", "& p, & ul": { my: 0.75 }, "& ul": { pl: 2.5 } }}>
+      {blocks.map((block, i) =>
         block.kind === "text" ? (
           <Typography key={i} component="p" className="tabular-nums">
             <Rich text={block.text} />
+            {streaming && i === blocks.length - 1 && <span className="chat-cursor" aria-hidden />}
           </Typography>
         ) : (
           <Box key={i} component="ul" className="tabular-nums">

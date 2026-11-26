@@ -6,4 +6,6 @@ export interface BackendRequest {
   rawBody?: BodyInit | null;
   contentType?: string | null;
   accessToken?: string | null;
+  /** Por defecto JSON; "text/event-stream" para las respuestas progresivas (SSE). */
+  accept?: string;
 }

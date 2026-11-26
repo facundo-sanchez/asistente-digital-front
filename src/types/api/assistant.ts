@@ -40,6 +40,14 @@ export interface MessageResponse {
   createdAt: ISODateTime;
 }
 
+/** Evento de POST /assistant/conversations/{id}/messages/stream (SSE). */
+export interface AssistantStreamEvent {
+  /** tool: consulta una herramienta (text = su nombre); text: un pedazo de la respuesta; done: message guardado; error: text = mensaje. */
+  type: "tool" | "text" | "done" | "error";
+  text: string | null;
+  message: MessageResponse | null;
+}
+
 /** POST /assistant/conversations */
 export interface CreateConversationRequest {
   title?: string | null;
