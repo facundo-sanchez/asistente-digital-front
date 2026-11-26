@@ -23,9 +23,21 @@ const SUGGESTIONS = [
   "¿Cuánto gasté con la tarjeta este mes?",
 ];
 
-/** El chat de una conversación. Sin conversationId, la crea con la primera pregunta. */
-export function AssistantChat({ conversationId, initial }: { conversationId: string | null; initial: MessageResponse[] }) {
+/**
+ * El chat de una conversación. Sin conversationId, la crea con la primera pregunta.
+ * stay: sigue en la misma pantalla (la burbuja del celular) en vez de ir a /assistant?c=…
+ */
+export function AssistantChat({
+  conversationId: initialId,
+  initial,
+  stay = false,
+}: {
+  conversationId: string | null;
+  initial: MessageResponse[];
+  stay?: boolean;
+}) {
   const router = useRouter();
+  const [conversationId, setConversationId] = useState(initialId);
   const [messages, setMessages] = useState(initial);
   const [text, setText] = useState("");
   const [thinking, setThinking] = useState(false);
@@ -48,10 +60,11 @@ export function AssistantChat({ conversationId, initial }: { conversationId: str
     ]);
     try {
       const id = conversationId ?? (await assistantApi.create()).id;
+      setConversationId(id);
       const answer = await assistantApi.send(id, question);
       setMessages((current) => [...current, answer]);
-      if (conversationId) router.refresh();
-      else router.replace(`/assistant?c=${id}`);
+      if (!stay && !conversationId) router.replace(`/assistant?c=${id}`);
+      else if (!stay) router.refresh();
     } catch (e) {
       setError(e instanceof ApiError && e.status < 500 ? e.message : "No pude responder ahora, probá de nuevo en un rato.");
       setText(question);
@@ -61,7 +74,7 @@ export function AssistantChat({ conversationId, initial }: { conversationId: str
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: { xs: "calc(100dvh - 220px)", md: 560 }, minWidth: 0 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", minHeight: stay ? 0 : { xs: "calc(100dvh - 220px)", md: 560 }, flexGrow: 1, minWidth: 0 }}>
       <Stack spacing={2.5} sx={{ flexGrow: 1, pb: 2 }}>
         {messages.length === 0 && (
           <Box sx={{ my: "auto", py: 4 }}>
