@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type { AuthorizationUrlResponse, GmailAuthorizationRequest } from "@/types/api";
 import { backendFetch } from "@/lib/server/backend";
+import { callbackOrigin } from "@/lib/server/callback-origin";
 import { codeChallengeOf, createGoogleOAuthState, GMAIL_OAUTH, saveGoogleOAuthState } from "@/lib/server/google-oauth";
+import { publicOrigin } from "@/lib/server/public-origin";
 import { redirectTo } from "@/lib/server/route-helpers";
 import { ACCESS_COOKIE } from "@/lib/server/session-cookies";
 
@@ -30,6 +32,10 @@ export async function GET(request: NextRequest) {
   } catch {
     return redirectTo(request, "/integrations?gmail=unavailable");
   }
+
+  // Google vuelve a otra dirección que la de esta página: la cookie del intento no llegaría
+  const origin = callbackOrigin(authorization.authorizationUrl);
+  if (origin && origin !== publicOrigin(request)) return redirectTo(request, "/integrations?gmail=wrong_host");
 
   const response = NextResponse.redirect(authorization.authorizationUrl);
   saveGoogleOAuthState(response.cookies, attempt, GMAIL_OAUTH);

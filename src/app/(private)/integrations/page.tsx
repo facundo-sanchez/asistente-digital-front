@@ -18,6 +18,7 @@ const RESULTS: Record<string, { severity: "success" | "info" | "error"; text: st
   cancelled: { severity: "info", text: "No conectamos Gmail: cancelaste o no diste el permiso." },
   failed: { severity: "error", text: "No pudimos conectar Gmail. Probá de nuevo." },
   unavailable: { severity: "error", text: "Conectar Gmail no está disponible en este momento." },
+  wrong_host: { severity: "info", text: "Gmail se conecta solo desde la dirección principal de la app. Conectalo desde ahí y después lo ves desde cualquier dispositivo." },
 };
 
 export default async function IntegrationsPage({ searchParams }: { searchParams: SearchParams }) {
