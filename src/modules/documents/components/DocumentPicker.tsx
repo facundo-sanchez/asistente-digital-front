@@ -50,7 +50,7 @@ export function DocumentPicker({ label, value, onChange, documents, uploadType, 
         value={value}
         onChange={(e) => onChange(e.target.value)}
         error={!!error}
-        helperText={error ?? "Elegí uno de tus documentos o subí el PDF o la foto de la factura."}
+        helperText={error ?? "Elegí uno de tus documentos o subí el archivo (PDF, foto o Excel)."}
       >
         <MenuItem value="">Sin archivo</MenuItem>
         {options.map((document) => (

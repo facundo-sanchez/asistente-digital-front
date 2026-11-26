@@ -4,7 +4,7 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import ArrowBackOutlined from "@mui/icons-material/ArrowBackOutlined";
-import type { DocumentResponse, ObligationResponse, PageResponse } from "@/types/api";
+import type { CardStatementResponse, DocumentResponse, ObligationResponse, PageResponse } from "@/types/api";
 import { ButtonLink } from "@/components/common/ButtonLink";
 import { TextLink } from "@/components/common/TextLink";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -30,6 +30,10 @@ export default async function ObligationPage({ params, searchParams }: { params:
     serverGet<PageResponse<DocumentResponse>>("/documents?size=100"),
   ]);
   if (!obligation) notFound();
+  // Si salió de un resumen de tarjeta, enlace a él
+  const statement = obligation.obligationType === "CREDIT_CARD_PAYMENT"
+    ? await serverGet<CardStatementResponse>(`/card-statements?obligationId=${obligation.id}`)
+    : null;
   const receipts = (documents?.content ?? []).map((d) => ({ id: d.id, name: d.title ?? d.originalFilename }));
   const query = await searchParams;
   const notice = firstParam(query.invoice) === "1"
@@ -67,7 +71,7 @@ export default async function ObligationPage({ params, searchParams }: { params:
       </Box>
       {notice && <Alert severity="success">{notice}</Alert>}
       <Panel title="Datos del vencimiento">
-        <ObligationDetails obligation={obligation} />
+        <ObligationDetails obligation={obligation} statementId={statement?.id} />
       </Panel>
       <PaymentsPanel obligation={obligation} receipts={receipts} />
       {obligation.recurrenceId && <RecurrencePanel ruleId={obligation.recurrenceId} />}

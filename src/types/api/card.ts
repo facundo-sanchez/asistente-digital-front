@@ -1,4 +1,5 @@
 /** Backend: org.acme.card.infrastructure.rest.dto (CU-015, CU-016, CU-017) */
+import type { EffectiveObligationStatus } from "./obligation";
 import type {
   CurrencyCode,
   Decimal,
@@ -73,6 +74,8 @@ export interface CardResponse {
   id: UUID;
   /** Servicio CREDIT_CARD del emisor. */
   serviceId: UUID;
+  /** Nombre del servicio del emisor (ej. "Galicia"). */
+  serviceName: string | null;
   name: string;
   brand: CardBrand;
   /** Últimos 4 de la tarjeta. */
@@ -81,8 +84,6 @@ export interface CardResponse {
   accountLastFour: string | null;
   holderName: string | null;
   additional: boolean;
-  closingDay: number | null;
-  dueDay: number | null;
   creditLimit: Decimal | null;
   currency: CurrencyCode;
   active: boolean;
@@ -90,7 +91,7 @@ export interface CardResponse {
   updatedAt: ISODateTime;
 }
 
-/** POST /cards, PUT /cards/{id} */
+/** POST /cards, PUT /cards/{id}. Cierre y vencimiento no van: los fija el banco en cada resumen. */
 export interface CardRequest {
   serviceId: UUID;
   name: string;
@@ -101,13 +102,12 @@ export interface CardRequest {
   accountLastFour?: string | null;
   holderName?: string | null;
   additional?: boolean | null;
-  /** 1 a 31. */
-  closingDay?: number | null;
-  /** 1 a 31. */
-  dueDay?: number | null;
   creditLimit?: Decimal | null;
-  /** Por defecto ARS. */
-  currency?: CurrencyCode | null;
+}
+
+/** PATCH /cards/{id}/status */
+export interface CardStatusRequest {
+  active: boolean;
 }
 
 // ----------------------------------------------------------------------------
@@ -118,12 +118,17 @@ export interface CardRequest {
 export interface CardStatementResponse {
   id: UUID;
   cardId: UUID;
+  /** Nombre de la tarjeta. */
+  cardName: string | null;
   documentId: UUID | null;
   extractionResultId: UUID | null;
   /** Obligación de pago en moneda local. */
   obligationId: UUID | null;
+  /** Estado de ese vencimiento. */
+  obligationStatus: EffectiveObligationStatus | null;
   /** Obligación de pago en dólares. */
   obligationUsdId: UUID | null;
+  obligationUsdStatus: EffectiveObligationStatus | null;
   periodStart: ISODate | null;
   /** null si el resumen se detectó por email sin PDF. */
   closingDate: ISODate | null;
