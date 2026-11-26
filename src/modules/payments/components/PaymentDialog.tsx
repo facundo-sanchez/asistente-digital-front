@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -18,6 +18,7 @@ import { FormTextField } from "@/components/forms/FormTextField";
 import { applyApiErrors } from "@/lib/api/form-errors";
 import { formatMoney } from "@/lib/money";
 import { PAYMENT_METHOD_LABELS } from "@/lib/payment-methods";
+import { DocumentPicker } from "@/modules/documents/components/DocumentPicker";
 import { OBLIGATION_CURRENCIES, parseAmount } from "@/modules/obligations/validation";
 import { paymentSchema, today, type PaymentFormValues } from "../validation";
 import type { PaymentDialogProps } from "./payment-dialog-props";
@@ -122,20 +123,20 @@ export function PaymentDialog({
                 ))}
               </FormTextField>
             </Box>
-            <FormTextField<PaymentFormValues>
+            <Controller
               name="receiptDocumentId"
               control={control}
-              label="Comprobante (opcional)"
-              select
-              helperText={receipts.length === 0 ? "Subí el comprobante en Documentos para poder adjuntarlo." : undefined}
-            >
-              <MenuItem value="">Sin comprobante</MenuItem>
-              {receipts.map((receipt) => (
-                <MenuItem key={receipt.id} value={receipt.id}>
-                  {receipt.name}
-                </MenuItem>
-              ))}
-            </FormTextField>
+              render={({ field }) => (
+                <DocumentPicker
+                  label="Comprobante (opcional)"
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  documents={receipts}
+                  uploadType="PAYMENT_RECEIPT"
+                  serviceId={obligation.serviceId ?? undefined}
+                />
+              )}
+            />
             <FormTextField<PaymentFormValues> name="notes" control={control} label="Notas (opcional)" multiline minRows={2} />
           </Stack>
         </DialogContent>
