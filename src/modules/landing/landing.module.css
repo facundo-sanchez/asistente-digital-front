@@ -203,6 +203,8 @@
   position: relative;
   aspect-ratio: 1;
   width: 100%;
+  /* El texto del centro se mide con la roseta, no con la pantalla */
+  container-type: inline-size;
 }
 
 .rosette :global(.guilloche-rosette__arc) {
@@ -226,14 +228,16 @@
 }
 
 .rosetteAmount {
-  font-size: clamp(1.6rem, 3.4vw, 2.9rem);
+  /* En una línea: el signo no se separa del monto */
+  white-space: nowrap;
+  font-size: clamp(1.1rem, 9cqi, 2.9rem);
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
 .rosetteOf {
   color: var(--ink-soft);
-  font-size: clamp(0.85rem, 1.1vw, 1rem);
+  font-size: clamp(0.75rem, 3.2cqi, 1rem);
 }
 
 /* ---------- regla de pasos ---------- */
