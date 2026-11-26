@@ -15,8 +15,11 @@ import { serverGet } from "@/lib/server/server-get";
 import { isUuid } from "@/lib/uuid";
 import { StatementDetails } from "@/modules/card-statements/components/StatementDetails";
 import { StatementRejectAction } from "@/modules/card-statements/components/StatementRejectAction";
-import { ExtractedTransactionsTable } from "@/modules/statement-extraction/components/ExtractedTransactionsTable";
 import { DocumentPreview } from "@/modules/documents/components/DocumentPreview";
+import { TransactionsTable } from "@/modules/card-transactions/components/TransactionsTable";
+import { withBasePath } from "@/lib/config";
+import Button from "@mui/material/Button";
+import DownloadOutlined from "@mui/icons-material/DownloadOutlined";
 
 export const metadata: Metadata = { title: "Resumen de tarjeta" };
 
@@ -32,11 +35,12 @@ export default async function StatementPage({ params, searchParams }: { params: 
     serverGet<CardTransactionResponse[]>(`/card-statements/${statement.id}/transactions`),
   ]);
   const query = await searchParams;
-  const notice = firstParam(query.created) === "1"
-    ? "Cargamos el resumen y creamos sus vencimientos."
-    : firstParam(query.updated) === "1"
-      ? "Guardamos los cambios. Sus vencimientos quedaron actualizados."
-      : null;
+  const notice =
+    firstParam(query.created) === "1"
+      ? "Cargamos el resumen y creamos sus vencimientos."
+      : firstParam(query.updated) === "1"
+        ? "Guardamos los cambios. Sus vencimientos quedaron actualizados."
+        : null;
   const rejected = statement.status === "REJECTED";
   // Con pagos en sus vencimientos no se edita ni anula (el backend también lo impide)
   const locked = [statement.obligationStatus, statement.obligationUsdStatus].some((s) => s !== null && PAID_STATES.includes(s));
@@ -44,13 +48,16 @@ export default async function StatementPage({ params, searchParams }: { params: 
   return (
     <Stack spacing={4} sx={{ maxWidth: 900 }}>
       <Box>
-        <TextLink href={`/cards/${statement.cardId}`} sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, mb: 2, color: "text.secondary" }}>
+        <TextLink
+          href={`/cards/${statement.cardId}`}
+          sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, mb: 2, color: "text.secondary" }}
+        >
           <ArrowBackOutlined fontSize="small" />
           {statement.cardName}
         </TextLink>
         <PageHeader
           title={`Resumen que vence el ${formatDate(statement.dueDate)}`}
-          description={rejected ? "Anulado" : statement.cardName ?? undefined}
+          description={rejected ? "Anulado" : (statement.cardName ?? undefined)}
           action={
             !rejected &&
             !locked && (
@@ -66,27 +73,57 @@ export default async function StatementPage({ params, searchParams }: { params: 
       </Box>
       {notice && <Alert severity="success">{notice}</Alert>}
       {rejected && <Alert severity="info">Este resumen está anulado y sus vencimientos, cancelados.</Alert>}
-      {locked && !rejected && <Alert severity="info">Sus vencimientos tienen pagos: para corregirlo o anularlo, primero anulá los pagos.</Alert>}
+      {locked && !rejected && (
+        <Alert severity="info">Sus vencimientos tienen pagos: para corregirlo o anularlo, primero anulá los pagos.</Alert>
+      )}
       <Panel title="Datos del resumen">
         <StatementDetails statement={statement} />
       </Panel>
       {transactions && transactions.length > 0 && (
-        <Panel title="Movimientos" description={`${transactions.length} movimientos, con sus cuotas`}>
-          <ExtractedTransactionsTable
-            rows={transactions.map((t) => ({
-              date: t.transactionDate,
-              description: t.description,
-              merchant: t.merchantName,
-              installmentNumber: t.installmentNumber,
-              installmentTotal: t.installmentTotal,
-              amount: t.amount,
-              currency: t.currency,
-            }))}
-          />
+        <Panel
+          title="Movimientos"
+          description={`${transactions.length} movimientos. Si un rubro no es el correcto, cambialo y elegí si se aplica siempre a ese comercio.`}
+          action={
+            <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
+              {/* Navegación completa: la descarga la resuelve el BFF */}
+              <Button
+                size="small"
+                startIcon={<DownloadOutlined />}
+                href={withBasePath(`/api/backend/card-statements/${statement.id}/export.xlsx`)}
+              >
+                Excel
+              </Button>
+              <ButtonLink size="small" href={`/card-statements/${statement.id}/print`}>
+                Imprimir / PDF
+              </ButtonLink>
+            </Stack>
+          }
+        >
+          <TransactionsTable transactions={transactions} />
         </Panel>
       )}
+      {transactions && transactions.length === 0 && !rejected && (
+        <Alert
+          severity="info"
+          action={
+            <ButtonLink href="/documents/new?type=CARD_STATEMENT" color="inherit" size="small">
+              Cargar el PDF
+            </ButtonLink>
+          }
+        >
+          Este resumen no tiene el detalle de consumos (por ejemplo, llegó por email solo con los totales). Subí el PDF del resumen con
+          «Leer con IA» y al confirmarlo se le suman los movimientos.
+        </Alert>
+      )}
       {document && (
-        <Panel title="Archivo del resumen" action={<ButtonLink href={`/documents/${document.id}`} variant="outlined">Ver documento</ButtonLink>}>
+        <Panel
+          title="Archivo del resumen"
+          action={
+            <ButtonLink href={`/documents/${document.id}`} variant="outlined">
+              Ver documento
+            </ButtonLink>
+          }
+        >
           <DocumentPreview document={document} />
         </Panel>
       )}

@@ -319,3 +319,9 @@ export interface CardReportFilters {
   cardId?: UUID;
   currency?: CurrencyCode;
 }
+
+/** GET /cards/installments/pending */
+export interface PendingInstallmentsResponse {
+  items: PendingInstallmentResponse[];
+  totals: CurrencyTotalResponse[];
+}

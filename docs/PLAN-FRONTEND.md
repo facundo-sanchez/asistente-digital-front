@@ -15,6 +15,7 @@
 
 - Hechos (front + backend, mergeados en `develop`): base y autenticación (módulos 0 y 1), servicios (2), documentos (3), vencimientos y pagos con recurrencias (4), facturas (5), tarjetas con resúmenes en pesos y dólares (6) e IA documental (9: resúmenes y facturas desde Excel, PDF o foto, con revisión y confirmación). Detalle por parte en los `MODULO-0N-*.md`.
 - Hecho, sin mergear (ramas `feature/dashboard-*`): **dashboard (7)** completo, 7.1 a 7.5; falta la prueba contra la base. También ahí: subir el comprobante desde el formulario del pago.
+- Hecho, sin mergear: **Gmail (10)** en `feature/gmail-*` y **consumos (11)** en `feature/consumos-1-2` (rubros, cuotas, informe, exportar).
 - Hecho, sin mergear (ramas `feature/notificaciones-*`): **notificaciones (8)** completo, 8.1 a 8.4: avisos en la app y por email, campana y preferencias.
 - Decisiones tomadas en el camino que cambian este plan: no se usó Redux ni material-react-table (Server Components + `fetch`, tablas propias "libro de cuentas"); fechas con `Intl` en vez de moment; filtros en la URL.
 
@@ -188,21 +189,21 @@
 > Los movimientos con cuota n de m, cuotas pagas e importe se guardan desde el módulo 9 (parte 9.4). Acá quedan el informe, las categorías y **exportar el resumen a PDF y Excel**.
 
 ### Consumos
-- [~] API: `/card-statements/{id}/transactions` (hecho en 9.4); faltan `/card-transactions/{id}`, `PATCH /card-transactions/{id}/category`, `/card-statements/{id}/reconciliation`
-- [~] Tabla de consumos del resumen: fecha, comercio, cuota N/M, importe y moneda (9.4); falta la categoría
+- [x] API: `/card-statements/{id}/transactions`, `/card-transactions` (detalle del informe), `PATCH /card-transactions/{id}/category`, `PATCH /card-transactions/{id}/category`, `/card-statements/{id}/reconciliation`
+- [x] Tabla de consumos del resumen: fecha, comercio, cuota N/M, rubro (editable) e importe
 - [x] Revisión de la extracción IA: editar, agregar y eliminar consumos (9.4)
-- [ ] Recategorizar con opción "aplicar siempre a este comercio" (crea la regla, RN-019)
+- [x] Recategorizar con "Siempre" para el comercio (crea la regla y recategoriza sus otros consumos, RN-019)
 - [x] Conciliación en la revisión: diferencia entre el total del resumen y la suma de consumos, por moneda (9.4)
-- [ ] Pantalla de reglas por comercio (`/card-merchant-rules`): listar y eliminar
+- [x] Rubros por comercio (`/cards/rules`): listar y borrar
 
 ### Informe (`/cards/report`)
-- [ ] Filtros: período, tarjeta(s), moneda
-- [ ] KPIs: total por moneda (pesos y dólares separados, RN-018)
-- [ ] Gráfico de gasto por categoría (dona) y evolución mensual (barras) con Chart.js
-- [ ] Gasto por tarjeta y top de comercios
-- [ ] Cuotas pendientes (`/cards/installments/pending`): restante por compra, total por moneda y fecha estimada de la última cuota
-- [ ] Drill-down: click en una categoría, mes o comercio → lista de consumos
-- [ ] Exportar el resumen de la tarjeta (totales, consumos y cuotas) a PDF y a Excel
+- [x] Filtros: meses desde/hasta y tarjeta (en la URL)
+- [x] Total por moneda y cuotas por pagar (RN-018)
+- [x] Barras por mes (Chart.js) y por rubro (con nombre; la dona no distingue 15 rubros)
+- [x] Gasto por tarjeta y los 10 comercios con más gasto
+- [x] Cuotas pendientes (`/cards/installments`): lo que falta por compra, total por moneda y cuándo termina; las cuotas se unen entre resúmenes (RN-020)
+- [x] Detalle: un rubro o comercio lleva a sus consumos (`/cards/transactions`)
+- [x] Exportar el resumen a Excel (backend, POI) y a PDF (versión para imprimir)
 
 ## Fase 10 – Integraciones / Gmail (CU-003, CU-013) 🔗
 
@@ -265,3 +266,4 @@
 | 26/11/2026 | Módulo 7 (dashboard) hecho en `feature/dashboard-*`: indicadores, próximos vencimientos, para revisar, documentos por vencer, gráficos de lo pagado y últimas actividades. Comprobante subido desde el formulario del pago |
 | 26/11/2026 | Plan del módulo 8 (notificaciones) |
 | 26/11/2026 | Módulo 8 (notificaciones) hecho en `feature/notificaciones-*`: avisos por umbral sin duplicados, campana, preferencias por canal y email diario con reintentos |
+| 26/11/2026 | Módulo 10 (Gmail) y módulo 11 (consumos: rubros por comercio, cuotas unidas, informe, cuotas pendientes, Excel y PDF del resumen) hechos, sin mergear |
