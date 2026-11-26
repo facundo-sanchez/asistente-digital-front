@@ -18,7 +18,7 @@
 |---|---|---|
 | Dónde se guardan los archivos | Disco local (carpeta configurable, `DOCUMENTS_DIR`) detrás de un puerto `FileStorage` | Funciona sin Docker y alcanza para el despliegue en LAN. MinIO/S3 sería otro adaptador del mismo puerto (parte 3.6, opcional) |
 | Nombre del archivo guardado | `storage_key` = `{userId}/{uuid}`; el nombre original solo se guarda en la base | Evita rutas armadas con datos del usuario (path traversal) y choques de nombres |
-| Tipos admitidos | PDF, JPG, PNG y WEBP; hasta 10 MB | Lo que se usa para facturas y comprobantes. El tipo se verifica por el contenido (bytes iniciales), no por la extensión |
+| Tipos admitidos | PDF, JPG, PNG, WEBP y Excel (XLSX, XLS; agregado el 26/11/2026 para resúmenes de tarjeta); hasta 10 MB | Lo que se usa para facturas y comprobantes. El tipo se verifica por el contenido (bytes iniciales), no por la extensión |
 | Archivo repetido | Mismo SHA-256 del mismo usuario → 409 con enlace al documento existente | La base ya lo impide (índice único); se informa en vez de fallar |
 | Procesamiento con IA | Los documentos manuales quedan `NOT_REQUIRED` | La extracción con IA llega en el módulo 9 |
 | Asociación | Solo a servicio en este módulo | Bienes no tienen módulo todavía; obligaciones se vinculan a través de facturas (módulo 5) |

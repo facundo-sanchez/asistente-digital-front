@@ -1,12 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { MAX_FILE_SIZE, formatFileSize, validateFile } from "./upload-rules";
+import { MAX_FILE_SIZE, XLSX_TYPE, formatFileSize, isSpreadsheet, validateFile } from "./upload-rules";
 
-const file = (size: number, type: string) => new File([new Uint8Array(size)], "archivo", { type });
+const file = (size: number, type: string, name = "archivo") => new File([new Uint8Array(size)], name, { type });
 
 describe("reglas de archivo", () => {
   it("acepta PDF e imágenes dentro del tamaño", () => {
     expect(validateFile(file(100, "application/pdf"))).toBeNull();
     expect(validateFile(file(100, "image/webp"))).toBeNull();
+  });
+
+  it("acepta Excel, también por extensión si el navegador no informa el tipo", () => {
+    expect(validateFile(file(100, XLSX_TYPE))).toBeNull();
+    expect(validateFile(file(100, "", "resumen.XLS"))).toBeNull();
+    expect(validateFile(file(100, "", "programa.exe"))).toMatch(/Excel/);
+    expect(isSpreadsheet(XLSX_TYPE)).toBe(true);
   });
 
   it("rechaza vacíos, grandes y tipos no admitidos", () => {

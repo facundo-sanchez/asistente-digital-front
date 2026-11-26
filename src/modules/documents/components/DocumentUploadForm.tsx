@@ -17,7 +17,7 @@ import { ApiError } from "@/lib/api/api-error";
 import { DOCUMENT_TYPE_LABELS } from "@/lib/document-types";
 import { documentsApi } from "../api";
 import type { DocumentUploadFormProps } from "./document-upload-form-props";
-import { ACCEPT_ATTRIBUTE, formatFileSize, validateFile } from "../upload-rules";
+import { ACCEPTED_LABEL, ACCEPT_ATTRIBUTE, formatFileSize, validateFile } from "../upload-rules";
 
 /** Subir un documento: elegir o arrastrar el archivo, tipo y título opcional. */
 export function DocumentUploadForm({ service }: DocumentUploadFormProps) {
@@ -110,7 +110,7 @@ export function DocumentUploadForm({ service }: DocumentUploadFormProps) {
             <>
               <Typography sx={{ fontWeight: 600 }}>Arrastrá el archivo acá o tocá para elegirlo</Typography>
               <Typography variant="body2" color="text.secondary">
-                PDF, JPG, PNG o WEBP de hasta 10 MB
+                {ACCEPTED_LABEL} de hasta 10 MB
               </Typography>
             </>
           )}

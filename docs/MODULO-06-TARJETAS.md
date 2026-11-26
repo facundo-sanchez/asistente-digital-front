@@ -23,6 +23,7 @@
 | Repetido (RN-016) | Un resumen por tarjeta y vencimiento: el segundo responde 409 con mensaje claro | La base ya lo impide |
 | Fechas de cierre y vencimiento | La app **no las calcula**: cada resumen trae las suyas, tal como las informa el banco. La tarjeta no pide días fijos; muestra el próximo cierre y vencimiento del **último resumen** como dato informativo | El banco las fija con un criterio propio que puede cambiar mes a mes (feriados, ciclos); calcularlas daría fechas falsas |
 | Editar o anular un resumen | Mientras sus vencimientos no tengan pagos; los cambios se copian a ellos; anular los cancela | Mismo criterio de facturas (5.3) |
+| Archivo del resumen | PDF o Excel (los bancos ofrecen los dos). XLSX se verifica por contenido (ZIP con el libro de Excel); Excel no tiene vista previa: se descarga. Leer sus consumos llega con los módulos 9 y 11 | El usuario baja el que le da su banco |
 | Baja de tarjeta | Desactivar (no se borra): sus resúmenes y vencimientos se conservan | Historial (RN-008) |
 
 ## Resumen de partes
