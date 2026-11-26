@@ -1,9 +1,9 @@
+import { GuillocheRosette } from "@/components/brand/GuillocheRosette";
 import styles from "../landing.module.css";
 import { STEPS } from "../landing-content";
-import { MonthRosette } from "./MonthRosette";
 import { PrimaryActions } from "./PrimaryActions";
 
-/** Primera pantalla: qué es, la acción y la roseta del mes de ejemplo; abajo, los cuatro pasos. */
+/** Primera pantalla: qué es, la acción y la roseta (decorativa); abajo, los cuatro pasos. */
 export function HeroSection({ signedIn }: { signedIn: boolean }) {
   return (
     <section className={styles.wrap} aria-labelledby="hero-title">
@@ -19,7 +19,9 @@ export function HeroSection({ signedIn }: { signedIn: boolean }) {
           </p>
           <PrimaryActions signedIn={signedIn} secondary={{ href: "#como-funciona", label: "Ver cómo funciona" }} />
         </div>
-        <MonthRosette value={0.68} paid="$ 684.300" className={styles.heroRosette} />
+        <div className={`${styles.rosette} ${styles.heroRosette}`}>
+          <GuillocheRosette value={0.68} size="100%" lineColor="#2A4A52" arcColor="#8CC5B6" />
+        </div>
       </div>
       <ol className={styles.stepRule}>
         {STEPS.map((step, i) => (
