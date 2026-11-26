@@ -6,7 +6,7 @@
 
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
-**Estado:** planificado, sin empezar. Se adelanta al módulo 7 porque es lo que más trabajo le ahorra al usuario.
+**Estado:** en desarrollo (9.1 hecha). Se adelanta al módulo 7 porque es lo que más trabajo le ahorra al usuario.
 
 ## Objetivo
 
@@ -23,7 +23,7 @@ El usuario adjunta un archivo —**Excel, PDF o foto**— del resumen de su tarj
 | Tema | Decisión | Por qué |
 |---|---|---|
 | Un solo camino para todos los archivos | La IA interpreta los tres formatos. El **Excel se convierte antes a una tabla de texto** (genérico, sin saber de qué banco es); **PDF e imágenes** se le envían directo (Gemini es multimodal) | Cada banco arma su Excel distinto: un lector por banco obliga a programar y mantener un formato por cada uno y se rompe cuando el banco cambia una columna |
-| Modelo | Gemini Flash (rápido y barato), temperatura baja, **salida JSON con esquema fijo** versionado (`schema_version`) | Datos estructurados y comparables; si el esquema cambia, los resultados viejos siguen identificados |
+| Modelo | Gemini Flash Lite (`gemini-3.5-flash-lite`, configurable con `GEMINI_MODEL`; `gemini-2.5-flash` ya no se ofrece a cuentas nuevas), temperatura baja, **salida JSON con esquema fijo** versionado (`schema_version`) | Datos estructurados y comparables; si el esquema cambia, los resultados viejos siguen identificados |
 | Leer Excel | Apache POI (`poi-ooxml`): XLSX y XLS, todas las hojas, celdas como texto | Librería estándar; además permite distinguir un XLS real de un `.doc` (pendiente anotado en `FileType`) |
 | La IA no confirma nada | Todo resultado queda **pendiente de revisión** (CU-004, RN-013). El dato confirmado vive en `card_statements` / `invoices`; la propuesta, en `ai_extraction_results` | Regla de la especificación; trazabilidad del origen y la confianza (RN-006) |
 | Controles automáticos | Suma de movimientos = total del resumen (por tarjeta y moneda); cuota n ≤ m; tarjeta asociada por últimos 4 (de tarjeta o de cuenta); vencimiento ≥ cierre; RN-016 (resumen repetido). Lo que no cuadra se marca en la revisión | No confiar ciegamente en la IA (CU-016 paso 7) |
@@ -39,7 +39,7 @@ El usuario adjunta un archivo —**Excel, PDF o foto**— del resumen de su tarj
 
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 9.1 | Conexión con Gemini y lectura de archivos (Excel a texto, PDF e imagen) | `feature/ia-1-lectura` | — | [ ] |
+| 9.1 | Conexión con Gemini y lectura de archivos (Excel a texto, PDF e imagen) | `feature/ia-1-lectura` | — | [x] |
 | 9.2 | Cola de procesamiento: subir con "Leer con IA", estado en el documento, reintentos | `feature/ia-2-cola` | 9.1 | [ ] |
 | 9.3 | Extracción de resúmenes de tarjeta (totales, tarjetas, movimientos y cuotas) con controles | `feature/ia-3-resumen` | 9.2 | [ ] |
 | 9.4 | Pantalla de revisión y confirmación del resumen (crea resumen, vencimientos y movimientos) | `feature/ia-4-revision-resumen` | 9.3 | [ ] |
@@ -48,20 +48,22 @@ El usuario adjunta un archivo —**Excel, PDF o foto**— del resumen de su tarj
 Orden recomendado: 9.1 → 9.2 → 9.3 → 9.4 → 9.5. Con 9.1 a 9.4 se cargan resúmenes solos.
 
 **Antes de empezar se necesita:**
-- `GEMINI_API_KEY` en el `.env` del backend (nunca en el repositorio).
-- Archivos de ejemplo reales (con importes cambiados si se quiere): el Excel de BBVA y el resumen (Excel o PDF) de al menos otro banco, para probar dos formatos desde el principio. Se guardan fuera del repositorio.
+- [x] `GEMINI_API_KEY` en el `.env` del backend (nunca en el repositorio).
+- [x] Ejemplos de BBVA: Excel ("Movimientos del período": tarjeta por últimos 4, fecha, comercio, cuota n/m, importes en $ y U$S, totales por tarjeta; **sin** cierre ni vencimiento) y PDF (cierre, vencimiento, próximos, saldos en $ y U$S, pago mínimo, saldo anterior y pagos, cuotas a vencer por mes, movimientos con `C.n/m` y cupón agrupados por titular). No hay ejemplos de otros bancos: el esquema se diseña genérico y se prueba con BBVA.
 
 ---
 
 ## Parte 9.1 – Conexión con Gemini y lectura de archivos
 
 ### Backend
-- [ ] Configuración: modelo (`gemini-2.5-flash`), temperatura, timeout; `log-requests`/`log-responses` en `false` salvo en desarrollo.
-- [ ] `SpreadsheetText` (Apache POI): XLSX/XLS → tabla de texto (una sección por hoja, celdas separadas, filas vacías fuera). Reemplaza la detección de XLS por cabecera en `FileType` por una lectura real.
-- [ ] Puerto `DocumentReader` y adaptador Gemini: recibe el documento (texto de la planilla, o PDF/imagen como archivo) y un esquema; devuelve JSON. Errores tipados (sin clave, tiempo agotado, respuesta inválida) sin contenido del documento.
-- [ ] Tests: planilla de ejemplo → texto esperado; adaptador con un modelo falso.
+- [x] Configuración: modelo (`gemini-2.5-flash`), temperatura, timeout; `log-requests`/`log-responses` en `false` salvo en desarrollo.
+- [x] `SpreadsheetText` (Apache POI): XLSX/XLS → tabla de texto (una sección por hoja, celdas separadas, filas vacías fuera). Reemplaza la detección de XLS por cabecera en `FileType` por una lectura real.
+- [x] Puerto `DocumentReader` y adaptador Gemini: recibe el documento (texto de la planilla, o PDF/imagen como archivo) y un esquema; devuelve JSON. Errores tipados (sin clave, tiempo agotado, respuesta inválida) sin contenido del documento.
+- [x] Tests: planilla de ejemplo → texto esperado; adaptador con un modelo falso.
 
 **Listo cuando:** el Excel de BBVA se convierte a una tabla legible y una llamada de prueba a Gemini devuelve JSON válido.
+
+**Hecho (26/11/2026):** Apache POI (`poi-ooxml` 5.2.3); `SpreadsheetText` (cualquier XLSX/XLS → tabla de texto, formato es-AR, sin filas vacías, tope de 2000 filas); `FileType` abre el XLS como planilla (un `.doc` con cabecera OLE ya no pasa); puerto `DocumentReader` (`available`, `readJson`) con `DocumentInput` (texto o archivo) y `DocumentReadException` + `ReadFailure` (sin contenido del documento); `GeminiDocumentReader` (PDF con `PdfFileContent`, imagen con `ImageContent`, planilla como texto; respuesta JSON validada, quita el envoltorio ```json). Config: modelo, timeout y logs de pedidos apagados por defecto. Verificado: tests OK y una llamada real a Gemini devolvió JSON con comercio y cuota de una fila de BBVA.
 
 ---
 
