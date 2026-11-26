@@ -1,5 +1,5 @@
 /** Backend: org.acme.dashboard.application.model (módulo 7) */
-import type { CurrencyCode, Decimal, ISODate } from "./common";
+import type { CurrencyCode, Decimal, DocumentType, ISODate, ISODateTime, ServiceCategory, UUID } from "./common";
 
 /** Lo del mes en una moneda. */
 export interface MonthTotalsResponse {
@@ -27,4 +27,36 @@ export interface DashboardSummaryResponse {
   /** Cuántos vencen en los próximos 7 días. */
   dueSoon: number;
   activeServices: number;
+  /** Lo que leyó la IA y espera revisión; schemaVersion "invoice/..." es factura, si no, resumen de tarjeta. */
+  toReview: PendingReviewResponse[];
+  /** Documentos que vencen en los próximos 30 días. */
+  expiringDocuments: ExpiringDocumentResponse[];
+}
+
+export interface PendingReviewResponse {
+  id: UUID;
+  schemaVersion: string;
+  documentId: UUID;
+  documentTitle: string | null;
+  createdAt: ISODateTime;
+}
+
+export interface ExpiringDocumentResponse {
+  id: UUID;
+  title: string;
+  documentType: DocumentType;
+  expiresOn: ISODate;
+}
+
+/** Lo pagado en una moneda; key es el mes ("2026-11") o la categoría del servicio. */
+export interface SpendingTotalResponse<K extends string = string> {
+  key: K;
+  currency: CurrencyCode;
+  total: Decimal;
+}
+
+/** GET /dashboard/spending: últimos 6 meses por moneda (con ceros) y el mes actual por categoría. */
+export interface DashboardSpendingResponse {
+  months: SpendingTotalResponse[];
+  categories: SpendingTotalResponse<ServiceCategory>[];
 }
