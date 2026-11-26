@@ -3,7 +3,7 @@
 export const LINKEDIN_URL = "https://www.linkedin.com/in/facundo-sanchez-647b5a21a/";
 
 /** Un mes de ejemplo: lo pagado después de cada paso de la historia. */
-export const SAMPLE_MONTH = { label: "Noviembre · ejemplo", total: "$ 1.005.142" };
+export const SAMPLE_MONTH = { label: "Noviembre", total: "$ 1.005.142" };
 
 export const STEPS = [
   { title: "Llega la factura", text: "Camuzzi te la manda por mail, como siempre." },
