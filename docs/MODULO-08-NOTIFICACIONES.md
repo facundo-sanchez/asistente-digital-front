@@ -33,7 +33,7 @@ Que el usuario no tenga que entrar a mirar: la app le avisa lo que vence, lo que
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
 | 8.1 | Generación de avisos en la app + `GET /notifications`, marcar leída y todas leídas | `feature/notificaciones-1-2` (junto con 8.2) | — | [~] |
-| 8.2 | Campana en la barra con las no leídas y pantalla de avisos | `feature/notificaciones-1-2` | 8.1 | [ ] |
+| 8.2 | Campana en la barra con las no leídas y pantalla de avisos | `feature/notificaciones-1-2` | 8.1 | [~] |
 | 8.3 | Preferencias: qué avisos, cuántos días antes y por qué canal | `feature/notificaciones-3-4` (junto con 8.4) | 8.1 | [ ] |
 | 8.4 | Email diario con los avisos del día | `feature/notificaciones-3-4` | 8.3 | [ ] |
 
@@ -58,11 +58,13 @@ Orden recomendado: 8.1 → 8.2 → 8.3 → 8.4. Con 8.1 y 8.2 los avisos ya apar
 ## Parte 8.2 – Campana y pantalla de avisos
 
 ### Frontend
-- [ ] Campana en la barra superior con la cantidad de no leídas; al abrirla, los últimos avisos con enlace a cada cosa (vencimiento, documento, revisión) y "Marcar todo como leído".
-- [ ] `/notifications`: todos los avisos de los últimos 30 días, filtro "Solo no leídos".
-- [ ] La cantidad se actualiza al navegar (sin consultas cada pocos segundos).
+- [x] Campana en la barra superior con la cantidad de no leídas; al abrirla, los últimos avisos con enlace a cada cosa (vencimiento, documento, revisión) y "Marcar todo como leído".
+- [x] `/notifications`: todos los avisos de los últimos 30 días, filtro "Solo no leídos".
+- [x] La cantidad se actualiza al navegar (sin consultas cada pocos segundos).
 
 **Listo cuando:** se ve el aviso en la campana, al tocarlo lleva al vencimiento y queda leído.
+
+**Hecho, falta la prueba contra la base (26/11/2026):** `NotificationBell` en la barra (cantidad sin leer, se vuelve a pedir en cada cambio de ruta; al abrir trae los últimos 6; tocar uno lo marca leído y lleva al vencimiento o al documento; "Marcar todo como leído"). Página `/notifications` con "Solo los no leídos", paginada y con su estado vacío. Backend: el listado devuelve `PageResponse` (con `totalPages`) como los demás.
 
 ---
 

@@ -52,3 +52,8 @@ export interface NotificationPreferenceRequest {
   /** 0 a 60, máximo 10 valores. */
   daysBefore: number[];
 }
+
+/** GET /notifications/unread-count */
+export interface UnreadCountResponse {
+  unread: number;
+}
