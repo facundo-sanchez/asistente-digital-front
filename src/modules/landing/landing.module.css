@@ -1,4 +1,4 @@
-/* Presentación pública: el mundo "papel moneda" de noche (tinta petróleo, verde agua, hornero solo en el paso activo). */
+/* Presentación pública: el mundo "papel moneda". De noche, tinta petróleo y verde agua; de día, papel de seguridad y tinta petróleo. */
 .page {
   --ground: #0f2328;
   --sheet: #14303a;
@@ -8,6 +8,13 @@
   --mint: #8cc5b6;
   --mint-deep: #6fae9e;
   --hornero: #e9a35e;
+  --mint-hover: #aad7cb;
+  --on-mint: #0f2328;
+  --contrast: #e3ece7;
+  --contrast-hover: #ffffff;
+  --on-contrast: #0f2328;
+  --paid: #8dbf84;
+  --engrave: #2a4a52;
   --narrow: var(--font-archivo-narrow), "Archivo Narrow", sans-serif;
   --gutter: clamp(16px, 5.5vw, 80px);
 
@@ -16,6 +23,26 @@
   color: var(--ink);
   font-family: var(--font-archivo), "Archivo", sans-serif;
   color-scheme: dark;
+}
+
+/* Modo claro (el tema de MUI pone la clase en <html>) */
+:global(.light) .page {
+  --ground: #e9efeb;
+  --sheet: #f6f9f7;
+  --ink: #16323a;
+  --ink-soft: #48656b;
+  --rule: #c9d8d0;
+  --mint: #1d4650;
+  --mint-deep: #2c5c67;
+  --hornero: #a85a17;
+  --mint-hover: #2c5c67;
+  --on-mint: #f6f9f7;
+  --contrast: #16323a;
+  --contrast-hover: #1d4650;
+  --on-contrast: #f6f9f7;
+  --paid: #3f6e3a;
+  --engrave: #9fbdb1;
+  color-scheme: light;
 }
 
 .page ::selection {
@@ -114,11 +141,11 @@
 
 .btnPrimary {
   background: var(--mint);
-  color: var(--ground);
+  color: var(--on-mint);
 }
 
 .btnPrimary:hover {
-  background: #aad7cb;
+  background: var(--mint-hover);
 }
 
 .btnGhost {
@@ -137,12 +164,12 @@
 }
 
 .btnLight {
-  background: var(--ink);
-  color: var(--ground);
+  background: var(--contrast);
+  color: var(--on-contrast);
 }
 
 .btnLight:hover {
-  background: #fff;
+  background: var(--contrast-hover);
 }
 
 /* ---------- primera pantalla ---------- */
@@ -508,7 +535,7 @@
   padding: 0 16px;
   border-radius: 10px;
   background: var(--mint);
-  color: var(--ground);
+  color: var(--on-mint);
   font-weight: 600;
   font-size: 14px;
 }
@@ -517,7 +544,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #8dbf84;
+  color: var(--paid);
   font-weight: 600;
 }
 

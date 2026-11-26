@@ -6,7 +6,7 @@ import { SAMPLE_MONTH } from "../landing-content";
 export function MonthRosette({ value, paid, className }: { value: number; paid: string; className?: string }) {
   return (
     <div className={`${styles.rosette} ${className ?? ""}`}>
-      <GuillocheRosette value={value} size="100%" lineColor="#2A4A52" arcColor="#8CC5B6" />
+      <GuillocheRosette value={value} size="100%" lineColor="var(--engrave)" arcColor="var(--mint)" />
       <div className={styles.rosetteCenter} aria-hidden>
         <span className={styles.rosetteMonth}>{SAMPLE_MONTH.label}</span>
         <strong className={`${styles.rosetteAmount} ${styles.tabular}`}>{paid}</strong>
