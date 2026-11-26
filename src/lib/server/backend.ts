@@ -10,7 +10,7 @@ const API_BACKEND =
   process.env.API_BACKEND ?? "http://localhost:8080/asistente-digital-back/api/v1";
 
 export async function backendFetch(path: string, req: BackendRequest = {}): Promise<Response> {
-  const headers = new Headers({ Accept: "application/json" });
+  const headers = new Headers({ Accept: req.accept ?? "application/json" });
   let body: BodyInit | undefined;
 
   if (req.rawBody != null) {

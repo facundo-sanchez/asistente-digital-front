@@ -9,6 +9,7 @@ import type { UserResponse } from "@/types/api";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { ColorModeToggle } from "@/components/theme/ColorModeToggle";
 import { NavList } from "./NavList";
+import { AssistantBubble } from "@/modules/assistant/components/AssistantBubble";
 import { NotificationBell } from "@/modules/notifications/components/NotificationBell";
 import { UserMenu } from "./UserMenu";
 
@@ -92,9 +93,10 @@ export function AppShell({ user, children }: { user: Pick<UserResponse, "name" |
           <UserMenu user={user} />
         </Box>
 
-        <Box component="main" sx={{ flexGrow: 1, px: { xs: 2, md: 5 }, py: { xs: 3, md: 5 } }}>
+        <Box component="main" sx={{ flexGrow: 1, px: { xs: 2, md: 5 }, py: { xs: 3, md: 5 }, pb: { xs: 12, md: 5 } }}>
           {children}
         </Box>
+        <AssistantBubble />
       </Box>
     </Box>
   );
