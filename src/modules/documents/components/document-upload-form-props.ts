@@ -6,4 +6,6 @@ export interface DocumentUploadFormProps {
   service?: ServiceOption;
   /** Tipos que la IA puede leer ahora (vacío si no hay IA). */
   aiTypes: DocumentType[];
+  /** Tipo elegido al abrir (ej. "Resumen de tarjeta" desde una tarjeta). */
+  initialType?: DocumentType;
 }

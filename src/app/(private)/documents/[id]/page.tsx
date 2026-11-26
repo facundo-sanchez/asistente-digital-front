@@ -28,10 +28,13 @@ export default async function DocumentPage({ params, searchParams }: { params: P
   const document = await serverGet<DocumentResponse>(`/documents/${id}`);
   if (!document) notFound();
   const name = document.title ?? document.originalFilename;
-  const [job, ai] = await Promise.all([
+  const [job, ai, extraction] = await Promise.all([
     // 404 = nunca se pidió leerlo con IA
     document.processingStatus === "NOT_REQUIRED" ? null : serverGet<ProcessingJobResponse>(`/documents/${id}/processing`),
     serverGet<AiAvailabilityResponse>("/documents/ai"),
+    document.processingStatus === "REQUIRES_REVIEW" || document.processingStatus === "COMPLETED"
+      ? serverGet<{ id: string }>(`/extractions?documentId=${id}`)
+      : null,
   ]);
   const canProcess = !!ai?.available && ai.documentTypes.includes(document.documentType);
   const showProcessing = document.processingStatus !== "NOT_REQUIRED" || canProcess;
@@ -64,7 +67,7 @@ export default async function DocumentPage({ params, searchParams }: { params: P
       {updated && <Alert severity="success">Guardamos los cambios.</Alert>}
       {showProcessing && (
         <Panel title="Lectura con IA">
-          <DocumentProcessing document={document} job={job} canProcess={canProcess} />
+          <DocumentProcessing document={document} job={job} canProcess={canProcess} extractionId={extraction?.id ?? null} />
         </Panel>
       )}
       <Panel title="Vista previa">

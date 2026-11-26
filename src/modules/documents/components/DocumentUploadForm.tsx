@@ -23,11 +23,11 @@ import type { DocumentUploadFormProps } from "./document-upload-form-props";
 import { ACCEPTED_LABEL, ACCEPT_ATTRIBUTE, formatFileSize, validateFile } from "../upload-rules";
 
 /** Subir un documento: elegir o arrastrar el archivo, tipo y título opcional. */
-export function DocumentUploadForm({ service, aiTypes }: DocumentUploadFormProps) {
+export function DocumentUploadForm({ service, aiTypes, initialType }: DocumentUploadFormProps) {
   const router = useRouter();
   const backHref = service ? `/services/${service.id}` : "/documents";
   const [file, setFile] = useState<File | null>(null);
-  const [documentType, setDocumentType] = useState<DocumentType>("INVOICE");
+  const [documentType, setDocumentType] = useState<DocumentType>(initialType ?? "INVOICE");
   const [title, setTitle] = useState("");
   const [dragging, setDragging] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);

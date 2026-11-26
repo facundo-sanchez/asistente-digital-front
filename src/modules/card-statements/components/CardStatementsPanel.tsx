@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import AddOutlined from "@mui/icons-material/AddOutlined";
+import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import type { CardResponse, CardStatementResponse } from "@/types/api";
 import { ButtonLink } from "@/components/common/ButtonLink";
 import { TextLink } from "@/components/common/TextLink";
@@ -26,9 +27,14 @@ export async function CardStatementsPanel({ card }: { card: CardResponse }) {
       description={next}
       action={
         card.active && (
-          <ButtonLink href={`/cards/${card.id}/statements/new`} variant="contained" startIcon={<AddOutlined />}>
-            Cargar resumen
-          </ButtonLink>
+          <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: "wrap" }}>
+            <ButtonLink href="/documents/new?type=CARD_STATEMENT" variant="contained" startIcon={<AutoAwesomeOutlined />}>
+              Cargar desde archivo
+            </ButtonLink>
+            <ButtonLink href={`/cards/${card.id}/statements/new`} variant="outlined" startIcon={<AddOutlined />}>
+              Cargar a mano
+            </ButtonLink>
+          </Stack>
         )
       }
     >

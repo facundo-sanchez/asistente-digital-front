@@ -7,6 +7,8 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
+import { ButtonLink } from "@/components/common/ButtonLink";
+import { TextLink } from "@/components/common/TextLink";
 import { ApiError } from "@/lib/api/api-error";
 import { formatDay } from "@/lib/dates";
 import { processingErrorMessage } from "@/lib/processing-labels";
@@ -21,7 +23,7 @@ const POLL_MS = 4000;
  * Estado de la lectura con IA de un documento: mientras espera o se lee, la página se refresca
  * sola; si falló, se puede reintentar; si nunca se pidió, se puede pedir.
  */
-export function DocumentProcessing({ document, job, canProcess }: DocumentProcessingProps) {
+export function DocumentProcessing({ document, job, canProcess, extractionId }: DocumentProcessingProps) {
   const router = useRouter();
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,10 +84,18 @@ export function DocumentProcessing({ document, job, canProcess }: DocumentProces
           )}
         </>
       )}
-      {status === "REQUIRES_REVIEW" && job?.completedAt && (
-        <Typography variant="body2" color="text.secondary">
-          Leído el {formatDay(job.completedAt)}. La revisión de los datos llega en la próxima parte.
-        </Typography>
+      {status === "REQUIRES_REVIEW" && extractionId && (
+        <>
+          <Typography variant="body2" color="text.secondary">
+            {job?.completedAt ? `Leído el ${formatDay(job.completedAt)}. ` : ""}Revisá los datos: nada se guarda hasta que confirmes.
+          </Typography>
+          <ButtonLink href={`/extractions/${extractionId}`} variant="contained">
+            Revisar y confirmar
+          </ButtonLink>
+        </>
+      )}
+      {status === "COMPLETED" && extractionId && (
+        <TextLink href={`/extractions/${extractionId}`}>Ver lo que leyó la IA</TextLink>
       )}
       {error && <Alert severity="error">{error}</Alert>}
     </Stack>

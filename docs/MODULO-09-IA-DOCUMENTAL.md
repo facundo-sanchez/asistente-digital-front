@@ -6,7 +6,7 @@
 
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
-**Estado:** en desarrollo (9.1 y 9.2 hechas). Se adelanta al módulo 7 porque es lo que más trabajo le ahorra al usuario.
+**Estado:** en desarrollo (9.1 a 9.4 hechas: los resúmenes ya se cargan solos). Se adelanta al módulo 7 porque es lo que más trabajo le ahorra al usuario.
 
 ## Objetivo
 
@@ -41,8 +41,8 @@ El usuario adjunta un archivo —**Excel, PDF o foto**— del resumen de su tarj
 |---|---|---|---|---|
 | 9.1 | Conexión con Gemini y lectura de archivos (Excel a texto, PDF e imagen) | `feature/ia-1-lectura` | — | [x] |
 | 9.2 | Cola de procesamiento: subir con "Leer con IA", estado en el documento, reintentos | `feature/ia-2-cola` | 9.1 | [x] |
-| 9.3 | Extracción de resúmenes de tarjeta (totales, tarjetas, movimientos y cuotas) con controles | `feature/ia-3-resumen` | 9.2 | [ ] |
-| 9.4 | Pantalla de revisión y confirmación del resumen (crea resumen, vencimientos y movimientos) | `feature/ia-4-revision-resumen` | 9.3 | [ ] |
+| 9.3 | Extracción de resúmenes de tarjeta (totales, tarjetas, movimientos y cuotas) con controles | `feature/ia-3-4-resumen` (junto con 9.4) | 9.2 | [x] |
+| 9.4 | Pantalla de revisión y confirmación del resumen (crea resumen, vencimientos y movimientos) | `feature/ia-3-4-resumen` | 9.3 | [x] |
 | 9.5 | Facturas desde un archivo (extracción, servicio sugerido, revisión y confirmación) | `feature/ia-5-facturas` | 9.2 | [ ] |
 
 Orden recomendado: 9.1 → 9.2 → 9.3 → 9.4 → 9.5. Con 9.1 a 9.4 se cargan resúmenes solos.
@@ -89,27 +89,31 @@ Orden recomendado: 9.1 → 9.2 → 9.3 → 9.4 → 9.5. Con 9.1 a 9.4 se cargan 
 ## Parte 9.3 – Extracción de resúmenes de tarjeta
 
 ### Backend
-- [ ] Esquema `card_statement/1`: banco, tarjetas (últimos 4 de tarjeta o cuenta, titular), cierre, vencimiento, próximos cierre y vencimiento, totales en pesos y en dólares, pago mínimo; movimientos (fecha, descripción, comercio, cuota n de m, importe, moneda, tipo: compra, cuota, devolución, comisión, impuesto, interés, pago) y totales por tarjeta.
-- [ ] Controles: cuadre de totales por tarjeta y moneda (con la diferencia), cuotas válidas, tarjeta encontrada por últimos 4, resumen repetido (RN-016). Confianza por campo.
-- [ ] Guarda el resultado en `ai_extraction_results` (`PENDING`).
-- [ ] Tests con las salidas de los archivos de ejemplo (sin llamar a Gemini): Excel de BBVA con dos tarjetas y cuotas, otro banco.
+- [x] Esquema `card_statement/1`: banco, tarjetas (últimos 4 de tarjeta o cuenta, titular), cierre, vencimiento, próximos cierre y vencimiento, totales en pesos y en dólares, pago mínimo; movimientos (fecha, descripción, comercio, cuota n de m, importe, moneda, tipo: compra, cuota, devolución, comisión, impuesto, interés, pago) y totales por tarjeta.
+- [x] Controles: cuadre de totales por tarjeta y moneda (con la diferencia), cuotas válidas, tarjeta encontrada por últimos 4, resumen repetido (RN-016). Confianza por campo.
+- [x] Guarda el resultado en `ai_extraction_results` (`PENDING`).
+- [x] Tests con las salidas de los archivos de ejemplo (sin llamar a Gemini): Excel de BBVA con dos tarjetas y cuotas, otro banco.
 
 **Listo cuando:** el Excel de BBVA de ejemplo produce sus 7 movimientos, las cuotas 6/6, 10/12, 18/18 y 4/12, los totales por tarjeta (****0002 y ****8995) y el total del período cuadrado.
+
+**Hecho (26/11/2026):** `CardStatementProcessor` (Excel → texto con `SpreadsheetText`; PDF/imagen → archivo; prompt genérico `CardStatementPrompt`; acepta el objeto o el primero de una lista) guarda la propuesta en `ai_extraction_results` (`ExtractedStatement` / `ExtractedCard` / `ExtractedTransaction`). `StatementChecks`: falta el vencimiento, cuadre por moneda (con saldo anterior en el PDF; sin él en la planilla), cuadre por tarjeta y cuotas imposibles. Tests con los dos ejemplos de BBVA (`BbvaSamples`). Corrección encontrada en la prueba real: la extensión de Gemini solo crea el `ChatModel` si se inyecta directo (con `Instance<ChatModel>` no existía y la lectura fallaba); se inyecta directo y el proxy lo construye al primer uso.
 
 ---
 
 ## Parte 9.4 – Revisión y confirmación del resumen
 
 ### Backend
-- [ ] `GET /extractions/{id}` y `POST /extractions/{id}/confirm` (con las correcciones) / `reject`.
-- [ ] Confirmar crea, en una transacción: el resumen (`source = AI_EXTRACTION`, `extraction_result_id`), sus vencimientos (módulo 6) y los movimientos con cuotas vinculadas entre resúmenes (RN-020). Estado `CONFIRMED` o `CORRECTED` según si el usuario cambió algo.
-- [ ] Tests: confirmar sin cambios, con correcciones, tarjeta no registrada, repetido.
+- [x] `GET /extractions/{id}` y `POST /extractions/{id}/confirm` (con las correcciones) / `reject`.
+- [x] Confirmar crea, en una transacción: el resumen (`source = AI_EXTRACTION`, `extraction_result_id`), sus vencimientos (módulo 6) y los movimientos con cuotas vinculadas entre resúmenes (RN-020). Estado `CONFIRMED` o `CORRECTED` según si el usuario cambió algo.
+- [x] Tests: confirmar sin cambios, con correcciones, tarjeta no registrada, repetido.
 
 ### Frontend
-- [ ] Pantalla de revisión: datos del resumen (con lo que falta pedido explícitamente, ej. vencimiento), tarjeta asociada (o "Crear tarjeta terminada en 8995"), movimientos con cuota n de m e importe, cuadre de totales y campos de baja confianza resaltados; Confirmar o Descartar.
-- [ ] Aviso "Hay resúmenes para revisar" en Tarjetas y en el Inicio.
+- [x] Pantalla de revisión: datos del resumen (con lo que falta pedido explícitamente, ej. vencimiento), tarjeta asociada (o "Crear tarjeta terminada en 8995"), movimientos con cuota n de m e importe, cuadre de totales y campos de baja confianza resaltados; Confirmar o Descartar.
+- [x] Aviso "Hay resúmenes para revisar" en Tarjetas y en el Inicio.
 
 **Listo cuando:** se sube el Excel de BBVA, se completa el vencimiento y al confirmar aparecen el resumen, sus vencimientos y los 7 movimientos con sus cuotas.
+
+**Hecho (26/11/2026):** `StatementExtractionUseCase` (revisar: tarjeta sugerida por últimos 4 de tarjeta o cuenta, avisos, repetido; confirmar: reusa la carga manual con `source = AI_EXTRACTION`, guarda los movimientos normalizados —pagos y devoluciones negativos, cuota imposible sin cuota—, marca `CONFIRMED`/`CORRECTED`, cierra el trabajo y asocia el documento al banco; descartar). Endpoints `GET /extractions?documentId=`, `GET /extractions/{id}`, `POST /extractions/{id}/confirm|reject`, `GET /card-statements/{id}/transactions`. Front: `/extractions/[id]` (formulario editable con avisos y tabla de movimientos con "quedan N"), botón "Revisar y confirmar" en el documento, "Cargar desde archivo" en la tarjeta (abre la subida con el tipo elegido) y movimientos en el detalle del resumen. Pendiente para el módulo 11: vincular las cuotas de una misma compra entre resúmenes (RN-020) y distinguir titular/adicional en cada movimiento. Verificado de punta a punta con Gemini real y la planilla de BBVA: 7 movimientos, cuotas correctas, totales cuadrados, resumen y vencimiento creados.
 
 ---
 
