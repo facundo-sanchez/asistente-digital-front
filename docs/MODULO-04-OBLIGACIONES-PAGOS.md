@@ -37,7 +37,7 @@
 | 4.3 | Registrar un pago (total o parcial) | `feature/obligaciones-3-pago` | 4.2 | [x] |
 | 4.4 | Historial de pagos, anulación y corrección | `feature/obligaciones-4-historial` | 4.3 | [x] |
 | 4.5 | Vencimientos dentro del servicio | `feature/obligaciones-5-en-servicio` | 4.1 | [x] |
-| 4.6 | Vencimientos que se repiten (alquiler, seguros) | `feature/obligaciones-6-recurrentes` | 4.2 | [ ] |
+| 4.6 | Vencimientos que se repiten (alquiler, seguros) | `feature/obligaciones-6-recurrentes` | 4.2 | [x] |
 
 Orden: 4.1 → 4.2 → 4.3 → 4.4 → 4.5 → 4.6. Con 4.1 a 4.3 el módulo ya es usable.
 
@@ -130,14 +130,16 @@ Orden: 4.1 → 4.2 → 4.3 → 4.4 → 4.5 → 4.6. Con 4.1 a 4.3 el módulo ya 
 **Objetivo:** el alquiler (o un seguro, la VTV) se carga una vez y el sistema genera el vencimiento de cada período.
 
 ### Backend
-- [ ] Tipo de obligación `RENT` ("Alquiler"), con migración Flyway (la base valida los tipos).
-- [ ] `RecurringRuleRepository` y casos de uso: crear (crea también el primer vencimiento), editar (afecta a los próximos, no a los ya creados), desactivar.
-- [ ] `POST/GET/PUT /recurring-rules`, `PATCH /recurring-rules/{id}/status`.
-- [ ] Tarea diaria (Quarkus Scheduler) que crea el próximo vencimiento de cada regla activa unos días antes; día 31 → último día de los meses cortos; sin duplicados por período (`recurrence_id` + vencimiento).
-- [ ] Tests: cálculo de fechas (mensual, bimestral, anual, día 31, febrero), no duplica, regla inactiva no genera, regla ajena (404).
+- [x] Tipo de obligación `RENT` ("Alquiler"), con migración Flyway (la base valida los tipos).
+- [x] `RecurringRuleRepository` y casos de uso: crear (crea también el primer vencimiento), editar (afecta a los próximos, no a los ya creados), desactivar.
+- [x] `POST/GET/PUT /recurring-rules`, `PATCH /recurring-rules/{id}/status`.
+- [x] Tarea diaria (Quarkus Scheduler) que crea el próximo vencimiento de cada regla activa unos días antes; día 31 → último día de los meses cortos; sin duplicados por período (`recurrence_id` + vencimiento).
+- [x] Tests: cálculo de fechas (mensual, bimestral, anual, día 31, febrero), no duplica, regla inactiva no genera, regla ajena (404).
 
 ### Frontend
-- [ ] En el alta de vencimiento: "Se repite" con periodicidad y día del mes.
-- [ ] En el detalle: "Se repite cada mes" con acceso a editar o desactivar la regla.
+- [x] En el alta de vencimiento: "Se repite" con periodicidad y día del mes.
+- [x] En el detalle: "Se repite cada mes" con acceso a editar o desactivar la regla.
 
 **Listo cuando:** se carga "Alquiler depto" mensual el día 10 y, al correr la tarea, aparece el vencimiento del mes siguiente con el mismo importe; al desactivar la regla deja de generarse.
+
+**Hecho (25/11/2026):** V12 (tipo `RENT`, `recurring_rules.obligation_type`, índice único `recurrence_id` + `due_date`). `RecurringRule.following/nextObligation/advance` (día 31 → último día del mes y vuelve al 31; título «Alquiler depto · diciembre 2026»), `RecurringObligationGenerator` (crea los períodos que vencen en los próximos 20 días, se pone al día si el servidor estuvo apagado, tope de 24 por corrida, sin duplicados), `ManageRecurringRuleUseCase` (crear genera ya el primer vencimiento; el día del mes sale de la fecha elegida) y `RecurringObligationJob` (Quarkus Scheduler, todos los días a las 5 y 30 s después de arrancar). Endpoints: `GET/POST /recurring-rules`, `GET/PUT /recurring-rules/{id}`, `PATCH /recurring-rules/{id}/status`. Front: tipo "Alquiler", "Se repite" + "Cada cuánto" en el alta, panel "Se repite" en el detalle (periodicidad, próximo vencimiento, Editar repetición, Dejar de repetir / Reanudar) y `/recurring-rules/[id]/edit` (reusa `ObligationForm`). Verificado contra la base: crear → vencimiento "Alquiler depto · diciembre 2026" tipo Alquiler; editar el importe → el próximo sale con el nuevo y el ya creado no cambia; NONE 400; ajena 404. 8 tests de backend nuevos.

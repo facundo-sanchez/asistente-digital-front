@@ -10,6 +10,7 @@ export const OBLIGATION_TYPE_LABELS: Record<ObligationType, string> = {
   DOCUMENT_RENEWAL: "Renovación de documento",
   SUBSCRIPTION: "Suscripción",
   MAINTENANCE: "Mantenimiento",
+  RENT: "Alquiler",
   OTHER: "Otro",
 };
 

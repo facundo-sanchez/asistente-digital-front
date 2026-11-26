@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -35,6 +36,11 @@ export default async function ObligationsPage({ searchParams }: { searchParams: 
   ]);
   const obligations = result?.content ?? [];
   const filtered = hasActiveFilters(filters);
+  const notice = firstParam(raw.recurring) === "1"
+    ? "Listo: se repite. Ya creamos el primer vencimiento y los próximos aparecen solos."
+    : firstParam(raw.recurring) === "updated"
+      ? "Guardamos la repetición. Los próximos vencimientos salen con los datos nuevos."
+      : null;
 
   const newButton = (
     <ButtonLink href="/obligations/new" variant="contained" startIcon={<AddOutlined />}>
@@ -45,6 +51,7 @@ export default async function ObligationsPage({ searchParams }: { searchParams: 
   return (
     <Stack spacing={4} sx={{ maxWidth: 1200 }}>
       <PageHeader title="Vencimientos" description="Lo que tenés que pagar o renovar, ordenado por fecha." action={newButton} />
+      {notice && <Alert severity="success">{notice}</Alert>}
       <ObligationFilters filters={filters} services={(services?.content ?? []).map(({ id, name }) => ({ id, name }))} />
       <Panel
         title={filtered ? "Resultados" : "Por pagar"}

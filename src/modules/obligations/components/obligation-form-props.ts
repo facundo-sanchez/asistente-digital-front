@@ -1,4 +1,4 @@
-import type { ObligationResponse } from "@/types/api";
+import type { ObligationResponse, RecurringRuleResponse } from "@/types/api";
 import type { ServiceOption } from "@/modules/documents/components/service-option";
 
 export interface ObligationFormProps {
@@ -8,4 +8,6 @@ export interface ObligationFormProps {
   services: ServiceOption[];
   /** Alta desde un servicio: arranca asociada a él y al cancelar vuelve a él. */
   defaultService?: ServiceOption;
+  /** Si viene, el formulario edita esta repetición (afecta a los próximos vencimientos). */
+  rule?: RecurringRuleResponse;
 }

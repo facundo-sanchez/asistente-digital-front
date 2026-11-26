@@ -14,6 +14,7 @@ import { serverGet } from "@/lib/server/server-get";
 import { isUuid } from "@/lib/uuid";
 import { ServiceDocumentsPanel } from "@/modules/documents/components/ServiceDocumentsPanel";
 import { ObligationCancelAction } from "@/modules/obligations/components/ObligationCancelAction";
+import { RecurrencePanel } from "@/modules/obligations/components/RecurrencePanel";
 import { ObligationDetails } from "@/modules/obligations/components/ObligationDetails";
 import { PaymentsPanel } from "@/modules/payments/components/PaymentsPanel";
 import { RegisterPaymentAction } from "@/modules/payments/components/RegisterPaymentAction";
@@ -67,6 +68,7 @@ export default async function ObligationPage({ params, searchParams }: { params:
         <ObligationDetails obligation={obligation} />
       </Panel>
       <PaymentsPanel obligation={obligation} receipts={receipts} />
+      {obligation.recurrenceId && <RecurrencePanel ruleId={obligation.recurrenceId} />}
       {/* CU-005: los documentos asociados llegan por su servicio (facturas, pólizas) */}
       {obligation.serviceId && <ServiceDocumentsPanel serviceId={obligation.serviceId} />}
     </Stack>
