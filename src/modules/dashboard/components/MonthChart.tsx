@@ -17,7 +17,7 @@ const GRID = "rgba(138, 144, 142, 0.25)";
 export function MonthChart({ months }: { months: SpendingTotalResponse[] }) {
   const currency = months[0]?.currency ?? "ARS";
   return (
-    <div aria-hidden style={{ position: "relative", height: 220 }}>
+    <div aria-hidden style={{ position: "relative", height: 220, width: "100%", minWidth: 0 }}>
       <Bar
         data={{
           labels: months.map((m) => monthLabel(m.key)),

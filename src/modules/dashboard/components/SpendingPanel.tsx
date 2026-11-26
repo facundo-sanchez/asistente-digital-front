@@ -19,7 +19,7 @@ export function SpendingPanel({ spending }: { spending: DashboardSpendingRespons
   return (
     <Panel title="Lo que pagaste" description="Pagos registrados en los últimos 6 meses y en qué se fue este mes">
       <Box sx={{ display: "grid", gap: 4, gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 3fr) minmax(0, 2fr)" } }}>
-        <Stack spacing={3}>
+        <Stack spacing={3} sx={{ minWidth: 0 }}>
           {currencies.map((currency) => {
             const months = spending.months.filter((m) => m.currency === currency);
             return (
@@ -45,7 +45,7 @@ export function SpendingPanel({ spending }: { spending: DashboardSpendingRespons
             );
           })}
         </Stack>
-        <Box>
+        <Box sx={{ minWidth: 0 }}>
           <Typography sx={{ fontWeight: 600, mb: 1.5 }}>Este mes, por categoría</Typography>
           {spending.categories.length === 0 ? (
             <Typography variant="body2" color="text.secondary">
