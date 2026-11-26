@@ -4,7 +4,7 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import ArrowBackOutlined from "@mui/icons-material/ArrowBackOutlined";
-import type { CardStatementResponse, DocumentResponse } from "@/types/api";
+import type { CardStatementResponse, CardTransactionResponse, DocumentResponse } from "@/types/api";
 import { ButtonLink } from "@/components/common/ButtonLink";
 import { TextLink } from "@/components/common/TextLink";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -15,6 +15,7 @@ import { serverGet } from "@/lib/server/server-get";
 import { isUuid } from "@/lib/uuid";
 import { StatementDetails } from "@/modules/card-statements/components/StatementDetails";
 import { StatementRejectAction } from "@/modules/card-statements/components/StatementRejectAction";
+import { ExtractedTransactionsTable } from "@/modules/statement-extraction/components/ExtractedTransactionsTable";
 import { DocumentPreview } from "@/modules/documents/components/DocumentPreview";
 
 export const metadata: Metadata = { title: "Resumen de tarjeta" };
@@ -26,7 +27,10 @@ export default async function StatementPage({ params, searchParams }: { params: 
   if (!isUuid(id)) notFound();
   const statement = await serverGet<CardStatementResponse>(`/card-statements/${id}`);
   if (!statement) notFound();
-  const document = statement.documentId ? await serverGet<DocumentResponse>(`/documents/${statement.documentId}`) : null;
+  const [document, transactions] = await Promise.all([
+    statement.documentId ? serverGet<DocumentResponse>(`/documents/${statement.documentId}`) : null,
+    serverGet<CardTransactionResponse[]>(`/card-statements/${statement.id}/transactions`),
+  ]);
   const query = await searchParams;
   const notice = firstParam(query.created) === "1"
     ? "Cargamos el resumen y creamos sus vencimientos."
@@ -66,8 +70,23 @@ export default async function StatementPage({ params, searchParams }: { params: 
       <Panel title="Datos del resumen">
         <StatementDetails statement={statement} />
       </Panel>
+      {transactions && transactions.length > 0 && (
+        <Panel title="Movimientos" description={`${transactions.length} movimientos, con sus cuotas`}>
+          <ExtractedTransactionsTable
+            rows={transactions.map((t) => ({
+              date: t.transactionDate,
+              description: t.description,
+              merchant: t.merchantName,
+              installmentNumber: t.installmentNumber,
+              installmentTotal: t.installmentTotal,
+              amount: t.amount,
+              currency: t.currency,
+            }))}
+          />
+        </Panel>
+      )}
       {document && (
-        <Panel title="PDF del resumen" action={<ButtonLink href={`/documents/${document.id}`} variant="outlined">Ver documento</ButtonLink>}>
+        <Panel title="Archivo del resumen" action={<ButtonLink href={`/documents/${document.id}`} variant="outlined">Ver documento</ButtonLink>}>
           <DocumentPreview document={document} />
         </Panel>
       )}

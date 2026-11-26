@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import AddOutlined from "@mui/icons-material/AddOutlined";
+import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import type { InvoiceResponse, PageResponse, ServiceResponse } from "@/types/api";
 import { ButtonLink } from "@/components/common/ButtonLink";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -34,9 +35,14 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
   const filtered = hasActiveFilters(filters);
 
   const newButton = (
-    <ButtonLink href="/invoices/new" variant="contained" startIcon={<AddOutlined />}>
-      Cargar factura
-    </ButtonLink>
+    <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: "wrap" }}>
+      <ButtonLink href="/documents/new?type=INVOICE" variant="contained" startIcon={<AutoAwesomeOutlined />}>
+        Cargar desde archivo
+      </ButtonLink>
+      <ButtonLink href="/invoices/new" variant="outlined" startIcon={<AddOutlined />}>
+        Cargar a mano
+      </ButtonLink>
+    </Stack>
   );
 
   return (
