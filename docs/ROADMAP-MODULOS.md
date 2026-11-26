@@ -25,7 +25,7 @@
 | 9 | **IA documental** | `feature/ia-<n>-*` (5 partes, ver [MODULO-09-IA-DOCUMENTAL.md](./MODULO-09-IA-DOCUMENTAL.md)) | Cola de procesamiento, Gemini, extracción de resúmenes (Excel, PDF, imagen) y facturas, movimientos con cuotas | Subir con "Leer con IA", estado del procesamiento, pantalla de revisión y confirmación | 3, 5, 6 | [x] 5/5 partes |
 | 10 | **Gmail** (incluye BBVA) | `feature/gmail-<n>-*` (4 partes, ver [MODULO-10-GMAIL.md](./MODULO-10-GMAIL.md)) | OAuth, lectura de emails, reglas por proveedor | Conexión, "detectado en tu correo" | 6, 9 | [~] 4/4 partes, falta probar con Gmail real |
 | 11 | **Consumos e informe de tarjeta** | `feature/consumos-<n>-*` (5 partes, ver [MODULO-11-CONSUMOS.md](./MODULO-11-CONSUMOS.md)) | Vistas del informe, categorías y reglas por comercio (los movimientos con cuota n de m, cuotas pagas y monto se guardan desde el módulo 9) | Informe y cuotas; **exportar el resumen a PDF y Excel** | 6, 9 | [~] 5/5 partes, falta probar contra la base |
-| 12 | **Asistente IA** | `feature/asistente` | Herramientas sobre los módulos anteriores | Chat | todo lo anterior | [ ] |
+| 12 | **Asistente IA** | `feature/asistente-<n>-*` (4 partes, ver [MODULO-12-ASISTENTE.md](./MODULO-12-ASISTENTE.md)) | Herramientas sobre los módulos anteriores | Chat | todo lo anterior | [ ] |
 
 Módulos 0 a 8 = **MVP**. Desde el 9: automatización e IA.
 
