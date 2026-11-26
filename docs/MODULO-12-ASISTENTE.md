@@ -4,6 +4,8 @@
 > Al terminar una parte: marcar `[x]`, cambiar su estado en la tabla y anotar la fecha.
 > Visión general: [ROADMAP-MODULOS.md](./ROADMAP-MODULOS.md). Caso de uso: CU-008. SPEC técnica: 4.8 (módulo `assistant`), 6.9 (API), 9.5 (herramientas controladas). Criterio de código: simple, sin abstracciones de más.
 
+**Estado (26/11/2026):** 12.1 y 12.2 hechas en `feature/asistente-1-2` (backend y front), con tests; falta probarlas con Gemini real. Cambios: se usó el esqueleto del módulo que ya existía (la respuesta trae `metadata.references` y `metadata.tools`); las sugerencias de la conversación vacía y el título con la primera pregunta se adelantaron de 12.3; `monthTotal(month)` quedó como `monthSummary()` (el mes actual) y `serviceSpending` como `servicePayments()`.
+
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
 ## Objetivo
@@ -33,8 +35,8 @@ Preguntarle a la app en lenguaje natural por tus datos: "¿Qué vence esta seman
 
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 12.1 | Conversaciones y chat básico (sin datos) | `feature/asistente-1-2` (junto con 12.2) | — | [ ] |
-| 12.2 | Herramientas: responde con tus datos y con links | `feature/asistente-1-2` | 12.1 | [ ] |
+| 12.1 | Conversaciones y chat básico (sin datos) | `feature/asistente-1-2` (junto con 12.2) | — | [~] |
+| 12.2 | Herramientas: responde con tus datos y con links | `feature/asistente-1-2` | 12.1 | [~] |
 | 12.3 | Respuesta progresiva (SSE), título automático y sugerencias | `feature/asistente-3-4` (junto con 12.4) | 12.2 | [ ] |
 | 12.4 | Límites y cuidado: cuota por hora, errores del modelo, auditoría | `feature/asistente-3-4` | 12.2 | [ ] |
 
@@ -43,16 +45,16 @@ Preguntarle a la app en lenguaje natural por tus datos: "¿Qué vence esta seman
 ## Parte 12.1 – Conversaciones y chat básico
 
 ### Backend
-- [ ] Módulo `assistant` (puerto `AssistantModel` con adaptador Gemini, repositorios de conversación y mensaje).
-- [ ] `GET/POST /assistant/conversations`, `GET /assistant/conversations/{id}` (con mensajes), `DELETE /assistant/conversations/{id}` (borrado lógico).
-- [ ] `POST /assistant/conversations/{id}/messages` (`content`, hasta 2000 caracteres): guarda la pregunta, llama al modelo con el historial y guarda la respuesta.
-- [ ] Mensaje de sistema: quién es, que responde en castellano rioplatense, que no inventa datos, la fecha de hoy y la zona horaria del usuario.
-- [ ] Tests: aislamiento entre usuarios, borrado lógico, historial de 20 mensajes (con un modelo falso).
+- [x] Módulo `assistant` (puerto `AssistantModel` con adaptador Gemini, repositorios de conversación y mensaje).
+- [x] `GET/POST /assistant/conversations`, `GET /assistant/conversations/{id}` (con mensajes), `DELETE /assistant/conversations/{id}` (borrado lógico).
+- [x] `POST /assistant/conversations/{id}/messages` (`content`, hasta 2000 caracteres): guarda la pregunta, llama al modelo con el historial y guarda la respuesta.
+- [x] Mensaje de sistema: quién es, que responde en castellano rioplatense, que no inventa datos, la fecha de hoy y la zona horaria del usuario.
+- [x] Tests: aislamiento entre usuarios, borrado lógico, historial de 20 mensajes (con un modelo falso).
 
 ### Frontend
-- [ ] `/assistant`: lista de conversaciones a la izquierda (nueva, borrar) y el chat a la derecha; en el celular, una cosa por vez.
-- [ ] Chat: mensajes, caja de texto (Enter envía, Shift+Enter salto de línea), "Pensando…" mientras responde.
-- [ ] Ítem "Asistente" en el menú.
+- [x] `/assistant`: lista de conversaciones a la izquierda (nueva, borrar) y el chat a la derecha; en el celular, una cosa por vez.
+- [x] Chat: mensajes, caja de texto (Enter envía, Shift+Enter salto de línea), "Pensando…" mientras responde.
+- [x] Ítem "Asistente" en el menú.
 
 **Listo cuando:** creo una conversación, pregunto algo, veo la respuesta y al volver sigue ahí.
 
@@ -76,13 +78,13 @@ Herramientas de solo lectura; cada una llama al caso de uso existente con el usu
 | `expiringDocuments(days)` | Documentos por vencer (seguro, garantía) | documentos |
 | `searchDocuments(text)` | Buscar un documento por nombre | documentos |
 
-- [ ] Cada resultado trae `type` + `id` de los registros. La respuesta guarda las referencias usadas en `metadata.references`.
-- [ ] Respuestas cortas: como máximo 20 registros por herramienta; si hay más, dice cuántos faltan.
-- [ ] Tests: cada herramienta usa el usuario del token (no hay parámetro de usuario), y las referencias quedan guardadas.
+- [x] Cada resultado trae `type` + `id` de los registros. La respuesta guarda las referencias usadas en `metadata.references`.
+- [x] Respuestas cortas: como máximo 20 registros por herramienta; si hay más, dice cuántos faltan.
+- [x] Tests: cada herramienta usa el usuario del token (no hay parámetro de usuario), y las referencias quedan guardadas.
 
 ### Frontend
-- [ ] Debajo de la respuesta, las referencias como chips con link (factura, vencimiento, servicio, documento, resumen).
-- [ ] Montos y fechas en el formato del usuario (lo pide el mensaje de sistema).
+- [x] Debajo de la respuesta, las referencias como chips con link (factura, vencimiento, servicio, documento, resumen).
+- [x] Montos y fechas en el formato del usuario (lo pide el mensaje de sistema).
 
 **Listo cuando:** "¿Qué facturas no pagué?" responde con mis facturas reales, y cada una lleva a su detalle.
 

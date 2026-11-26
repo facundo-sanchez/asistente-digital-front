@@ -4,6 +4,16 @@ import type { ISODateTime, JsonObject, UUID } from "./common";
 export const MESSAGE_ROLES = ["USER", "ASSISTANT", "TOOL", "SYSTEM"] as const;
 export type MessageRole = (typeof MESSAGE_ROLES)[number];
 
+export const REFERENCE_TYPES = ["OBLIGATION", "INVOICE", "SERVICE", "DOCUMENT"] as const;
+export type ReferenceType = (typeof REFERENCE_TYPES)[number];
+
+/** Un registro que usó la respuesta (metadata.references de un mensaje del asistente). */
+export interface AssistantReference {
+  type: ReferenceType;
+  id: UUID;
+  label: string;
+}
+
 /** GET /assistant/conversations */
 export interface ConversationResponse {
   id: UUID;
@@ -25,7 +35,7 @@ export interface MessageResponse {
   id: UUID;
   role: MessageRole;
   content: string;
-  /** Referencias a registros y herramientas usadas. */
+  /** references: registros usados (AssistantReference[]); tools: herramientas llamadas. */
   metadata: JsonObject;
   createdAt: ISODateTime;
 }
@@ -37,6 +47,6 @@ export interface CreateConversationRequest {
 
 /** POST /assistant/conversations/{id}/messages */
 export interface SendMessageRequest {
-  /** Máximo 4000 caracteres. */
+  /** Hasta 4000 caracteres. */
   content: string;
 }
