@@ -4,6 +4,7 @@ import type {
   ChangePasswordRequest,
   ForgotPasswordRequest,
   LoginRequest,
+  PaymentWalletRequest,
   RegisterRequest,
   ResetPasswordRequest,
   SessionUserResponse,
@@ -27,4 +28,5 @@ export const authApi = {
 export const userApi = {
   me: () => api.get<UserResponse>("users/me"),
   updateProfile: (body: UpdateProfileRequest) => api.put<UserResponse>("users/me", body),
+  setPaymentWallet: (body: PaymentWalletRequest) => api.put<UserResponse>("users/me/payment-wallet", body),
 };

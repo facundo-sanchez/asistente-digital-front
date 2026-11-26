@@ -23,6 +23,8 @@ export interface ServiceResponse {
   endDate: ISODate | null;
   active: boolean;
   notes: string | null;
+  /** Página donde se pagan sus facturas (https). */
+  paymentUrl: string | null;
   metadata: JsonObject;
   createdAt: ISODateTime;
   updatedAt: ISODateTime;
@@ -38,6 +40,7 @@ export interface ServiceRequest {
   startDate?: ISODate | null;
   endDate?: ISODate | null;
   notes?: string | null;
+  paymentUrl?: string | null;
   metadata?: JsonObject | null;
 }
 

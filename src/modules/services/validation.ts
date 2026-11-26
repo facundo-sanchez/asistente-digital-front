@@ -21,6 +21,12 @@ export const serviceSchema = yup.object({
       return !endDate || !startDate || endDate >= startDate;
     }),
   notes: yup.string().trim().max(2000, "Hasta 2000 caracteres").default(""),
+  paymentUrl: yup
+    .string()
+    .trim()
+    .max(500, "Hasta 500 caracteres")
+    .matches(/^(https:\/\/\S+)?$/, "Ingresá un link que empiece con https://")
+    .default(""),
 });
 
 export type ServiceFormValues = yup.InferType<typeof serviceSchema>;

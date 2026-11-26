@@ -30,6 +30,7 @@ const EMPTY: DefaultValues<ServiceFormValues> = {
   startDate: "",
   endDate: "",
   notes: "",
+  paymentUrl: "",
 };
 
 /** Del formulario al contrato del backend: los textos vacíos viajan como null. */
@@ -43,6 +44,7 @@ function toRequest(values: ServiceFormValues): ServiceRequest {
     startDate: values.startDate || null,
     endDate: values.endDate || null,
     notes: values.notes || null,
+    paymentUrl: values.paymentUrl || null,
   };
 }
 
@@ -66,6 +68,7 @@ function toFormValues(service: ServiceResponse): DefaultValues<ServiceFormValues
     startDate: service.startDate ?? "",
     endDate: service.endDate ?? "",
     notes: service.notes ?? "",
+    paymentUrl: service.paymentUrl ?? "",
   };
 }
 
@@ -186,6 +189,14 @@ export function ServiceForm({ service, preset, next }: ServiceFormProps) {
             slotProps={{ inputLabel: { shrink: true } }}
           />
         </Box>
+
+        <FormTextField<ServiceFormValues>
+          name="paymentUrl"
+          control={control}
+          label="Link de pago (opcional)"
+          helperText="La página donde pagás sus facturas. La factura va a tener un botón que te lleva ahí."
+          slotProps={{ htmlInput: { inputMode: "url", autoComplete: "off" } }}
+        />
 
         <FormTextField<ServiceFormValues> name="notes" control={control} label="Notas (opcional)" multiline minRows={3} />
 
