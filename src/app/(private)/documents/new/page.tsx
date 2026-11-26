@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Stack from "@mui/material/Stack";
-import type { ServiceResponse } from "@/types/api";
+import type { AiAvailabilityResponse, ServiceResponse } from "@/types/api";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Panel } from "@/components/layout/Panel";
 import { firstParam, type SearchParams } from "@/lib/search-params";
@@ -14,13 +14,16 @@ export const metadata: Metadata = { title: "Subir documento" };
 export default async function NewDocumentPage({ searchParams }: { searchParams: SearchParams }) {
   const serviceId = firstParam((await searchParams).serviceId);
   // Un id inválido o de otro usuario se ignora: se sube sin servicio
-  const service = serviceId && isUuid(serviceId) ? await serverGet<ServiceResponse>(`/services/${serviceId}`) : null;
+  const [service, ai] = await Promise.all([
+    serviceId && isUuid(serviceId) ? serverGet<ServiceResponse>(`/services/${serviceId}`) : null,
+    serverGet<AiAvailabilityResponse>("/documents/ai"),
+  ]);
 
   return (
     <Stack spacing={4} sx={{ maxWidth: 720 }}>
       <PageHeader title="Subir documento" description="Facturas, comprobantes, pólizas y otros papeles importantes." />
       <Panel title="Archivo">
-        <DocumentUploadForm service={service ? { id: service.id, name: service.name } : undefined} />
+        <DocumentUploadForm service={service ? { id: service.id, name: service.name } : undefined} aiTypes={ai?.available ? ai.documentTypes : []} />
       </Panel>
     </Stack>
   );

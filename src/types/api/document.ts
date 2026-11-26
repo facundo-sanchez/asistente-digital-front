@@ -77,9 +77,17 @@ export interface ProcessingJobResponse {
   attempts: number;
   maxAttempts: number;
   errorCode: string | null;
+  /** Próximo reintento automático, si falló y quedan intentos. */
+  nextRetryAt: ISODateTime | null;
   startedAt: ISODateTime | null;
   createdAt: ISODateTime;
   completedAt: ISODateTime | null;
+}
+
+/** GET /documents/ai: si se puede pedir la lectura con IA y para qué tipos. */
+export interface AiAvailabilityResponse {
+  available: boolean;
+  documentTypes: DocumentType[];
 }
 
 /** Propuesta de la IA para revisar antes de confirmar. */

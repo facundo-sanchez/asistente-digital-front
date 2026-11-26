@@ -6,6 +6,7 @@ import { TextLink } from "@/components/common/TextLink";
 import { formatDay } from "@/lib/dates";
 import { DOCUMENT_TYPE_LABELS } from "@/lib/document-types";
 import { formatFileSize } from "../upload-rules";
+import { ProcessingStatusLabel } from "./ProcessingStatusLabel";
 
 /**
  * Documentos como libro de cuentas: documento (título y archivo), tipo, servicio,
@@ -45,6 +46,11 @@ export function DocumentsTable({ documents }: { documents: DocumentResponse[] })
                   <Typography variant="body2" color="text.secondary" sx={{ overflowWrap: "anywhere" }}>
                     {document.originalFilename}
                   </Typography>
+                )}
+                {document.processingStatus !== "NOT_REQUIRED" && (
+                  <Box sx={{ mt: 0.5 }}>
+                    <ProcessingStatusLabel status={document.processingStatus} />
+                  </Box>
                 )}
               </Box>
               <Box component="td" sx={{ ...ledgerCell, ...desktopOnly }}>

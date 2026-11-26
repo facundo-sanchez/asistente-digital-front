@@ -6,7 +6,7 @@
 
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
-**Estado:** en desarrollo (9.1 hecha). Se adelanta al módulo 7 porque es lo que más trabajo le ahorra al usuario.
+**Estado:** en desarrollo (9.1 y 9.2 hechas). Se adelanta al módulo 7 porque es lo que más trabajo le ahorra al usuario.
 
 ## Objetivo
 
@@ -29,7 +29,7 @@ El usuario adjunta un archivo —**Excel, PDF o foto**— del resumen de su tarj
 | Controles automáticos | Suma de movimientos = total del resumen (por tarjeta y moneda); cuota n ≤ m; tarjeta asociada por últimos 4 (de tarjeta o de cuenta); vencimiento ≥ cierre; RN-016 (resumen repetido). Lo que no cuadra se marca en la revisión | No confiar ciegamente en la IA (CU-016 paso 7) |
 | Datos que el archivo no trae | Se piden en la revisión (ej. el Excel de BBVA no informa cierre ni vencimiento) | El usuario completa solo lo que falta |
 | Procesamiento en segundo plano | Al subir, se crea un trabajo en `document_processing_jobs`; una tarea programada lo procesa con reintentos (hasta 5, con espera creciente) y recupera los abandonados (`locked_until`). El documento muestra "Procesando…", "Listo para revisar" o "No pudimos leerlo" | La IA puede tardar o fallar; la subida no espera ni se pierde |
-| Privacidad (RN-007, RN-010) | Se envía a Gemini **solo con el consentimiento del usuario** (opción "Leer el archivo con IA" al subir, recordada en el perfil). No se registra el contenido en los logs: `log-requests` y `log-responses` en `false` fuera de desarrollo. Los errores guardan código, no contenido | El archivo tiene datos personales y financieros |
+| Privacidad (RN-007, RN-010) | Se envía a Gemini **solo con el consentimiento del usuario**: marcar "Leer el archivo con IA" al subir (o el botón "Leer con IA" del documento) es el consentimiento para ese archivo; la preferencia se recuerda en el navegador. No se registra el contenido en los logs: `log-requests` y `log-responses` en `false` fuera de desarrollo. Los errores guardan código, no contenido | El archivo tiene datos personales y financieros |
 | Costo y límites | Máximo 10 MB (el de documentos); Excel convertido a texto (pocos tokens); un trabajo por documento; un tope diario de procesamientos por usuario configurable | Evitar costos inesperados |
 | Movimientos y cuotas | Al confirmar un resumen se guardan sus movimientos en `card_transactions` con cuota n de m, cuotas pagas (= n), restantes (m − n) e importe; las cuotas de una misma compra se vinculan entre resúmenes (RN-020) | Base del informe y de las cuotas pendientes (módulo 11) |
 | Categorías de consumo | La IA propone una categoría por movimiento; corregirla y las reglas por comercio (RN-019) quedan para el módulo 11 | Mantener este módulo acotado |
@@ -40,7 +40,7 @@ El usuario adjunta un archivo —**Excel, PDF o foto**— del resumen de su tarj
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
 | 9.1 | Conexión con Gemini y lectura de archivos (Excel a texto, PDF e imagen) | `feature/ia-1-lectura` | — | [x] |
-| 9.2 | Cola de procesamiento: subir con "Leer con IA", estado en el documento, reintentos | `feature/ia-2-cola` | 9.1 | [ ] |
+| 9.2 | Cola de procesamiento: subir con "Leer con IA", estado en el documento, reintentos | `feature/ia-2-cola` | 9.1 | [x] |
 | 9.3 | Extracción de resúmenes de tarjeta (totales, tarjetas, movimientos y cuotas) con controles | `feature/ia-3-resumen` | 9.2 | [ ] |
 | 9.4 | Pantalla de revisión y confirmación del resumen (crea resumen, vencimientos y movimientos) | `feature/ia-4-revision-resumen` | 9.3 | [ ] |
 | 9.5 | Facturas desde un archivo (extracción, servicio sugerido, revisión y confirmación) | `feature/ia-5-facturas` | 9.2 | [ ] |
@@ -70,17 +70,19 @@ Orden recomendado: 9.1 → 9.2 → 9.3 → 9.4 → 9.5. Con 9.1 a 9.4 se cargan 
 ## Parte 9.2 – Cola de procesamiento
 
 ### Backend
-- [ ] Al subir un documento con "Leer con IA": `processing_status = PENDING` y un trabajo en `document_processing_jobs`.
-- [ ] Tarea programada: toma trabajos pendientes (bloqueándolos con `locked_until`), procesa, reintenta con espera creciente hasta `max_attempts`, marca `DEAD` y recupera los abandonados.
-- [ ] `GET /documents/{id}/processing` (estado y error legible) y `POST /documents/{id}/process` (reintentar a pedido).
-- [ ] Tope diario por usuario; consentimiento guardado en el perfil.
-- [ ] Tests: reintento, máximo de intentos, recuperación de abandonados, tope.
+- [x] Al subir un documento con "Leer con IA": `processing_status = PENDING` y un trabajo en `document_processing_jobs`.
+- [x] Tarea programada: toma trabajos pendientes (bloqueándolos con `locked_until`), procesa, reintenta con espera creciente hasta `max_attempts`, marca `DEAD` y recupera los abandonados.
+- [x] `GET /documents/{id}/processing` (estado y error legible) y `POST /documents/{id}/process` (reintentar a pedido).
+- [x] Tope diario por usuario (`app.ai.daily-limit`, 50 por defecto). El consentimiento es el pedido de lectura (no hace falta guardarlo en el perfil).
+- [x] Tests: reintento, máximo de intentos, recuperación de abandonados, tope.
 
 ### Frontend
-- [ ] En la subida (Documentos, factura y resumen): opción "Leer el archivo con IA" con aviso de privacidad.
-- [ ] Estado en el documento y en las listas: Procesando… / Listo para revisar / No pudimos leerlo (con Reintentar).
+- [x] En la subida (Documentos, factura y resumen): opción "Leer el archivo con IA" con aviso de privacidad.
+- [x] Estado en el documento y en las listas: Procesando… / Listo para revisar / No pudimos leerlo (con Reintentar).
 
 **Listo cuando:** se sube un archivo, aparece "Procesando…" y luego "Listo para revisar"; si Gemini falla, reintenta solo.
+
+**Hecho (26/11/2026):** ciclo de vida en `DocumentProcessingJob` (`start`, `succeed`, `fail` con reintentos a 1, 2, 4, 8 min y `DEAD`; estado del documento), `ProcessingJobRepository` (toma el próximo listo con `SELECT … FOR UPDATE SKIP LOCKED`; recupera los abandonados al vencer el bloqueo), `DocumentProcessingUseCase` (disponibilidad, controles, pedido idempotente), `ProcessingJobRunner` (transacciones cortas; la IA corre fuera) y `ProcessingWorker` (cada 20 s, hasta 5 por corrida). Puerto `DocumentProcessor`: un procesador por tipo de documento, llegan en 9.3 (resúmenes) y 9.5 (facturas); hasta entonces la IA figura como no disponible. Endpoints: `GET /documents/ai`, `GET /documents/{id}/processing`, `POST /documents/{id}/process`; `POST /documents` acepta `process=true` y controla antes de guardar el archivo. Front: casilla "Leer el archivo con IA" (recordada con `useStoredFlag`), estado en la tabla y panel "Lectura con IA" en el detalle (se refresca solo mientras lee; Reintentar). Verificado: tests OK (cola con procesador falso: éxito, reintento, error definitivo, abandonados, tope) y API contra la base. El recorrido completo en pantalla se ve desde la 9.3.
 
 ---
 

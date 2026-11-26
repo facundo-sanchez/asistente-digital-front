@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import LinearProgress from "@mui/material/LinearProgress";
 import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
@@ -13,6 +15,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import UploadFileOutlined from "@mui/icons-material/UploadFileOutlined";
 import { DOCUMENT_TYPES, type DocumentType } from "@/types/api";
+import { useStoredFlag } from "@/hooks/use-stored-flag";
 import { ApiError } from "@/lib/api/api-error";
 import { DOCUMENT_TYPE_LABELS } from "@/lib/document-types";
 import { documentsApi } from "../api";
@@ -20,7 +23,7 @@ import type { DocumentUploadFormProps } from "./document-upload-form-props";
 import { ACCEPTED_LABEL, ACCEPT_ATTRIBUTE, formatFileSize, validateFile } from "../upload-rules";
 
 /** Subir un documento: elegir o arrastrar el archivo, tipo y título opcional. */
-export function DocumentUploadForm({ service }: DocumentUploadFormProps) {
+export function DocumentUploadForm({ service, aiTypes }: DocumentUploadFormProps) {
   const router = useRouter();
   const backHref = service ? `/services/${service.id}` : "/documents";
   const [file, setFile] = useState<File | null>(null);
@@ -29,6 +32,9 @@ export function DocumentUploadForm({ service }: DocumentUploadFormProps) {
   const [dragging, setDragging] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Se recuerda en este navegador; por defecto, sí
+  const [readWithAi, setReadWithAi] = useStoredFlag("adv:read-with-ai", true);
+  const aiOffered = aiTypes.includes(documentType);
 
   const pick = (picked: File | undefined) => {
     if (!picked) return;
@@ -52,8 +58,10 @@ export function DocumentUploadForm({ service }: DocumentUploadFormProps) {
     setError(null);
     setProgress(0);
     try {
-      await documentsApi.upload(file, documentType, title, service?.id ?? null, setProgress);
-      router.push(`${backHref}?uploaded=1`);
+      const process = aiOffered && readWithAi;
+      const uploaded = await documentsApi.upload(file, documentType, title, service?.id ?? null, setProgress, process);
+      // Con lectura con IA, al detalle: ahí se ve cómo avanza
+      router.push(process ? `/documents/${uploaded.id}` : `${backHref}?uploaded=1`);
       router.refresh();
     } catch (e) {
       setProgress(null);
@@ -139,6 +147,18 @@ export function DocumentUploadForm({ service }: DocumentUploadFormProps) {
             disabled={uploading}
           />
         </Box>
+
+        {aiOffered && (
+          <Box>
+            <FormControlLabel
+              control={<Checkbox checked={readWithAi} onChange={(e) => setReadWithAi(e.target.checked)} disabled={uploading} />}
+              label="Leer el archivo con IA y cargar los datos"
+            />
+            <Typography variant="body2" color="text.secondary" sx={{ ml: 4, maxWidth: "60ch" }}>
+              Se envía a Google Gemini solo para leerlo. Antes de guardar nada vas a poder revisar los datos.
+            </Typography>
+          </Box>
+        )}
 
         {uploading && (
           <Box>
