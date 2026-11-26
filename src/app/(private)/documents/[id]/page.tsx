@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import ArrowBackOutlined from "@mui/icons-material/ArrowBackOutlined";
 import DownloadOutlined from "@mui/icons-material/DownloadOutlined";
-import type { AiAvailabilityResponse, DocumentResponse, ProcessingJobResponse } from "@/types/api";
+import type { LatestExtractionResponse, AiAvailabilityResponse, DocumentResponse, ProcessingJobResponse } from "@/types/api";
 import { ButtonLink } from "@/components/common/ButtonLink";
 import { TextLink } from "@/components/common/TextLink";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -22,6 +22,12 @@ import { documentFileUrl } from "@/modules/documents/file-url";
 
 export const metadata: Metadata = { title: "Documento" };
 
+/** La revisión según lo que leyó la IA: factura o resumen de tarjeta. */
+function reviewHref(extraction: LatestExtractionResponse | null): string | null {
+  if (!extraction) return null;
+  return extraction.schemaVersion.startsWith("invoice/") ? `/invoice-extractions/${extraction.id}` : `/extractions/${extraction.id}`;
+}
+
 export default async function DocumentPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {
   const { id } = await params;
   if (!isUuid(id)) notFound();
@@ -33,7 +39,7 @@ export default async function DocumentPage({ params, searchParams }: { params: P
     document.processingStatus === "NOT_REQUIRED" ? null : serverGet<ProcessingJobResponse>(`/documents/${id}/processing`),
     serverGet<AiAvailabilityResponse>("/documents/ai"),
     document.processingStatus === "REQUIRES_REVIEW" || document.processingStatus === "COMPLETED"
-      ? serverGet<{ id: string }>(`/extractions?documentId=${id}`)
+      ? serverGet<LatestExtractionResponse>(`/extractions?documentId=${id}`)
       : null,
   ]);
   const canProcess = !!ai?.available && ai.documentTypes.includes(document.documentType);
@@ -67,7 +73,7 @@ export default async function DocumentPage({ params, searchParams }: { params: P
       {updated && <Alert severity="success">Guardamos los cambios.</Alert>}
       {showProcessing && (
         <Panel title="Lectura con IA">
-          <DocumentProcessing document={document} job={job} canProcess={canProcess} extractionId={extraction?.id ?? null} />
+          <DocumentProcessing document={document} job={job} canProcess={canProcess} reviewHref={reviewHref(extraction)} />
         </Panel>
       )}
       <Panel title="Vista previa">

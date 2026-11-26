@@ -6,7 +6,7 @@
 
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
-**Estado:** en desarrollo (9.1 a 9.4 hechas: los resúmenes ya se cargan solos). Se adelanta al módulo 7 porque es lo que más trabajo le ahorra al usuario.
+**Estado:** completo (9.1 a 9.5): resúmenes y facturas se cargan desde Excel, PDF o foto. Se adelanta al módulo 7 porque es lo que más trabajo le ahorra al usuario.
 
 ## Objetivo
 
@@ -43,7 +43,7 @@ El usuario adjunta un archivo —**Excel, PDF o foto**— del resumen de su tarj
 | 9.2 | Cola de procesamiento: subir con "Leer con IA", estado en el documento, reintentos | `feature/ia-2-cola` | 9.1 | [x] |
 | 9.3 | Extracción de resúmenes de tarjeta (totales, tarjetas, movimientos y cuotas) con controles | `feature/ia-3-4-resumen` (junto con 9.4) | 9.2 | [x] |
 | 9.4 | Pantalla de revisión y confirmación del resumen (crea resumen, vencimientos y movimientos) | `feature/ia-3-4-resumen` | 9.3 | [x] |
-| 9.5 | Facturas desde un archivo (extracción, servicio sugerido, revisión y confirmación) | `feature/ia-5-facturas` | 9.2 | [ ] |
+| 9.5 | Facturas desde un archivo (extracción, servicio sugerido, revisión y confirmación) | `feature/ia-5-facturas` | 9.2 | [x] |
 
 Orden recomendado: 9.1 → 9.2 → 9.3 → 9.4 → 9.5. Con 9.1 a 9.4 se cargan resúmenes solos.
 
@@ -120,14 +120,16 @@ Orden recomendado: 9.1 → 9.2 → 9.3 → 9.4 → 9.5. Con 9.1 a 9.4 se cargan 
 ## Parte 9.5 – Facturas desde un archivo
 
 ### Backend
-- [ ] Esquema `invoice/1`: proveedor, número, período, emisión, vencimiento, importe, moneda, código de pago, número de socio.
-- [ ] Servicio sugerido por proveedor y número de socio (CU-004 paso 5); posibles repetidas (RN-005).
-- [ ] Confirmar crea la factura (`source = AI_EXTRACTION`) y su vencimiento (módulo 5).
+- [x] Esquema `invoice/1`: proveedor, número, período, emisión, vencimiento, importe, moneda, código de pago, número de socio.
+- [x] Servicio sugerido por proveedor y número de socio (CU-004 paso 5); posibles repetidas (RN-005).
+- [x] Confirmar crea la factura (`source = AI_EXTRACTION`) y su vencimiento (módulo 5).
 
 ### Frontend
-- [ ] "Cargar factura desde un archivo" y la misma pantalla de revisión adaptada a facturas.
+- [x] "Cargar factura desde un archivo" y la misma pantalla de revisión adaptada a facturas.
 
 **Listo cuando:** se sube el PDF de una factura de luz y, tras revisar, queda la factura con su vencimiento.
+
+**Hecho (26/11/2026):** `InvoiceProcessor` + `InvoicePrompt` (primer vencimiento y su importe), `InvoiceExtractionUseCase` (servicio sugerido por número de socio normalizado o, si no, por el nombre del proveedor; avisos de datos faltantes y posible repetida; confirmar reusa la carga manual con `source = AI_EXTRACTION`). Se extrajo lo común a los dos procesadores (`AiInputs`: archivo para la IA y validación del JSON) y a las dos revisiones (`ExtractionReviews`: buscar, exigir pendiente, cerrar). `GET /extractions?documentId=` devuelve también el esquema para ir a la revisión correcta. Front: `/invoice-extractions/[id]` (misma validación que la carga manual y aviso de repetidas) y "Cargar desde archivo" en Facturas. Verificado de punta a punta con Gemini real: datos correctos, servicio sugerido aunque el número de cliente venía con guiones, factura y vencimiento creados.
 
 ---
 

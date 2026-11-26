@@ -23,7 +23,7 @@ const POLL_MS = 4000;
  * Estado de la lectura con IA de un documento: mientras espera o se lee, la página se refresca
  * sola; si falló, se puede reintentar; si nunca se pidió, se puede pedir.
  */
-export function DocumentProcessing({ document, job, canProcess, extractionId }: DocumentProcessingProps) {
+export function DocumentProcessing({ document, job, canProcess, reviewHref }: DocumentProcessingProps) {
   const router = useRouter();
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,18 +84,18 @@ export function DocumentProcessing({ document, job, canProcess, extractionId }: 
           )}
         </>
       )}
-      {status === "REQUIRES_REVIEW" && extractionId && (
+      {status === "REQUIRES_REVIEW" && reviewHref && (
         <>
           <Typography variant="body2" color="text.secondary">
             {job?.completedAt ? `Leído el ${formatDay(job.completedAt)}. ` : ""}Revisá los datos: nada se guarda hasta que confirmes.
           </Typography>
-          <ButtonLink href={`/extractions/${extractionId}`} variant="contained">
+          <ButtonLink href={reviewHref} variant="contained">
             Revisar y confirmar
           </ButtonLink>
         </>
       )}
-      {status === "COMPLETED" && extractionId && (
-        <TextLink href={`/extractions/${extractionId}`}>Ver lo que leyó la IA</TextLink>
+      {status === "COMPLETED" && reviewHref && (
+        <TextLink href={reviewHref}>Ver lo que leyó la IA</TextLink>
       )}
       {error && <Alert severity="error">{error}</Alert>}
     </Stack>
