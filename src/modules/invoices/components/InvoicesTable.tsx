@@ -15,7 +15,7 @@ const EMPTY = (
 
 /**
  * Facturas como libro de cuentas: servicio (con número y período), vencimiento, importe y
- * el estado de su vencimiento. El servicio lleva al vencimiento, donde se paga.
+ * el estado de su vencimiento. El servicio lleva al detalle de la factura.
  */
 export function InvoicesTable({ invoices }: { invoices: InvoiceResponse[] }) {
   return (
@@ -43,13 +43,9 @@ export function InvoicesTable({ invoices }: { invoices: InvoiceResponse[] }) {
             return (
               <Box component="tr" key={invoice.id}>
                 <Box component="td" sx={ledgerCell}>
-                  {invoice.obligationId ? (
-                    <TextLink href={`/obligations/${invoice.obligationId}`} sx={{ fontWeight: 600, color: "text.primary" }}>
-                      {invoice.serviceName}
-                    </TextLink>
-                  ) : (
-                    <Typography sx={{ fontWeight: 600 }}>{invoice.serviceName}</Typography>
-                  )}
+                  <TextLink href={`/invoices/${invoice.id}`} sx={{ fontWeight: 600, color: "text.primary" }}>
+                    {invoice.serviceName}
+                  </TextLink>
                   <Typography variant="body2" color="text.secondary" className="tabular-nums">
                     {detail || "Sin número"}
                   </Typography>

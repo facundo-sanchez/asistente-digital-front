@@ -39,34 +39,50 @@ function toRequest(values: InvoiceFormValues): InvoiceRequest {
  * Cargar una factura a mano (CU-002). Al guardar queda confirmada, genera su vencimiento
  * y lleva a él, listo para pagar.
  */
-export function InvoiceForm({ services, defaultService }: InvoiceFormProps) {
+export function InvoiceForm({ invoice, services, defaultService }: InvoiceFormProps) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const { control, handleSubmit, setError, formState } = useForm<InvoiceFormValues>({
     resolver: yupResolver(invoiceSchema),
-    defaultValues: {
-      // Sin servicio elegido el campo arranca vacío (DefaultValues admite undefined, no null)
-      service: defaultService,
-      invoiceNumber: "",
-      billingPeriod: "",
-      issueDate: "",
-      dueDate: "",
-      totalAmount: "",
-      currency: "ARS",
-      paymentCode: "",
-    },
+    defaultValues: invoice
+      ? {
+          service: services.find((s) => s.id === invoice.serviceId) ?? { id: invoice.serviceId, name: invoice.serviceName ?? "" },
+          invoiceNumber: invoice.invoiceNumber ?? "",
+          billingPeriod: invoice.billingPeriod ?? "",
+          issueDate: invoice.issueDate ?? "",
+          dueDate: invoice.dueDate,
+          totalAmount: String(invoice.totalAmount).replace(".", ","),
+          currency: invoice.currency as InvoiceFormValues["currency"],
+          paymentCode: invoice.paymentCode ?? "",
+        }
+      : {
+          // Sin servicio elegido el campo arranca vacío (DefaultValues admite undefined, no null)
+          service: defaultService,
+          invoiceNumber: "",
+          billingPeriod: "",
+          issueDate: "",
+          dueDate: "",
+          totalAmount: "",
+          currency: "ARS",
+          paymentCode: "",
+        },
   });
   const [watchedService, watchedNumber, watchedPeriod, watchedAmount] = useWatch({
     control,
     name: ["service", "invoiceNumber", "billingPeriod", "totalAmount"],
   });
-  const cancelHref = defaultService ? `/services/${defaultService.id}` : "/invoices";
+  const cancelHref = invoice ? `/invoices/${invoice.id}` : defaultService ? `/services/${defaultService.id}` : "/invoices";
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
     try {
-      const created = await invoicesApi.create(toRequest(values));
-      router.push(created.obligationId ? `/obligations/${created.obligationId}?invoice=1` : "/invoices");
+      if (invoice) {
+        await invoicesApi.update(invoice.id, toRequest(values));
+        router.push(`/invoices/${invoice.id}?updated=1`);
+      } else {
+        const created = await invoicesApi.create(toRequest(values));
+        router.push(created.obligationId ? `/obligations/${created.obligationId}?invoice=1` : "/invoices");
+      }
       router.refresh();
     } catch (e) {
       setFormError(applyApiErrors(e, setError, { serviceId: "service" }));
@@ -129,6 +145,7 @@ export function InvoiceForm({ services, defaultService }: InvoiceFormProps) {
           invoiceNumber={watchedNumber ?? ""}
           billingPeriod={watchedPeriod ?? ""}
           totalAmount={watchedAmount ?? ""}
+          excludeId={invoice?.id}
         />
 
         <FormTextField<InvoiceFormValues>
@@ -141,7 +158,7 @@ export function InvoiceForm({ services, defaultService }: InvoiceFormProps) {
 
         <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
           <Button type="submit" variant="contained" size="large" loading={formState.isSubmitting}>
-            Guardar factura
+            {invoice ? "Guardar cambios" : "Guardar factura"}
           </Button>
           <Button component={NextLink} href={cancelHref} size="large" color="inherit">
             Cancelar
