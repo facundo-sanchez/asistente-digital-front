@@ -34,8 +34,8 @@ Que el usuario no tenga que entrar a mirar: la app le avisa lo que vence, lo que
 |---|---|---|---|---|
 | 8.1 | Generación de avisos en la app + `GET /notifications`, marcar leída y todas leídas | `feature/notificaciones-1-2` (junto con 8.2) | — | [~] |
 | 8.2 | Campana en la barra con las no leídas y pantalla de avisos | `feature/notificaciones-1-2` | 8.1 | [~] |
-| 8.3 | Preferencias: qué avisos, cuántos días antes y por qué canal | `feature/notificaciones-3-4` (junto con 8.4) | 8.1 | [ ] |
-| 8.4 | Email diario con los avisos del día | `feature/notificaciones-3-4` | 8.3 | [ ] |
+| 8.3 | Preferencias: qué avisos, cuántos días antes y por qué canal | `feature/notificaciones-3-4` (junto con 8.4) | 8.1 | [~] |
+| 8.4 | Email diario con los avisos del día | `feature/notificaciones-3-4` | 8.3 | [~] |
 
 Orden recomendado: 8.1 → 8.2 → 8.3 → 8.4. Con 8.1 y 8.2 los avisos ya aparecen en la app.
 
@@ -71,20 +71,24 @@ Orden recomendado: 8.1 → 8.2 → 8.3 → 8.4. Con 8.1 y 8.2 los avisos ya apar
 ## Parte 8.3 – Preferencias
 
 ### Backend
-- [ ] `GET /notification-preferences` (con los valores por defecto si el usuario no guardó nada) y `PUT` (por canal: activado, tipos y días antes).
-- [ ] La generación respeta las preferencias (RN-009).
+- [x] `GET /notification-preferences` (con los valores por defecto si el usuario no guardó nada) y `PUT` (por canal: activado, tipos y días antes).
+- [x] La generación respeta las preferencias (RN-009).
 
 ### Frontend
-- [ ] Sección "Notificaciones" en Mi perfil: por canal (en la app, email), qué avisos y cuántos días antes.
+- [x] Sección "Avisos" en Mi perfil: por canal (en la app, email), qué avisos y cuántos días antes.
 
 **Listo cuando:** desactivar "vence pronto" por email deja de generarlos para ese canal.
+
+**Hecho, falta la prueba contra la base (26/11/2026):** se usa el formato de la tabla: por canal una fila `ALL` (canal activo y días) y una por tipo. `NotificationSettings` completa lo no guardado con los valores por defecto (en la app todo a 0/1/3/7 días; email sin "la IA leyó", a 0/1/3 días). El `PUT` reemplaza todo e ignora `PUSH` y tipos que no se generan. Front: `NotificationPreferencesForm` (interruptor por canal, tipos y días: el día, 1, 3, 7 o 15 antes).
 
 ---
 
 ## Parte 8.4 – Email diario
 
 ### Backend
-- [ ] Los avisos de email se juntan por usuario y día y salen en un solo email (asunto con la cantidad, lista con fecha, monto y enlace a la app).
-- [ ] Envío con reintentos (`attempts`, `last_error`); después de 5 intentos queda `FAILED`.
+- [x] Los avisos de email se juntan por usuario y día y salen en un solo email (asunto con la cantidad, lista con fecha, monto y enlace a la app).
+- [x] Envío con reintentos (`attempts`, `last_error`); después de 5 intentos queda `FAILED`.
 
 **Listo cuando:** dos vencimientos el mismo día llegan en un solo email y un SMTP caído se reintenta.
+
+**Hecho, falta la prueba contra la base (26/11/2026):** la generación deja los de email en `PENDING`; `EmailDigestJob` (cada 5 minutos) junta los pendientes por usuario en un solo email de texto con un enlace a cada cosa. Como todos se generan en la corrida de las 8, sale uno por día. Si falla: reintento a los 2, 4, 8 y 16 minutos y `FAILED` al quinto intento; un usuario inactivo los deja `CANCELLED`.

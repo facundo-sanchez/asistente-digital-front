@@ -15,7 +15,7 @@
 
 - Hechos (front + backend, mergeados en `develop`): base y autenticación (módulos 0 y 1), servicios (2), documentos (3), vencimientos y pagos con recurrencias (4), facturas (5), tarjetas con resúmenes en pesos y dólares (6) e IA documental (9: resúmenes y facturas desde Excel, PDF o foto, con revisión y confirmación). Detalle por parte en los `MODULO-0N-*.md`.
 - Hecho, sin mergear (ramas `feature/dashboard-*`): **dashboard (7)** completo, 7.1 a 7.5; falta la prueba contra la base. También ahí: subir el comprobante desde el formulario del pago.
-- Siguiente: **módulo 8 (Notificaciones)**, planificado en [MODULO-08-NOTIFICACIONES.md](./MODULO-08-NOTIFICACIONES.md), esperando confirmar las decisiones.
+- Hecho, sin mergear (ramas `feature/notificaciones-*`): **notificaciones (8)** completo, 8.1 a 8.4: avisos en la app y por email, campana y preferencias.
 - Decisiones tomadas en el camino que cambian este plan: no se usó Redux ni material-react-table (Server Components + `fetch`, tablas propias "libro de cuentas"); fechas con `Intl` en vez de moment; filtros en la URL.
 
 ## Decisiones pendientes
@@ -81,7 +81,7 @@
 - [x] `proxy.ts`: proteger el área privada y redirigir a login
 - [x] Manejar la expiración y renovación de la sesión (proxy + BFF), y el logout
 - [x] Perfil `/profile`: nombre, zona horaria, idioma, moneda y cambio de contraseña
-- [ ] Preferencias de notificación → se hacen en el módulo 8 (Notificaciones)
+- [x] Preferencias de notificación: sección "Avisos" en Mi perfil (módulo 8)
 
 ## Fase 3 – Servicios y proveedores (CU-001) 🔗
 
@@ -161,12 +161,12 @@
 
 ## Fase 8 – Notificaciones (CU-007) 🔗
 
-> Planificado en partes: ver [MODULO-08-NOTIFICACIONES.md](./MODULO-08-NOTIFICACIONES.md). Es lo siguiente.
+> Hecho en partes (8.1 a 8.4): ver [MODULO-08-NOTIFICACIONES.md](./MODULO-08-NOTIFICACIONES.md). Falta la prueba contra la base y el merge.
 
-- [ ] Campana en la barra con las no leídas y listado; pantalla `/notifications` (8.2)
-- [ ] Marcar como leída y todas como leídas (8.1, 8.2)
-- [ ] Preferencias en Mi perfil: canales (en la app, email) y anticipación (7, 3, 1 y 0 días) (8.3)
-- [ ] Email diario con los avisos del día (8.4)
+- [x] Campana en la barra con las no leídas y listado; pantalla `/notifications` (8.2)
+- [x] Marcar como leída y todas como leídas (8.1, 8.2)
+- [x] Preferencias en Mi perfil: canales (en la app, email), tipos de aviso y anticipación (8.3)
+- [x] Email diario con los avisos del día (8.4)
 - [ ] Web Push (post-MVP)
 
 **✅ Fin del MVP (fase 1 de producto)**: verificar los criterios de aceptación de la especificación funcional §10.
@@ -264,3 +264,4 @@
 | 26/11/2026 | Módulo 9 (IA documental) mergeado: cola de procesamiento, Gemini, resúmenes con movimientos y cuotas, facturas desde archivo, revisión y confirmación |
 | 26/11/2026 | Módulo 7 (dashboard) hecho en `feature/dashboard-*`: indicadores, próximos vencimientos, para revisar, documentos por vencer, gráficos de lo pagado y últimas actividades. Comprobante subido desde el formulario del pago |
 | 26/11/2026 | Plan del módulo 8 (notificaciones) |
+| 26/11/2026 | Módulo 8 (notificaciones) hecho en `feature/notificaciones-*`: avisos por umbral sin duplicados, campana, preferencias por canal y email diario con reintentos |
