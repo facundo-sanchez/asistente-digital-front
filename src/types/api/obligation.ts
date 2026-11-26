@@ -17,6 +17,7 @@ export const OBLIGATION_TYPES = [
   "DOCUMENT_RENEWAL",
   "SUBSCRIPTION",
   "MAINTENANCE",
+  "RENT",
   "OTHER",
 ] as const;
 export type ObligationType = (typeof OBLIGATION_TYPES)[number];
@@ -49,6 +50,8 @@ export type RecurrenceOrigin = (typeof RECURRENCE_ORIGINS)[number];
 export interface ObligationResponse {
   id: UUID;
   serviceId: UUID | null;
+  /** Nombre del servicio asociado (null si no tiene). */
+  serviceName: string | null;
   invoiceId: UUID | null;
   assetId: UUID | null;
   recurrenceId: UUID | null;
@@ -85,28 +88,26 @@ export interface ObligationRequest {
   dueDate: ISODate;
 }
 
-/** PATCH /obligations/{id}/cancel */
+/** POST /obligations/{id}/cancel */
 export interface CancelObligationRequest {
   reason?: string | null;
 }
 
-/** Filtros de GET /obligations. */
-export interface ObligationFilters {
-  status?: ObligationStatus;
-  from?: ISODate;
-  to?: ISODate;
-  serviceId?: UUID;
-}
+/** Frecuencias válidas para una repetición. */
+export type RecurringFrequency = Exclude<BillingFrequency, "NONE">;
 
+/** GET /recurring-rules, /recurring-rules/{id} */
 export interface RecurringRuleResponse {
   id: UUID;
   serviceId: UUID | null;
-  assetId: UUID | null;
   title: string;
-  frequency: Exclude<BillingFrequency, "NONE">;
+  obligationType: ObligationType;
+  frequency: RecurringFrequency;
+  /** Día del mes en que vence (null si es semanal). */
   dayOfMonth: number | null;
+  /** Vencimiento del próximo período que todavía no se generó. */
   nextExpectedDate: ISODate;
-  estimatedAmount: Decimal | null;
+  amount: Decimal | null;
   currency: CurrencyCode | null;
   origin: RecurrenceOrigin;
   active: boolean;
@@ -114,16 +115,19 @@ export interface RecurringRuleResponse {
   updatedAt: ISODateTime;
 }
 
-/** estimatedAmount y currency van juntos. */
+/** POST /recurring-rules, PUT /recurring-rules/{id}. amount y currency van juntos. */
 export interface RecurringRuleRequest {
-  serviceId?: UUID | null;
-  assetId?: UUID | null;
   title: string;
-  frequency: Exclude<BillingFrequency, "NONE">;
-  /** 1 a 31. */
-  dayOfMonth?: number | null;
+  obligationType: ObligationType;
+  serviceId: UUID | null;
+  frequency: RecurringFrequency;
+  /** Al crear: el primer vencimiento. Su día del mes se repite. */
   nextExpectedDate: ISODate;
-  estimatedAmount?: Decimal | null;
-  currency?: CurrencyCode | null;
-  active?: boolean | null;
+  amount: Decimal | null;
+  currency: CurrencyCode | null;
+}
+
+/** PATCH /recurring-rules/{id}/status */
+export interface RecurringRuleStatusRequest {
+  active: boolean;
 }

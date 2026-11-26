@@ -7,6 +7,7 @@ import type { NavItem } from "./nav-item";
 export const NAV_ITEMS: readonly NavItem[] = [
   { label: "Inicio", href: "/dashboard", icon: "dashboard" },
   { label: "Servicios", href: "/services", icon: "services" },
+  { label: "Vencimientos", href: "/obligations", icon: "obligations" },
   { label: "Documentos", href: "/documents", icon: "documents" },
   { label: "Mi perfil", href: "/profile", icon: "profile" },
 ];
