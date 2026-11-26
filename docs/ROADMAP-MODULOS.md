@@ -22,12 +22,14 @@
 | 6 | **Tarjetas y resúmenes** | `feature/tarjetas-<n>-*` (4 partes, ver [MODULO-06-TARJETAS.md](./MODULO-06-TARJETAS.md)) | Tarjetas, resumen y obligaciones ARS/USD | Tarjetas y carga de resumen | 2, 4 | [x] 4/4 partes |
 | 7 | **Dashboard** | `feature/dashboard` | Resumen y próximos vencimientos | KPIs y gráficos | 4, 5, 6 | [ ] |
 | 8 | **Notificaciones** | `feature/notificaciones` | Scheduler, preferencias | Campana, preferencias | 4 | [ ] |
-| 9 | **IA documental** | `feature/ia-documental` | Outbox, workers, extracción | Pantalla de revisión | 3, 5 | [ ] |
+| 9 | **IA documental** ⏭ siguiente | `feature/ia-<n>-*` (5 partes, ver [MODULO-09-IA-DOCUMENTAL.md](./MODULO-09-IA-DOCUMENTAL.md)) | Cola de procesamiento, Gemini, extracción de resúmenes (Excel, PDF, imagen) y facturas, movimientos con cuotas | Subir con "Leer con IA", estado del procesamiento, pantalla de revisión y confirmación | 3, 5, 6 | [ ] planificado |
 | 10 | **Gmail** (incluye BBVA) | `feature/gmail` | OAuth, lectura de emails, reglas por proveedor | Conexión, "detectado en tu correo" | 6, 9 | [ ] |
-| 11 | **Consumos e informe de tarjeta** | `feature/informe-tarjetas` | Movimientos, vistas del informe; la IA registra cada producto con cuota n de m, cuotas pagas y monto | Informe y cuotas; **exportar el resumen a PDF y Excel** | 6, 9 | [ ] |
+| 11 | **Consumos e informe de tarjeta** | `feature/informe-tarjetas` | Vistas del informe, categorías y reglas por comercio (los movimientos con cuota n de m, cuotas pagas y monto se guardan desde el módulo 9) | Informe y cuotas; **exportar el resumen a PDF y Excel** | 6, 9 | [ ] |
 | 12 | **Asistente IA** | `feature/asistente` | Herramientas sobre los módulos anteriores | Chat | todo lo anterior | [ ] |
 
 Módulos 0 a 8 = **MVP**. Desde el 9: automatización e IA.
+
+**Cambio de orden (26/11/2026):** después del módulo 6 se sigue con el **9 (IA documental)**, antes del 7 y el 8. Motivo: la idea es que el usuario adjunte el resumen o la factura (Excel, PDF o foto) y los datos se carguen solos; cada banco arma su Excel distinto, así que la lectura se resuelve con IA para todos los formatos en vez de programar un lector por banco. Los módulos 7 y 8 no dependen de esto.
 
 ## Forma de trabajo por módulo
 

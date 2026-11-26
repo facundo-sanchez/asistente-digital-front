@@ -11,11 +11,11 @@
 
 ---
 
-## Estado actual (24/11/2026)
+## Estado actual (26/11/2026)
 
-- Proyecto base creado a partir de un proyecto anterior ("MiBalance"): todavía quedan nombre, `basePath`, títulos y el README de ese proyecto.
-- Solo existen `layout.tsx`, `page.tsx` (placeholder), `not-found.tsx` y `api/env/route.ts` (vacío).
-- El backend (Quarkus) también es un esqueleto: tiene DTOs del proyecto anterior (Gasto, Tarjeta, Ahorro), login propio con JWT y login con Google. Todavía no tiene endpoints del nuevo dominio.
+- Hechos (front + backend, mergeados en `develop`): base y autenticación (módulos 0 y 1), servicios (2), documentos (3), vencimientos y pagos con recurrencias (4), facturas (5) y tarjetas con resúmenes en pesos y dólares (6). Detalle por parte en los `MODULO-0N-*.md`.
+- Siguiente: **módulo 9 (IA documental)**, planificado en [MODULO-09-IA-DOCUMENTAL.md](./MODULO-09-IA-DOCUMENTAL.md): cargar resúmenes y facturas desde Excel, PDF o foto. Se adelanta a los módulos 7 y 8 (ver [ROADMAP-MODULOS.md](./ROADMAP-MODULOS.md)).
+- Decisiones tomadas en el camino que cambian este plan: no se usó Redux ni material-react-table (Server Components + `fetch`, tablas propias "libro de cuentas"); fechas con `Intl` en vez de moment; filtros en la URL.
 
 ## Decisiones pendientes
 
@@ -93,59 +93,59 @@
 - [x] Campo "Nro. de socio / suministro" destacado, con ayuda de dónde encontrarlo en la factura (es lo que asocia las facturas del email al servicio)
 - [ ] (módulo 10) Al crear un servicio de un proveedor con detección por email, sugerir "Conectá Gmail para recibir tus facturas automáticamente"
 - [x] Advertencia de posible duplicado
-- [~] Detalle del servicio: datos hechos; facturas, obligaciones y documentos llegan con los módulos 3 a 5
+- [x] Detalle del servicio con paneles de documentos, facturas, vencimientos y (si es un banco) tarjetas
 - [x] Activar o desactivar un servicio
 
 ## Fase 4 – Documentos (CU-009) 🔗
 
 > Se desarrolla en partes: ver [MODULO-03-DOCUMENTOS.md](./MODULO-03-DOCUMENTOS.md).
 
-- [ ] Tipos `Document` y `ProcessingStatus`
-- [ ] API: `GET/POST/DELETE /documents`, `POST /documents/upload`, `GET /documents/{id}/download`
-- [ ] Repositorio documental: listado, búsqueda y filtros por categoría o servicio
-- [ ] Carga de archivos con drag & drop, validación de tipo y tamaño en el cliente y barra de progreso
-- [ ] Asociar el documento a un servicio, una obligación o un bien
-- [ ] Vista previa de PDF/imagen y descarga
-- [ ] Fecha de vencimiento del documento (opcional)
+- [x] Tipos `Document` y `ProcessingStatus`
+- [x] API: `GET/POST/DELETE /documents`, `POST /documents/upload`, `GET /documents/{id}/download`
+- [x] Repositorio documental: listado, búsqueda y filtros por categoría o servicio
+- [x] Carga de archivos con drag & drop, validación de tipo y tamaño en el cliente y barra de progreso
+- [x] Asociar el documento a un servicio (obligación y bien: no en este módulo)
+- [x] Vista previa de PDF/imagen y descarga (Excel: solo descarga)
+- [x] Fecha de vencimiento del documento (opcional)
 
 ## Fase 5 – Facturas y obligaciones (CU-002, CU-005) 🔗
 
 ### Facturas
-- [ ] Tipos `Invoice` y `ExtractionStatus`
-- [ ] API: `/invoices` (CRUD), `/invoices/{id}/confirm`, `/invoices/{id}/reject`
-- [ ] Listado de facturas con estado (pendiente de validación, confirmada, rechazada)
-- [ ] Carga manual de una factura: adjuntar el archivo y completar los datos
-- [ ] Advertencia de factura duplicada (RN-005)
+- [x] Tipos `Invoice` y `ExtractionStatus`
+- [x] API: `/invoices` (alta confirmada, listado, detalle, edición), `/invoices/duplicates`, `/invoices/{id}/reject`
+- [x] Listado de facturas con el estado de su vencimiento (las pendientes de validación llegan con la IA, módulo 9)
+- [x] Carga manual de una factura: adjuntar el archivo y completar los datos
+- [x] Advertencia de factura duplicada (RN-005)
 
 ### Obligaciones
-- [ ] Tipos `Obligation` y `ObligationStatus` (Pendiente, Próxima a vencer, Vencida, Pagada, Cancelada)
-- [ ] API: `/obligations` (CRUD + filtros), `/upcoming`, `/overdue`, `/summary`, `PATCH /{id}/cancel`
-- [ ] Tabla de obligaciones con filtros: período, proveedor, categoría y estado
-- [ ] Alta de una obligación sin factura (por ejemplo, VTV o renovación de licencia)
-- [ ] Detalle: importe, vencimiento, documento asociado, pagos e historial
-- [ ] Cancelar una obligación (con confirmación)
+- [x] Tipos `Obligation` y `ObligationStatus` (Pendiente, Próxima a vencer, Vencida, Pagada, Cancelada)
+- [x] API: `/obligations` (alta, edición, filtros por estado, servicio, categoría y período), `POST /{id}/cancel`, `/recurring-rules` (vencimientos que se repiten)
+- [x] Tabla de obligaciones con filtros: período, proveedor, categoría y estado
+- [x] Alta de una obligación sin factura (por ejemplo, VTV o renovación de licencia)
+- [x] Detalle: importe, vencimiento, documento asociado, pagos e historial
+- [x] Cancelar una obligación (con confirmación)
 
 ## Fase 6 – Pagos (CU-006) 🔗
 
-- [ ] Tipos `Payment`
-- [ ] API: `/payments` (CRUD), `/obligations/{id}/payments`
-- [ ] Diálogo para registrar un pago: fecha, importe, método y comprobante adjunto
-- [ ] Pagos parciales: mostrar el saldo pendiente y la diferencia
-- [ ] Historial de pagos con comprobantes descargables
-- [ ] Corregir un pago conservando la trazabilidad
+- [x] Tipos `Payment`
+- [x] API: `/payments` (CRUD), `/obligations/{id}/payments`
+- [x] Diálogo para registrar un pago: fecha, importe, método y comprobante adjunto
+- [x] Pagos parciales: mostrar el saldo pendiente y la diferencia
+- [x] Historial de pagos con comprobantes descargables
+- [x] Corregir un pago conservando la trazabilidad
 
 ## Fase 6b – Tarjetas de crédito y resúmenes (CU-015) 🔗
 
-- [ ] Tipos `Card`, `CardStatement` (`src/types/api/card.ts` ✔)
-- [ ] API: `/cards` (CRUD), `/cards/{id}/statements`, `/card-statements` (alta, edición, `confirm`, `reject`)
-- [ ] Listado de tarjetas: marca, últimos 4 dígitos, próximo cierre y vencimiento
-- [ ] Alta/edición de tarjeta: elegir o crear el servicio del emisor (categoría `CREDIT_CARD`), marca, últimos 4, días de cierre y vencimiento, límite
-- [ ] Carga de resumen: adjuntar PDF + totales en pesos y dólares, pago mínimo, cierre y vencimiento
-- [ ] Detalle del resumen: totales por moneda, obligaciones generadas (ARS / USD) y su estado de pago
-- [ ] Aviso de resumen duplicado (misma tarjeta y fecha de vencimiento, RN-016)
-- [ ] Campo "últimos 4 del número de cuenta" en la tarjeta, con ayuda: "figura en el email del resumen (ej. BBVA: Número de cuenta ****4521)"
-- [ ] Resumen detectado por email sin PDF (ej. BBVA): mostrar totales y vencimiento, aviso "Subí el PDF para ver los consumos" (notificación `CARD_STATEMENT_AVAILABLE`) y botón de carga
-- [ ] Mostrar las obligaciones `CREDIT_CARD_PAYMENT` en obligaciones y dashboard
+- [x] Tipos `Card`, `CardStatement`
+- [x] API: `/cards` (alta, edición, baja lógica), `/cards/{id}/statements`, `/card-statements` (alta confirmada, edición, `reject`, búsqueda por vencimiento)
+- [x] Listado de tarjetas: marca, últimos 4 dígitos y banco; el próximo cierre y vencimiento se muestran en la tarjeta según el último resumen
+- [x] Alta/edición de tarjeta: servicio del emisor (categoría `CREDIT_CARD`), marca, últimos 4, titular, adicional y límite. **Sin días de cierre y vencimiento**: los fija el banco en cada resumen
+- [x] Carga de resumen: adjuntar PDF o **Excel** + totales en pesos y dólares, pago mínimo, cierre y vencimiento
+- [x] Detalle del resumen: totales por moneda, obligaciones generadas (ARS / USD) y su estado de pago
+- [x] Aviso de resumen duplicado (misma tarjeta y fecha de vencimiento, RN-016)
+- [x] Campo "últimos 4 del número de cuenta" en la tarjeta, con ayuda: "figura en el email del resumen (ej. BBVA: Número de cuenta ****4521)"
+- [ ] (módulo 10) Resumen detectado por email sin PDF (ej. BBVA): mostrar totales y vencimiento, aviso "Subí el PDF para ver los consumos" (notificación `CARD_STATEMENT_AVAILABLE`) y botón de carga
+- [~] Mostrar las obligaciones `CREDIT_CARD_PAYMENT` en obligaciones (hecho) y dashboard (módulo 7)
 
 ## Fase 7 – Dashboard (CU-012) 🔗
 
@@ -167,6 +167,8 @@
 
 ## Fase 9 – Procesamiento documental con IA (CU-002, CU-004, CU-014) 🔗
 
+> Planificado en partes, con el enfoque acordado (la IA lee Excel, PDF e imágenes; el usuario revisa y confirma): ver [MODULO-09-IA-DOCUMENTAL.md](./MODULO-09-IA-DOCUMENTAL.md). Es lo siguiente a desarrollar.
+
 - [ ] Visualizar el pipeline: recibido → validando → extrayendo → validando datos → esperando confirmación → registrado
 - [ ] Consultar el estado periódicamente (`GET /documents/{id}/processing`) y luego migrar a SSE
 - [ ] Pantalla de revisión: datos extraídos junto a la vista previa del documento, editables
@@ -176,6 +178,8 @@
 - [ ] Propuestas de recurrencia: confirmar o editar la regla y distinguir lo estimado de lo real
 
 ## Fase 9b – Consumos e informe de compras con tarjeta (CU-016, CU-017) 🔗
+
+> Los movimientos con cuota n de m, cuotas pagas e importe se guardan desde el módulo 9 (parte 9.4). Acá quedan el informe, las categorías y **exportar el resumen a PDF y Excel**.
 
 ### Consumos
 - [ ] API: `/card-statements/{id}/transactions`, `/card-transactions/{id}`, `PATCH /card-transactions/{id}/category`, `/card-statements/{id}/reconciliation`
@@ -192,6 +196,7 @@
 - [ ] Gasto por tarjeta y top de comercios
 - [ ] Cuotas pendientes (`/cards/installments/pending`): restante por compra, total por moneda y fecha estimada de la última cuota
 - [ ] Drill-down: click en una categoría, mes o comercio → lista de consumos
+- [ ] Exportar el resumen de la tarjeta (totales, consumos y cuotas) a PDF y a Excel
 
 ## Fase 10 – Integraciones / Gmail (CU-003, CU-013) 🔗
 
