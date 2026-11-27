@@ -8,7 +8,7 @@
 | Módulo | Mejora | Rama | Depende de | Estado |
 |---|---|---|---|---|
 | 15 | App instalable (PWA) y notificaciones push | `feature/push-<n>-*` | 8 | [ ] |
-| 16 | Alerta de aumentos de servicios | `feature/aumentos` | 5, 8 | [ ] |
+| 16 | Alerta de aumentos de servicios | `feature/aumentos` | 5, 8 | [x] |
 | 17 | Débito automático | `feature/debito-automatico` | 2, 4 | [x] |
 | 18 | Suscripciones en la tarjeta | `feature/suscripciones` | 11 | [ ] |
 | 19 | Calendario (link iCal) | `feature/calendario` | 4 | [ ] |
@@ -60,11 +60,14 @@ Orden acordado: **17, 16 y 15** primero (débito automático, aumentos, push); d
 | Cuándo | Al confirmar la factura (manual, leída por IA o de Gmail) | Es cuando el dato está listo |
 | Cómo se avisa | Notificación nueva `PRICE_INCREASE` (web, email y push con sus preferencias) y una marca en la factura | Mismo sistema de avisos |
 
+**Hecho (26/11/2026):** falta el indicador en la lista de facturas y el gráfico por servicio. Editar una factura no recalcula el aumento.
+
 ### Parte 16.1
-- [ ] Backend: al confirmar una factura, compara y, si supera el umbral, crea la notificación (idempotente por factura) y guarda el porcentaje en la factura; tipo `PRICE_INCREASE` en preferencias; `users.price_increase_threshold`.
-- [ ] Front: en la factura, "38 % más que el promedio de tus últimas 3 ($ 23.300)"; en la lista de facturas un indicador; en el detalle del servicio, gráfico de barras con el importe de cada factura.
-- [ ] Front: Mi perfil → Avisos: "Avisarme si una factura sube más de…".
-- [ ] Tests: sin historial no avisa; 3 anteriores y 25 % avisa con 20 %; otra moneda no se compara; no duplica.
+- [x] Backend: al confirmar una factura, compara y, si supera el umbral, crea la notificación (idempotente por factura) y guarda el porcentaje en la factura; tipo `PRICE_INCREASE` en preferencias; `users.price_increase_threshold`.
+- [x] Front: en la factura, "38 % más que el promedio de tus últimas facturas".
+- [ ] Front: indicador en la lista de facturas; gráfico de barras por servicio.
+- [x] Front: Mi perfil → Avisos: "Avisarme si una factura sube más de…" y el tipo de aviso en las preferencias.
+- [x] Tests: sin historial no avisa; 3 anteriores y 25 % avisa con 20 %; otra moneda no se compara; no duplica.
 - **Listo cuando:** confirmo una factura de gas 38 % más cara y me llega "Tu factura de gas subió 38 %".
 
 ---

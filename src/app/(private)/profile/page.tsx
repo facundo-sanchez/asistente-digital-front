@@ -7,6 +7,7 @@ import { Panel } from "@/components/layout/Panel";
 import { requireUser } from "@/lib/server/dal";
 import { serverGet } from "@/lib/server/server-get";
 import { NotificationPreferencesForm } from "@/modules/notifications/components/NotificationPreferencesForm";
+import { PriceIncreaseThresholdForm } from "@/modules/notifications/components/PriceIncreaseThresholdForm";
 import { ChangePasswordForm } from "@/modules/user/components/ChangePasswordForm";
 import { EmailVerificationBanner } from "@/modules/user/components/EmailVerificationBanner";
 import { PaymentWalletForm } from "@/modules/user/components/PaymentWalletForm";
@@ -35,6 +36,9 @@ export default async function ProfilePage() {
           description={`Qué te avisamos y cuándo. Los avisos por email llegan juntos, en un solo email por día, a ${user.email}.`}
         >
           <NotificationPreferencesForm initial={preferences} />
+          <Box sx={{ mt: 4 }}>
+            <PriceIncreaseThresholdForm initial={user.priceIncreaseThreshold} />
+          </Box>
         </Panel>
       )}
       <Panel

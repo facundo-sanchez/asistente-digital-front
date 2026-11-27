@@ -44,6 +44,8 @@ export interface InvoiceResponse {
   /** 0 a 1. Referencia técnica, no garantía de exactitud. */
   confidenceScore: Decimal | null;
   confirmedAt: ISODateTime | null;
+  /** Cuánto subió (%) respecto del promedio de las últimas facturas del servicio; null si no pasó el umbral. */
+  priceIncrease: number | null;
   /** Vencimiento que generó la factura (null si no generó). */
   obligationId: UUID | null;
   /** Estado de ese vencimiento: pendiente, pagado, vencido… */

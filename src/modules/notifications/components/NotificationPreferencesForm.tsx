@@ -26,6 +26,7 @@ const TYPES: { type: NotificationType; label: string }[] = [
   { type: "DOCUMENT_EXPIRING", label: "Documentos por vencer (pólizas, garantías…)" },
   { type: "DOCUMENT_DETECTED", label: "Archivos que la IA terminó de leer" },
   { type: "INTEGRATION_DISCONNECTED", label: "Cuando hay que volver a conectar Gmail" },
+  { type: "PRICE_INCREASE", label: "Facturas que vienen más caras que las anteriores" },
 ];
 
 const DAYS = [0, 1, 3, 7, 15];

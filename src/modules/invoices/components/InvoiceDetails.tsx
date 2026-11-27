@@ -34,6 +34,16 @@ export function InvoiceDetails({
     ["Número", invoice.invoiceNumber ? <span className="tabular-nums">{invoice.invoiceNumber}</span> : EMPTY],
     ["Período", invoice.billingPeriod ?? EMPTY],
     ["Importe", <span key="amount" className="tabular-nums">{formatMoney(invoice.totalAmount, invoice.currency)}</span>],
+    ...(invoice.priceIncrease != null
+      ? [
+          [
+            "Aumento",
+            <Typography key="increase" component="span" color="warning.main" sx={{ fontWeight: 600 }} className="tabular-nums">
+              {`${String(invoice.priceIncrease).replace(".", ",")} % más que el promedio de tus últimas facturas`}
+            </Typography>,
+          ] as [string, ReactNode],
+        ]
+      : []),
     ["Emitida", formatDate(invoice.issueDate) ?? EMPTY],
     ...(autoDebit ? [["Pago", "Se debita sola el día que vence"] as [string, ReactNode]] : []),
     ["Vence", <span key="due" className="tabular-nums">{formatDate(invoice.dueDate)}</span>],

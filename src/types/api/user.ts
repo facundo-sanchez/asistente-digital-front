@@ -12,6 +12,9 @@ export interface PaymentWalletRequest {
   paymentWallet: PaymentWallet | null;
 }
 
+export const PRICE_INCREASE_THRESHOLDS = [10, 20, 30, 50] as const;
+export type PriceIncreaseThreshold = (typeof PRICE_INCREASE_THRESHOLDS)[number];
+
 /** GET /users/me */
 export interface UserResponse {
   id: UUID;
@@ -28,6 +31,8 @@ export interface UserResponse {
   role: UserRole;
   /** Billetera para pagar facturas; null si no eligió ninguna. */
   paymentWallet: PaymentWallet | null;
+  /** Desde qué % de aumento de una factura se avisa. */
+  priceIncreaseThreshold: PriceIncreaseThreshold;
   createdAt: ISODateTime;
 }
 
