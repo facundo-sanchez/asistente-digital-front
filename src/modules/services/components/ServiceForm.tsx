@@ -8,6 +8,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import { BILLING_FREQUENCIES, SERVICE_CATEGORIES, type ServiceRequest, type ServiceResponse } from "@/types/api";
@@ -31,6 +33,8 @@ const EMPTY: DefaultValues<ServiceFormValues> = {
   endDate: "",
   notes: "",
   paymentUrl: "",
+  autoDebit: false,
+  autoDebitMethod: "",
 };
 
 /** Del formulario al contrato del backend: los textos vacíos viajan como null. */
@@ -45,6 +49,8 @@ function toRequest(values: ServiceFormValues): ServiceRequest {
     endDate: values.endDate || null,
     notes: values.notes || null,
     paymentUrl: values.paymentUrl || null,
+    autoDebit: values.autoDebit,
+    autoDebitMethod: values.autoDebit ? values.autoDebitMethod || null : null,
   };
 }
 
@@ -69,6 +75,8 @@ function toFormValues(service: ServiceResponse): DefaultValues<ServiceFormValues
     endDate: service.endDate ?? "",
     notes: service.notes ?? "",
     paymentUrl: service.paymentUrl ?? "",
+    autoDebit: service.autoDebit,
+    autoDebitMethod: service.autoDebitMethod ?? "",
   };
 }
 
@@ -94,7 +102,7 @@ export function ServiceForm({ service, preset, next }: ServiceFormProps) {
     resolver: yupResolver(serviceSchema),
     defaultValues: service ? toFormValues(service) : preset ? fromPreset(preset) : EMPTY,
   });
-  const [watchedProvider, watchedReference] = useWatch({ control, name: ["provider", "customerReference"] });
+  const [watchedProvider, watchedReference, watchedAutoDebit] = useWatch({ control, name: ["provider", "customerReference", "autoDebit"] });
   const cancelHref = service ? `/services/${service.id}` : next ? safeNextPath(next) : "/services";
 
   const onSubmit = handleSubmit(async (values) => {
@@ -188,6 +196,29 @@ export function ServiceForm({ service, preset, next }: ServiceFormProps) {
             type="date"
             slotProps={{ inputLabel: { shrink: true } }}
           />
+        </Box>
+
+        <Box>
+          <Controller
+            name="autoDebit"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={<Checkbox checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+                label="Se paga por débito automático"
+              />
+            )}
+          />
+          {watchedAutoDebit && (
+            <FormTextField<ServiceFormValues>
+              name="autoDebitMethod"
+              control={control}
+              label="Con qué se debita (opcional)"
+              helperText="Ej. Visa BBVA o caja de ahorro. El día que vence lo damos por pagado y te avisamos el día antes."
+              fullWidth
+              sx={{ mt: 1 }}
+            />
+          )}
         </Box>
 
         <FormTextField<ServiceFormValues>

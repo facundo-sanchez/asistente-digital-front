@@ -5,12 +5,13 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import ArrowBackOutlined from "@mui/icons-material/ArrowBackOutlined";
-import type { ServiceResponse } from "@/types/api";
+import type { ProviderResponse, ServiceResponse } from "@/types/api";
 import { TextLink } from "@/components/common/TextLink";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Panel } from "@/components/layout/Panel";
 import { firstParam, type SearchParams } from "@/lib/search-params";
 import { serverGet } from "@/lib/server/server-get";
+import { OwnProviderPanel } from "@/modules/providers/components/OwnProviderPanel";
 import { isUuid } from "@/lib/uuid";
 import { ServiceDetails } from "@/modules/services/components/ServiceDetails";
 import { ServiceStatusAction } from "@/modules/services/components/ServiceStatusAction";
@@ -28,6 +29,7 @@ export default async function ServicePage({ params, searchParams }: { params: Pr
 
   const service = await serverGet<ServiceResponse>(`/services/${id}`);
   if (!service) notFound();
+  const provider = await serverGet<ProviderResponse>(`/providers/${service.providerId}`);
   const query = await searchParams;
   const notice = firstParam(query.created) === "1"
     ? "Registramos el servicio. Ya podés asociarle facturas y vencimientos."
@@ -61,6 +63,7 @@ export default async function ServicePage({ params, searchParams }: { params: Pr
       <Panel title="Datos del servicio">
         <ServiceDetails service={service} />
       </Panel>
+      {provider?.custom && <OwnProviderPanel provider={provider} />}
       <ServiceDocumentsPanel serviceId={service.id} />
       {service.category === "CREDIT_CARD" && <ServiceCardsPanel serviceId={service.id} />}
       <ServiceInvoicesPanel serviceId={service.id} />

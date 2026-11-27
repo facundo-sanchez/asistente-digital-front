@@ -7,9 +7,9 @@
 
 | Módulo | Mejora | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 15 | App instalable (PWA) y notificaciones push | `feature/push-<n>-*` | 8 | [ ] |
-| 16 | Alerta de aumentos de servicios | `feature/aumentos` | 5, 8 | [ ] |
-| 17 | Débito automático | `feature/debito-automatico` | 2, 4 | [ ] |
+| 15 | App instalable (PWA) y notificaciones push | `feature/push-1-2` | 8 | [x] |
+| 16 | Alerta de aumentos de servicios | `feature/aumentos` | 5, 8 | [x] |
+| 17 | Débito automático | `feature/debito-automatico` | 2, 4 | [x] |
 | 18 | Suscripciones en la tarjeta | `feature/suscripciones` | 11 | [ ] |
 | 19 | Calendario (link iCal) | `feature/calendario` | 4 | [ ] |
 | 20 | Presupuesto del mes | `feature/presupuesto` | 11 | [ ] |
@@ -34,17 +34,19 @@ Orden acordado: **17, 16 y 15** primero (débito automático, aumentos, push); d
 | Qué se manda | Las mismas notificaciones del módulo 8 por un canal nuevo `PUSH` (que la tabla ya prevé), con sus preferencias | Un aviso, tres canales |
 | Suscripciones | Una por navegador o dispositivo; se borra sola si el servicio de push responde 404/410 | El usuario puede tener celular y compu |
 
+**Hecho (26/11/2026):** push **sigue las preferencias de los avisos en la app** (cada aviso nuevo de la campana sale también por push a los dispositivos activados) en lugar de tener preferencias propias: menos configuración y el mismo criterio. Falta probarlo en un celular real (necesita HTTPS o localhost y las claves VAPID).
+
 ### Parte 15.1 – Instalable
-- [ ] Front: `manifest.webmanifest`, íconos (192, 512, maskable) generados de la roseta, `theme-color` por modo, service worker en `public/sw.js` registrado solo en producción.
-- [ ] Front: pantalla "Sin conexión" del service worker.
+- [x] Front: `manifest.webmanifest`, íconos (192, 512, maskable) generados de la roseta, `theme-color` por modo, service worker en `public/sw.js` registrado solo en producción.
+- [x] Front: pantalla "Sin conexión" del service worker.
 - **Listo cuando:** Chrome en Android ofrece "Instalar app" y abre sin barra del navegador.
 
 ### Parte 15.2 – Notificaciones push
-- [ ] Backend: migración `push_subscriptions` (usuario, endpoint, claves p256dh y auth, user agent, fechas); `POST /push-subscriptions` y `DELETE /push-subscriptions`; claves `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` (sin ellas, push no disponible).
-- [ ] Backend: envío con cifrado Web Push (librería `web-push` de Java); tarea que manda las notificaciones `PUSH` pendientes como el resumen por email (reintentos, `FAILED` al quinto); borra la suscripción ante 404/410.
-- [ ] Backend: preferencias del módulo 8 con el canal `PUSH`.
-- [ ] Front: service worker muestra la notificación y al tocarla abre su link; Mi perfil → Avisos: "En este dispositivo" (activar o desactivar, pide permiso al tocarlo, nunca al entrar).
-- [ ] Tests: suscribir, enviar (cliente falso), borrar ante 410, aislamiento.
+- [x] Backend: migración V16 `push_subscriptions` (usuario, endpoint, claves p256dh y auth, user agent, fechas); `POST /push-subscriptions` y `DELETE /push-subscriptions`; claves `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` (sin ellas, push no disponible).
+- [x] Backend: envío con cifrado Web Push (librería `web-push` de Java); tarea que manda las notificaciones `PUSH` pendientes como el resumen por email (reintentos, `FAILED` al quinto); borra la suscripción ante 404/410.
+- [x] Backend: cada aviso nuevo en la app se encola también como `PUSH` si el usuario tiene dispositivos (sin preferencias propias).
+- [x] Front: service worker muestra la notificación y al tocarla abre su link; Mi perfil → Avisos: "En este dispositivo" (activar o desactivar, pide permiso al tocarlo, nunca al entrar).
+- [x] Tests: suscribir, enviar (cliente falso), borrar ante 410, aislamiento.
 - **Listo cuando:** con la app instalada en el celular llega "Mañana vence Gas casa · $ 32.100" y al tocarla abre el vencimiento.
 
 ---
@@ -60,11 +62,14 @@ Orden acordado: **17, 16 y 15** primero (débito automático, aumentos, push); d
 | Cuándo | Al confirmar la factura (manual, leída por IA o de Gmail) | Es cuando el dato está listo |
 | Cómo se avisa | Notificación nueva `PRICE_INCREASE` (web, email y push con sus preferencias) y una marca en la factura | Mismo sistema de avisos |
 
+**Hecho (26/11/2026):** falta el indicador en la lista de facturas y el gráfico por servicio. Editar una factura no recalcula el aumento.
+
 ### Parte 16.1
-- [ ] Backend: al confirmar una factura, compara y, si supera el umbral, crea la notificación (idempotente por factura) y guarda el porcentaje en la factura; tipo `PRICE_INCREASE` en preferencias; `users.price_increase_threshold`.
-- [ ] Front: en la factura, "38 % más que el promedio de tus últimas 3 ($ 23.300)"; en la lista de facturas un indicador; en el detalle del servicio, gráfico de barras con el importe de cada factura.
-- [ ] Front: Mi perfil → Avisos: "Avisarme si una factura sube más de…".
-- [ ] Tests: sin historial no avisa; 3 anteriores y 25 % avisa con 20 %; otra moneda no se compara; no duplica.
+- [x] Backend: al confirmar una factura, compara y, si supera el umbral, crea la notificación (idempotente por factura) y guarda el porcentaje en la factura; tipo `PRICE_INCREASE` en preferencias; `users.price_increase_threshold`.
+- [x] Front: en la factura, "38 % más que el promedio de tus últimas facturas".
+- [ ] Front: indicador en la lista de facturas; gráfico de barras por servicio.
+- [x] Front: Mi perfil → Avisos: "Avisarme si una factura sube más de…" y el tipo de aviso en las preferencias.
+- [x] Tests: sin historial no avisa; 3 anteriores y 25 % avisa con 20 %; otra moneda no se compara; no duplica.
 - **Listo cuando:** confirmo una factura de gas 38 % más cara y me llega "Tu factura de gas subió 38 %".
 
 ---
@@ -81,10 +86,13 @@ Orden acordado: **17, 16 y 15** primero (débito automático, aumentos, push); d
 | Sin importe | Si el vencimiento no tiene importe, no se registra el pago y se avisa "No sabemos cuánto se debitó" | No inventar montos |
 | Corregir | El pago automático se anula como cualquier otro (por ejemplo, si el débito rebotó) | Mismo mecanismo de pagos |
 
+**Hecho (26/11/2026):** usa el método de pago `DIRECT_DEBIT` que ya existía (no hizo falta uno nuevo) y el aviso de "vence pronto" con el texto "Se debita mañana" (así respeta las preferencias que ya hay, sin un tipo nuevo). Recupera hasta 3 días si la tarea no corrió. Falta la marca en la lista de vencimientos y en el inicio.
+
 ### Parte 17.1
-- [ ] Backend: migración `services.auto_debit` (bool) y `auto_debit_method` (texto); método de pago `AUTOMATIC_DEBIT`; la tarea diaria registra los pagos del día (idempotente: no paga dos veces); notificación `AUTO_DEBIT` un día antes; los de débito se excluyen de "vence pronto" y "vencido".
-- [ ] Front: en el formulario del servicio, "Se paga por débito automático" y el medio; en vencimientos y en el inicio, la marca "Débito automático"; en la factura, el botón Pagar no aparece (se debita solo).
-- [ ] Tests: registra el pago el día del vencimiento, no duplica, sin importe no paga y avisa, excluido de vencidos, aislamiento.
+- [x] Backend: migración V14 `services.auto_debit` y `auto_debit_method`; la tarea (cada hora) registra los pagos del día con `DIRECT_DEBIT` (no paga dos veces); aviso "Se debita mañana" el día anterior; los de débito con importe no avisan como vencidos.
+- [x] Front: en el formulario del servicio, "Se paga por débito automático" y con qué; en el detalle del servicio; en la factura y su vencimiento no aparece Pagar ("Se debita sola").
+- [ ] Front: la marca "Débito automático" en la lista de vencimientos y en el inicio.
+- [x] Tests: registra el pago el día del vencimiento, no duplica, sin importe no paga y avisa, excluido de vencidos, aislamiento.
 - **Listo cuando:** marco Luz como débito automático y el día que vence aparece pagada sola, con el aviso del día anterior.
 
 ---

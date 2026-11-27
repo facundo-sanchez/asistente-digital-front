@@ -13,7 +13,8 @@ import { ACCESS_COOKIE } from "./session-cookies";
 export const SESSION_EXPIRED_PATH = "/api/auth/session-expired";
 
 /**
- * Usuario de la sesión actual, o null si no hay sesión o el backend la rechaza (401).
+ * Usuario de la sesión actual, o null si no hay sesión, el backend la rechaza (401) o el usuario ya
+ * no existe (404: ej. cuenta borrada o base restaurada).
  * Si el backend falla por otro motivo, lanza: lo muestra error.tsx en lugar de cerrar la sesión.
  * Memoizado por request con cache().
  */
@@ -22,7 +23,7 @@ export const getCurrentUser = cache(async (): Promise<UserResponse | null> => {
   if (!accessToken) return null;
 
   const res = await backendFetch("/users/me", { accessToken });
-  if (res.status === 401) return null;
+  if (res.status === 401 || res.status === 404) return null;
   if (!res.ok) throw new Error(`No se pudo obtener el usuario (HTTP ${res.status})`);
   return (await res.json()) as UserResponse;
 });

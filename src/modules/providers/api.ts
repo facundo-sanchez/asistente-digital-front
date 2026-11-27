@@ -10,4 +10,5 @@ export const providersApi = {
   get: (id: UUID) => api.get<ProviderResponse>(`providers/${encodeURIComponent(id)}`),
   /** Proveedor propio (no está en el catálogo). 409 si ya existe uno con ese nombre. */
   create: (body: ProviderRequest) => api.post<ProviderResponse>("providers", body),
+  update: (id: string, body: ProviderRequest) => api.put<ProviderResponse>(`providers/${id}`, body),
 };

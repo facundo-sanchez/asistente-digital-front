@@ -69,7 +69,7 @@ export default async function InvoicePage({ params, searchParams }: { params: Pr
         <Alert severity="info">Su vencimiento tiene pagos: para corregir o anular la factura, primero anulá los pagos.</Alert>
       )}
       <Panel title="Datos de la factura">
-        <InvoiceDetails invoice={invoice} payment={paymentTarget(service, user.paymentWallet)} />
+        <InvoiceDetails invoice={invoice} payment={paymentTarget(service, user.paymentWallet)} autoDebit={service?.autoDebit} />
       </Panel>
       {document && (
         <Panel title="Archivo" action={<ButtonLink href={`/documents/${document.id}`} variant="outlined">Ver documento</ButtonLink>}>

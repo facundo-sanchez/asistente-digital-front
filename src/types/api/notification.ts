@@ -16,6 +16,8 @@ export const NOTIFICATION_TYPES = [
   "MAINTENANCE_DUE",
   /** Resumen de tarjeta detectado por email sin PDF: invitar a subirlo. */
   "CARD_STATEMENT_AVAILABLE",
+  /** Una factura vino más cara que el promedio de las anteriores del servicio. */
+  "PRICE_INCREASE",
 ] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 
