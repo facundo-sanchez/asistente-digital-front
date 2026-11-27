@@ -56,7 +56,8 @@ Consecuencias para el diseño:
 | 13.2 | Ficha: cuánto falta, cronograma, cambiar importe, cancelar | `feature/prestamos-1-2` | 13.1 | [ ] |
 | 13.3 | Comprobante de pago de cuota: la IA lo lee y registra el pago en su cuota | `feature/prestamos-3-4` (junto con 13.4) | 13.2 | [ ] |
 | 13.4 | Préstamos en el inicio, en vencimientos y en el asistente | `feature/prestamos-3-4` | 13.2 | [ ] |
-| 13.5 | Aviso de cuota por email (Gmail): importe y fecha reales antes de pagar | `feature/prestamos-5` | 13.2, módulo 10 | [ ] |
+| 13.5 | Aviso de cuota por email (Gmail): importe y fecha reales antes de pagar | `feature/prestamos-5-6` (junto con 13.6) | 13.2, módulo 10 | [ ] |
+| 13.6 | Cada cuánto se leen los emails, configurable en Mi perfil | `feature/prestamos-5-6` | módulo 10 | [ ] |
 
 ---
 
@@ -145,6 +146,29 @@ Consecuencias para el diseño:
 - [ ] En "Detectado en tu correo" (Integraciones): el aviso del préstamo con lo que se actualizó, o "¿A qué préstamo corresponde?" con un selector cuando hay varios.
 
 **Listo cuando:** con Gmail conectado, llega el aviso de la cuota 10 y su vencimiento pasa de estimado a $ 584.292,14 con vencimiento 07/11, sin tocar nada.
+
+---
+
+## Parte 13.6 – Cada cuánto se leen los emails
+
+Hoy Gmail se revisa cada 15 minutos para todos (`app.integrations.sync-every`). Con esta parte cada usuario elige la frecuencia en **Mi perfil**. Es una mejora del módulo 10; va acá porque el aviso de cuota la vuelve más útil (y porque cada lectura con IA gasta cuota de Gemini).
+
+### Decisiones
+- Opciones: **cada 15 minutos** (por defecto, como hoy), **cada hora**, **cada 6 horas**, **una vez por día** (a las 8, antes de los avisos de las 9) y **solo cuando toco "Revisar ahora"**.
+- La tarea sigue corriendo cada 15 minutos como reloj; para cada cuenta revisa solo si ya pasó su intervalo desde `last_sync_at` (columna que ya existe). Sin tareas nuevas ni cron por usuario.
+- "Revisar ahora" (Integraciones) sigue funcionando con cualquier opción.
+
+### Backend
+- [ ] Migración: `users.email_check_interval` (`15M`, `1H`, `6H`, `DAILY`, `MANUAL`; por defecto `15M`).
+- [ ] `PUT /users/me/email-check-interval` y el valor en `GET /users/me` (como la billetera: endpoint propio para no pisar el resto del perfil).
+- [ ] `GmailSyncUseCase`: antes de revisar una cuenta, compara `last_sync_at` con el intervalo de su usuario; `DAILY` revisa una vez por día desde las 8 en la zona del usuario; `MANUAL` nunca en automático.
+- [ ] Tests: con 1 hora no revisa a los 30 minutos y sí a los 61; `DAILY` una sola vez por día; `MANUAL` nunca en automático pero sí con "Revisar ahora".
+
+### Frontend
+- [ ] Mi perfil → sección **Correo**: "Revisar mis emails" con las cinco opciones y Guardar; solo se ve si el usuario tiene Gmail conectado (si no, un link a Integraciones).
+- [ ] En Integraciones, junto a la cuenta: "Se revisa cada hora · última revisión 10:15".
+
+**Listo cuando:** elijo "cada 6 horas" en Mi perfil y Gmail no se vuelve a revisar hasta 6 horas después de la última vez, salvo que toque "Revisar ahora".
 
 ---
 
