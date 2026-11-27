@@ -6,4 +6,6 @@ export const cardsApi = {
   create: (request: CardRequest) => api.post<CardResponse>("cards", request),
   update: (id: UUID, request: CardRequest) => api.put<CardResponse>(`cards/${id}`, request),
   changeStatus: (id: UUID, active: boolean) => api.patch<CardResponse>(`cards/${id}/status`, { active }),
+  dismissSubscription: (merchant: string) => api.post<void>("cards/subscriptions/dismiss", { merchant }),
+  restoreSubscription: (merchant: string) => api.post<void>("cards/subscriptions/restore", { merchant }),
 };
