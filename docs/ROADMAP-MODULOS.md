@@ -31,7 +31,7 @@
 | 15 | **App instalable y notificaciones push** | `feature/push-<n>-*` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 8 | [ ] |
 | 16 | **Alerta de aumentos** | `feature/aumentos` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 5, 8 | [ ] |
 | 17 | **Débito automático** | `feature/debito-automatico` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 2, 4 | [ ] |
-| 18 | **Suscripciones en la tarjeta** | `feature/suscripciones` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 11 | [ ] |
+| 18 | **Suscripciones en la tarjeta** | `feature/suscripciones` (2 partes, ver [MODULO-18-SUSCRIPCIONES.md](./MODULO-18-SUSCRIPCIONES.md)) | ver plan | ver plan | 11 | [ ] |
 | 19 | **Calendario (iCal)** | `feature/calendario` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 4 | [ ] |
 | 20 | **Presupuesto del mes** | `feature/presupuesto` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 11 | [ ] |
 | 21 | **Bienes** | `feature/bienes-<n>-*` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 3, 4 | [ ] |
