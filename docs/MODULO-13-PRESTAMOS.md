@@ -4,7 +4,7 @@
 > Al terminar una parte: marcar `[x]`, cambiar su estado en la tabla y anotar la fecha.
 > Visión general: [ROADMAP-MODULOS.md](./ROADMAP-MODULOS.md). Reutiliza vencimientos, pagos, avisos y documentos (módulos 3, 4 y 8) y la lectura con IA (módulo 9). Criterio de código: simple, sin abstracciones de más.
 
-**Estado (26/11/2026):** plan listo, sin empezar. La migración será la siguiente libre (hoy V17), no V14 como dice 13.1.
+**Estado (27/11/2026):** las 6 partes hechas (13.1–13.2 en `feature/prestamos-1-2`, 13.3–13.4 en `feature/prestamos-3-4`, 13.5–13.6 y el cálculo de cuotas en `feature/prestamos-5-6`), con tests; falta probarlas con tus comprobantes reales y Gemini. Cambios: la migración de 13.1 es V17 (recrea `v_obligations`) y la de los comprobantes V18 (tipos de documento `LOAN_CONTRACT` y `LOAN_RECEIPT`); la lectura del comprobante de alta se hizo en 13.3; el pago del comprobante se registra con método "Otro" y el desglose en sus notas; el inicio muestra los préstamos leyendo `/loans` (sin tocar `/dashboard`); en vencimientos se ve el tipo "Préstamo", sin un filtro nuevo. "Pagado" se calcula (sin cuotas pendientes), no se guarda. **Además:** préstamos de tasa fija con capital y TNA calculan sus cuotas por sistema francés (capital + interés + IVA 21 %, sin sellados) y el saldo de capital de cada una; verificado contra los comprobantes de BBVA (saldo exacto al centavo, cuota sin sellados). 13.5: si hay varios préstamos del banco sin referencia, el aviso queda en "Detectado" con el motivo y la referencia se carga editando el préstamo (no hay selector en Integraciones). V19 suma la regla de BBVA y la frecuencia por usuario.
 
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
@@ -54,30 +54,30 @@ Consecuencias para el diseño:
 
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 13.1 | Alta del préstamo (a mano o desde el comprobante de alta) y sus cuotas como vencimientos | `feature/prestamos-1-2` (junto con 13.2) | — | [ ] |
-| 13.2 | Ficha: cuánto falta, cronograma, cambiar importe, cancelar | `feature/prestamos-1-2` | 13.1 | [ ] |
-| 13.3 | Comprobante de pago de cuota: la IA lo lee y registra el pago en su cuota | `feature/prestamos-3-4` (junto con 13.4) | 13.2 | [ ] |
-| 13.4 | Préstamos en el inicio, en vencimientos y en el asistente | `feature/prestamos-3-4` | 13.2 | [ ] |
-| 13.5 | Aviso de cuota por email (Gmail): importe y fecha reales antes de pagar | `feature/prestamos-5-6` (junto con 13.6) | 13.2, módulo 10 | [ ] |
-| 13.6 | Cada cuánto se leen los emails, configurable en Mi perfil | `feature/prestamos-5-6` | módulo 10 | [ ] |
+| 13.1 | Alta del préstamo (a mano o desde el comprobante de alta) y sus cuotas como vencimientos | `feature/prestamos-1-2` (junto con 13.2) | — | [x] |
+| 13.2 | Ficha: cuánto falta, cronograma, cambiar importe, cancelar | `feature/prestamos-1-2` | 13.1 | [x] |
+| 13.3 | Comprobante de pago de cuota: la IA lo lee y registra el pago en su cuota | `feature/prestamos-3-4` (junto con 13.4) | 13.2 | [x] |
+| 13.4 | Préstamos en el inicio, en vencimientos y en el asistente | `feature/prestamos-3-4` | 13.2 | [x] |
+| 13.5 | Aviso de cuota por email (Gmail): importe y fecha reales antes de pagar | `feature/prestamos-5-6` (junto con 13.6) | 13.2, módulo 10 | [x] |
+| 13.6 | Cada cuánto se leen los emails, configurable en Mi perfil | `feature/prestamos-5-6` | módulo 10 | [x] |
 
 ---
 
 ## Parte 13.1 – Alta del préstamo
 
 ### Backend
-- [ ] Migración V14: tabla `loans` (usuario, entidad, nombre, número de préstamo, referencia corta del banco, moneda, capital, tasa fija/variable, TNA, fecha de alta, cantidad de cuotas, fecha de la primera cuota, documento del alta, último saldo del banco y su fecha, notas, estado `ACTIVE`/`PAID`/`CANCELLED`); único (usuario, número de préstamo); `obligations.loan_id` e `installment_number`; tipo de vencimiento `LOAN`; tipos de documento `LOAN_CONTRACT` y `LOAN_RECEIPT`.
-- [ ] `POST /loans`: valida (cuotas 1 a 360, importe > 0, ARS o USD, cuotas ya pagadas < total, número no repetido) y en una transacción crea el préstamo y sus N cuotas: el mismo día de cada mes que la primera (si el mes no lo tiene, el último), título "Préstamo {nombre} · cuota n/N", importe estimado; las ya pagadas quedan pagadas.
-- [ ] Lectura del comprobante de alta (esquema `loan_contract/1` en el módulo 9): entidad, número, tipo, capital, moneda, tasa, TNA, fecha de alta. `POST /loans/from-document/{documentId}` devuelve la propuesta para completar.
-- [ ] Si se adjunta un comprobante de **pago** en el alta, la propuesta suma total de cuotas (pagada + pendientes), día de vencimiento, importe de referencia, cuotas ya pagadas y saldo.
-- [ ] `GET /loans` (cuotas pagadas y pendientes, lo que falta pagar, saldo del banco, próxima cuota) y `GET /loans/{id}`.
-- [ ] Tests: N cuotas con fechas correctas (31/1 → 28/2), cuotas ya pagadas, número repetido, aislamiento; lectura con el comprobante de ejemplo (fixture **anonimizado**: sin titular, CUIT, domicilio ni cuenta reales).
+- [x] Migración V14: tabla `loans` (usuario, entidad, nombre, número de préstamo, referencia corta del banco, moneda, capital, tasa fija/variable, TNA, fecha de alta, cantidad de cuotas, fecha de la primera cuota, documento del alta, último saldo del banco y su fecha, notas, estado `ACTIVE`/`PAID`/`CANCELLED`); único (usuario, número de préstamo); `obligations.loan_id` e `installment_number`; tipo de vencimiento `LOAN`; tipos de documento `LOAN_CONTRACT` y `LOAN_RECEIPT`.
+- [x] `POST /loans`: valida (cuotas 1 a 360, importe > 0, ARS o USD, cuotas ya pagadas < total, número no repetido) y en una transacción crea el préstamo y sus N cuotas: el mismo día de cada mes que la primera (si el mes no lo tiene, el último), título "Préstamo {nombre} · cuota n/N", importe estimado; las ya pagadas quedan pagadas.
+- [x] Lectura del comprobante de alta (esquema `loan_contract/1` en el módulo 9): entidad, número, tipo, capital, moneda, tasa, TNA, fecha de alta. `POST /loans/from-document/{documentId}` devuelve la propuesta para completar.
+- [x] Si se adjunta un comprobante de **pago** en el alta, la propuesta suma total de cuotas (pagada + pendientes), día de vencimiento, importe de referencia, cuotas ya pagadas y saldo.
+- [x] `GET /loans` (cuotas pagadas y pendientes, lo que falta pagar, saldo del banco, próxima cuota) y `GET /loans/{id}`.
+- [x] Tests: N cuotas con fechas correctas (31/1 → 28/2), cuotas ya pagadas, número repetido, aislamiento; lectura con el comprobante de ejemplo (fixture **anonimizado**: sin titular, CUIT, domicilio ni cuenta reales).
 
 ### Frontend
-- [ ] "Préstamos" en el menú: lista con entidad, cuota n/N, lo que falta por moneda y próxima fecha.
-- [ ] Alta en dos caminos: **"Subir el comprobante"** (alta y, opcional, un pago: la IA completa lo que puede y marca lo que falta) o **"Cargarlo a mano"**.
-- [ ] Formulario: entidad, nombre, número de préstamo, moneda, capital, tasa, cantidad de cuotas, importe de la cuota, fecha de la primera cuota, cuotas ya pagadas; los datos leídos por la IA se ven marcados para revisar.
-- [ ] Antes de guardar, vista previa: primera y última cuota y total estimado a pagar.
+- [x] "Préstamos" en el menú: lista con entidad, cuota n/N, lo que falta por moneda y próxima fecha.
+- [x] Alta en dos caminos: **"Subir el comprobante"** (alta y, opcional, un pago: la IA completa lo que puede y marca lo que falta) o **"Cargarlo a mano"**.
+- [x] Formulario: entidad, nombre, número de préstamo, moneda, capital, tasa, cantidad de cuotas, importe de la cuota, fecha de la primera cuota, cuotas ya pagadas; los datos leídos por la IA se ven marcados para revisar.
+- [x] Antes de guardar, vista previa: primera y última cuota y total estimado a pagar.
 
 **Listo cuando:** subo el comprobante de alta de BBVA, completo 30 cuotas que vencen los 7, y aparecen los 30 vencimientos con el capital y la tasa leídos.
 
@@ -86,16 +86,16 @@ Consecuencias para el diseño:
 ## Parte 13.2 – Ficha del préstamo
 
 ### Backend
-- [ ] `PATCH /loans/{id}/installments/{n}` (`amount`): cambia el importe de una cuota pendiente. Una cuota con pagos no se edita.
-- [ ] `POST /loans/{id}/cancel` (`reason`): cancela las cuotas pendientes y marca el préstamo `CANCELLED`.
-- [ ] El préstamo pasa a `PAID` cuando se paga su última cuota pendiente.
-- [ ] `PUT /loans/{id}`: editar nombre, entidad, notas y documento del alta (no cuotas ni montos).
-- [ ] Tests: editar cuota, no editar una pagada, cancelar deja las pagadas, `PAID` con la última.
+- [x] `PATCH /loans/{id}/installments/{n}` (`amount`): cambia el importe de una cuota pendiente. Una cuota con pagos no se edita.
+- [x] `POST /loans/{id}/cancel` (`reason`): cancela las cuotas pendientes y marca el préstamo `CANCELLED`.
+- [x] El préstamo pasa a `PAID` cuando se paga su última cuota pendiente.
+- [x] `PUT /loans/{id}`: editar nombre, entidad, notas y documento del alta (no cuotas ni montos).
+- [x] Tests: editar cuota, no editar una pagada, cancelar deja las pagadas, `PAID` con la última.
 
 ### Frontend
-- [ ] Ficha: **lo que falta pagar** (suma de cuotas pendientes, estimado) y **saldo de capital según el banco** (con su fecha), cada uno con su nombre; cuotas pagadas n de N con barra de progreso; fecha de la última cuota; total pagado; TNA y tipo de tasa.
-- [ ] Cronograma: cada cuota con fecha, importe (real o "estimado"), estado y link a su vencimiento; "Cambiar importe" en las pendientes.
-- [ ] Comprobante de alta con vista previa; "Cancelar el préstamo" con confirmación y motivo.
+- [x] Ficha: **lo que falta pagar** (suma de cuotas pendientes, estimado) y **saldo de capital según el banco** (con su fecha), cada uno con su nombre; cuotas pagadas n de N con barra de progreso; fecha de la última cuota; total pagado; TNA y tipo de tasa.
+- [x] Cronograma: cada cuota con fecha, importe (real o "estimado"), estado y link a su vencimiento; "Cambiar importe" en las pendientes.
+- [x] Comprobante de alta con vista previa (falta: se hace con 13.3); "Cancelar el préstamo" con confirmación y motivo.
 
 **Listo cuando:** pago la cuota 4 desde su vencimiento y la ficha muestra 4 de 30 pagadas y lo que falta actualizado.
 
@@ -104,16 +104,16 @@ Consecuencias para el diseño:
 ## Parte 13.3 – Comprobante de pago de cuota
 
 ### Backend
-- [ ] Lectura del comprobante de pago (esquema `loan_receipt/1`): número de préstamo, cuota pagada, cuotas pendientes, fecha de vencimiento, fecha de pago, importe total, desglose (capital, intereses, IVA, sellados), saldo anterior y nuevo.
-- [ ] Revisión antes de confirmar: busca el préstamo por número y la cuota por número; avisa si no encuentra el préstamo ("Cargalo primero o elegí el préstamo"), si la cuota ya está pagada o si la cantidad de cuotas no coincide con lo cargado.
-- [ ] Al confirmar, en una transacción: fija el importe real de la cuota, registra el pago (fecha de pago, importe, el comprobante adjunto), guarda el nuevo saldo del banco y su fecha. El desglose queda en el pago para mostrarlo.
-- [ ] El mismo comprobante subido dos veces no registra dos pagos (checksum del documento, como en el módulo 3).
-- [ ] Tests: registra el pago en la cuota correcta, actualiza importe y saldo, rechaza la cuota ya pagada, aislamiento.
+- [x] Lectura del comprobante de pago (esquema `loan_receipt/1`): número de préstamo, cuota pagada, cuotas pendientes, fecha de vencimiento, fecha de pago, importe total, desglose (capital, intereses, IVA, sellados), saldo anterior y nuevo.
+- [x] Revisión antes de confirmar: busca el préstamo por número y la cuota por número; avisa si no encuentra el préstamo ("Cargalo primero o elegí el préstamo"), si la cuota ya está pagada o si la cantidad de cuotas no coincide con lo cargado.
+- [x] Al confirmar, en una transacción: fija el importe real de la cuota, registra el pago (fecha de pago, importe, el comprobante adjunto), guarda el nuevo saldo del banco y su fecha. El desglose queda en el pago para mostrarlo.
+- [x] El mismo comprobante subido dos veces no registra dos pagos (checksum del documento, como en el módulo 3).
+- [x] Tests: registra el pago en la cuota correcta, actualiza importe y saldo, rechaza la cuota ya pagada, aislamiento.
 
 ### Frontend
-- [ ] En la ficha y en cada cuota: "Subir comprobante de pago" → revisión con los datos leídos (cuota n/N, importe, fecha, desglose, nuevo saldo) → Confirmar.
-- [ ] También desde **Subir con IA** general: un comprobante de pago de préstamo se reconoce y va a esta revisión.
-- [ ] En el detalle de la cuota pagada: desglose de capital, intereses, IVA y sellados, y el comprobante.
+- [x] En la ficha: "Subir comprobante de pago" → revisión con los datos leídos (cuota n/N, importe, fecha, desglose, nuevo saldo) → Confirmar.
+- [x] También desde **Subir con IA** general: un comprobante de pago de préstamo se reconoce y va a esta revisión.
+- [x] En el detalle de la cuota pagada: desglose de capital, intereses, IVA y sellados, y el comprobante.
 
 **Listo cuando:** subo el comprobante de pago de la cuota 10 y queda pagada con $ 584.292,14 del 11/11, el saldo del banco pasa a $ 5.820.337,83 y la ficha muestra 10 de 30.
 
@@ -122,13 +122,13 @@ Consecuencias para el diseño:
 ## Parte 13.4 – Inicio, vencimientos y asistente
 
 ### Backend
-- [ ] `GET /dashboard`: lo que falta pagar de préstamos por moneda.
-- [ ] Herramienta del asistente `loans()`: préstamos activos con cuotas restantes, lo que falta, saldo del banco y próxima cuota (referencias a cada préstamo).
+- [x] Inicio: lo que falta pagar de préstamos por moneda (el front lee `/loans`; `/dashboard` sin cambios).
+- [x] Herramienta del asistente `loans()`: préstamos activos con cuotas restantes, lo que falta, saldo del banco y próxima cuota (referencias a cada préstamo).
 
 ### Frontend
-- [ ] Inicio: "Préstamos" con lo que falta por moneda y la próxima cuota.
-- [ ] En vencimientos, el tipo "Préstamo" con filtro; en el detalle de una cuota, "Ver el préstamo".
-- [ ] El asistente responde "¿cuánto me falta del préstamo?" con link a la ficha.
+- [x] Inicio: "Préstamos" con lo que falta por moneda y la próxima cuota.
+- [~] En vencimientos, el tipo "Préstamo" (sin filtro nuevo); en el detalle de una cuota, "Ver el préstamo".
+- [x] El asistente responde "¿cuánto me falta del préstamo?" con link a la ficha.
 
 **Listo cuando:** el inicio muestra cuánto debo de préstamos y el asistente responde cuántas cuotas me faltan.
 
@@ -137,15 +137,15 @@ Consecuencias para el diseño:
 ## Parte 13.5 – Aviso de cuota por email
 
 ### Backend
-- [ ] Regla de email del proveedor BBVA: remitente `avisos@bbva.com.ar`, asunto que contiene "PRESTAMOS", lectura del cuerpo (V15 si hace falta una regla nueva en `provider_email_rules`).
-- [ ] Lector por patrón de la frase "La cuota {n} de su préstamo {tipo} {referencia}, por {moneda} {importe}, vence el {dd/mm/aaaa}" (importe con coma decimal). Si la frase no coincide, el email queda en "Detectado en tu correo" como no leído, sin tocar nada.
-- [ ] Asociación: préstamo por referencia corta; si no hay, el único préstamo activo de BBVA (y se guarda la referencia); si hay varios, queda pendiente para que el usuario elija.
-- [ ] Actualiza la cuota n: importe real (deja de ser estimado) y fecha de vencimiento si cambió. No toca cuotas con pagos. El mismo email no se procesa dos veces (como el resto de Gmail).
-- [ ] Tests con el texto del ejemplo (anonimizado): importe 584292,14 → 584.292,14; fecha; préstamo único se asocia solo; con dos, queda pendiente; cuota pagada no cambia.
+- [x] Regla de email del proveedor BBVA: remitente `avisos@bbva.com.ar`, asunto que contiene "PRESTAMOS", lectura del cuerpo (V15 si hace falta una regla nueva en `provider_email_rules`).
+- [x] Lector por patrón de la frase "La cuota {n} de su préstamo {tipo} {referencia}, por {moneda} {importe}, vence el {dd/mm/aaaa}" (importe con coma decimal). Si la frase no coincide, el email queda en "Detectado en tu correo" como no leído, sin tocar nada.
+- [x] Asociación: préstamo por referencia corta; si no hay, el único préstamo activo de BBVA (y se guarda la referencia); si hay varios, queda pendiente para que el usuario elija.
+- [x] Actualiza la cuota n: importe real (deja de ser estimado) y fecha de vencimiento si cambió. No toca cuotas con pagos. El mismo email no se procesa dos veces (como el resto de Gmail).
+- [x] Tests con el texto del ejemplo (anonimizado): importe 584292,14 → 584.292,14; fecha; préstamo único se asocia solo; con dos, queda pendiente; cuota pagada no cambia.
 
 ### Frontend
-- [ ] En la cuota: "Importe confirmado por el banco el 05/11" en lugar de "estimado".
-- [ ] En "Detectado en tu correo" (Integraciones): el aviso del préstamo con lo que se actualizó, o "¿A qué préstamo corresponde?" con un selector cuando hay varios.
+- [x] En la cuota: "Importe confirmado por el banco el 05/11" en lugar de "estimado".
+- [~] En "Detectado en tu correo": "Cuota actualizada" o el motivo (sin selector: con varios préstamos del banco se carga la referencia editando el préstamo).
 
 **Listo cuando:** con Gmail conectado, llega el aviso de la cuota 10 y su vencimiento pasa de estimado a $ 584.292,14 con vencimiento 07/11, sin tocar nada.
 
@@ -161,14 +161,14 @@ Hoy Gmail se revisa cada 15 minutos para todos (`app.integrations.sync-every`). 
 - "Revisar ahora" (Integraciones) sigue funcionando con cualquier opción.
 
 ### Backend
-- [ ] Migración: `users.email_check_interval` (`15M`, `1H`, `6H`, `DAILY`, `MANUAL`; por defecto `15M`).
-- [ ] `PUT /users/me/email-check-interval` y el valor en `GET /users/me` (como la billetera: endpoint propio para no pisar el resto del perfil).
-- [ ] `GmailSyncUseCase`: antes de revisar una cuenta, compara `last_sync_at` con el intervalo de su usuario; `DAILY` revisa una vez por día desde las 8 en la zona del usuario; `MANUAL` nunca en automático.
-- [ ] Tests: con 1 hora no revisa a los 30 minutos y sí a los 61; `DAILY` una sola vez por día; `MANUAL` nunca en automático pero sí con "Revisar ahora".
+- [x] Migración: `users.email_check_interval` (`15M`, `1H`, `6H`, `DAILY`, `MANUAL`; por defecto `15M`).
+- [x] `PUT /users/me/email-check-interval` y el valor en `GET /users/me` (como la billetera: endpoint propio para no pisar el resto del perfil).
+- [x] `GmailSyncUseCase`: antes de revisar una cuenta, compara `last_sync_at` con el intervalo de su usuario; `DAILY` revisa una vez por día desde las 8 en la zona del usuario; `MANUAL` nunca en automático.
+- [x] Tests: con 1 hora no revisa a los 30 minutos y sí a los 61; `DAILY` una sola vez por día; `MANUAL` nunca en automático pero sí con "Revisar ahora".
 
 ### Frontend
-- [ ] Mi perfil → sección **Correo**: "Revisar mis emails" con las cinco opciones y Guardar; solo se ve si el usuario tiene Gmail conectado (si no, un link a Integraciones).
-- [ ] En Integraciones, junto a la cuenta: "Se revisa cada hora · última revisión 10:15".
+- [x] Mi perfil → sección **Correo**: "Revisar mis emails" con las cinco opciones y Guardar; solo se ve si el usuario tiene Gmail conectado (si no, un link a Integraciones).
+- [x] En Integraciones, junto a la cuenta: "Se revisa cada hora · última revisión 10:15".
 
 **Listo cuando:** elijo "cada 6 horas" en Mi perfil y Gmail no se vuelve a revisar hasta 6 horas después de la última vez, salvo que toque "Revisar ahora".
 
@@ -177,7 +177,7 @@ Hoy Gmail se revisa cada 15 minutos para todos (`app.integrations.sync-every`). 
 ## Fuera de alcance
 
 - Plata prestada a otros (lo que me deben).
-- Calcular las cuotas a partir de tasa y plazo (sistema francés o alemán).
+- Sellados en el cálculo de cuotas; sistema alemán; préstamos UVA o de tasa variable (siguen con el importe cargado o el del banco).
 - Detectar en Gmail los comprobantes de alta y de pago (hoy se suben a mano); solo se detecta el aviso de cuota.
 - Avisos de otros bancos: se suman con su regla y su patrón (o con la IA del módulo 10) cuando haya ejemplos.
 - Refinanciaciones y renovaciones: se cancela el préstamo y se carga uno nuevo.

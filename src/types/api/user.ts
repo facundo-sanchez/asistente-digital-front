@@ -12,6 +12,9 @@ export interface PaymentWalletRequest {
   paymentWallet: PaymentWallet | null;
 }
 
+export const EMAIL_CHECK_INTERVALS = ["EVERY_15_MINUTES", "HOURLY", "EVERY_6_HOURS", "DAILY", "MANUAL"] as const;
+export type EmailCheckInterval = (typeof EMAIL_CHECK_INTERVALS)[number];
+
 export const PRICE_INCREASE_THRESHOLDS = [10, 20, 30, 50] as const;
 export type PriceIncreaseThreshold = (typeof PRICE_INCREASE_THRESHOLDS)[number];
 
@@ -33,6 +36,8 @@ export interface UserResponse {
   paymentWallet: PaymentWallet | null;
   /** Desde qué % de aumento de una factura se avisa. */
   priceIncreaseThreshold: PriceIncreaseThreshold;
+  /** Cada cuánto se revisa su correo (Gmail). */
+  emailCheckInterval: EmailCheckInterval;
   createdAt: ISODateTime;
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { EMAIL_CHECK_LABELS } from "@/lib/email-check-intervals";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Alert from "@mui/material/Alert";
@@ -11,13 +12,13 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Typography from "@mui/material/Typography";
-import type { IntegrationResponse } from "@/types/api";
+import type { EmailCheckInterval, IntegrationResponse } from "@/types/api";
 import { formatDay } from "@/lib/dates";
 import { integrationsApi } from "../api";
 import { ConnectGmail } from "./ConnectGmail";
 
 /** Una cuenta de Gmail conectada: cuándo se sincronizó, sincronizar ahora y desconectar. */
-export function GmailAccount({ integration }: { integration: IntegrationResponse }) {
+export function GmailAccount({ integration, interval }: { integration: IntegrationResponse; interval?: EmailCheckInterval }) {
   const router = useRouter();
   const [syncing, setSyncing] = useState(false);
   const [message, setMessage] = useState<{ severity: "success" | "error"; text: string } | null>(null);
@@ -65,7 +66,8 @@ export function GmailAccount({ integration }: { integration: IntegrationResponse
           {integration.lastSyncAt
             ? `Última revisión: ${formatDay(integration.lastSyncAt)}`
             : "Todavía no se revisó: la primera vuelta es en unos minutos."}
-          {" · Revisamos tu correo cada 15 minutos."}
+          {" · "}
+          {interval ? `${EMAIL_CHECK_LABELS[interval]} (lo cambiás en Mi perfil).` : ""}
         </Typography>
       </Box>
       {needsReconnect ? (

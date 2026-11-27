@@ -4,7 +4,7 @@ import type { ISODateTime, JsonObject, UUID } from "./common";
 export const MESSAGE_ROLES = ["USER", "ASSISTANT", "TOOL", "SYSTEM"] as const;
 export type MessageRole = (typeof MESSAGE_ROLES)[number];
 
-export const REFERENCE_TYPES = ["OBLIGATION", "INVOICE", "SERVICE", "DOCUMENT"] as const;
+export const REFERENCE_TYPES = ["OBLIGATION", "INVOICE", "SERVICE", "DOCUMENT", "LOAN"] as const;
 export type ReferenceType = (typeof REFERENCE_TYPES)[number];
 
 /** Un registro que usó la respuesta (metadata.references de un mensaje del asistente). */

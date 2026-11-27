@@ -108,6 +108,8 @@ export const DOCUMENT_TYPES = [
   "POLICY",
   "CONTRACT",
   "PERSONAL_ID",
+  "LOAN_CONTRACT",
+  "LOAN_RECEIPT",
   "OTHER",
 ] as const;
 export type DocumentType = (typeof DOCUMENT_TYPES)[number];

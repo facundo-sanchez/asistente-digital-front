@@ -2,5 +2,5 @@
 export interface NavItem {
   label: string;
   href: string;
-  icon: "dashboard" | "services" | "invoices" | "cards" | "obligations" | "documents" | "integrations" | "assistant" | "profile";
+  icon: "dashboard" | "services" | "invoices" | "cards" | "obligations" | "documents" | "integrations" | "assistant" | "loans" | "profile";
 }

@@ -44,6 +44,9 @@ export function ObligationDetails({
     ...(payment
       ? [["Código de pago", <PaymentCode key="code" code={payment.code} payable target={payment.target} />] as [string, ReactNode]]
       : []),
+    ...(obligation.loanId
+      ? [["Préstamo", <TextLink key="loan" href={`/loans/${obligation.loanId}`}>Ver el préstamo y sus cuotas</TextLink>] as [string, ReactNode]]
+      : []),
     ...(statementId
       ? [["Resumen", <TextLink key="statement" href={`/card-statements/${statementId}`}>Ver resumen de la tarjeta</TextLink>] as [string, ReactNode]]
       : []),
