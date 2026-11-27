@@ -19,6 +19,7 @@ export const OBLIGATION_TYPES = [
   "SUBSCRIPTION",
   "MAINTENANCE",
   "RENT",
+  "LOAN",
   "OTHER",
 ] as const;
 export type ObligationType = (typeof OBLIGATION_TYPES)[number];
@@ -58,6 +59,9 @@ export interface ObligationResponse {
   invoiceId: UUID | null;
   assetId: UUID | null;
   recurrenceId: UUID | null;
+  /** Cuota de un préstamo: el préstamo y el número de cuota (null si no es cuota). */
+  loanId: UUID | null;
+  installmentNumber: number | null;
   title: string;
   description: string | null;
   obligationType: ObligationType;

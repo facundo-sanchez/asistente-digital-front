@@ -4,7 +4,7 @@
 > Al terminar una parte: marcar `[x]`, cambiar su estado en la tabla y anotar la fecha.
 > Visión general: [ROADMAP-MODULOS.md](./ROADMAP-MODULOS.md). Reutiliza vencimientos, pagos, avisos y documentos (módulos 3, 4 y 8) y la lectura con IA (módulo 9). Criterio de código: simple, sin abstracciones de más.
 
-**Estado (26/11/2026):** plan listo, sin empezar. La migración será la siguiente libre (hoy V17), no V14 como dice 13.1.
+**Estado (27/11/2026):** 13.1 y 13.2 hechas en `feature/prestamos-1-2` (backend y front), con tests. Cambios: la migración es V17 (recrea `v_obligations` para que vea las columnas nuevas); la **lectura con IA del comprobante de alta pasa a 13.3**, junto con la del comprobante de pago (misma infraestructura); por ahora el contrato se adjunta con el tipo de documento existente `CONTRACT`. El estado "Pagado" se calcula (sin cuotas pendientes), no se guarda.
 
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
@@ -54,8 +54,8 @@ Consecuencias para el diseño:
 
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 13.1 | Alta del préstamo (a mano o desde el comprobante de alta) y sus cuotas como vencimientos | `feature/prestamos-1-2` (junto con 13.2) | — | [ ] |
-| 13.2 | Ficha: cuánto falta, cronograma, cambiar importe, cancelar | `feature/prestamos-1-2` | 13.1 | [ ] |
+| 13.1 | Alta del préstamo (a mano o desde el comprobante de alta) y sus cuotas como vencimientos | `feature/prestamos-1-2` (junto con 13.2) | — | [~] |
+| 13.2 | Ficha: cuánto falta, cronograma, cambiar importe, cancelar | `feature/prestamos-1-2` | 13.1 | [x] |
 | 13.3 | Comprobante de pago de cuota: la IA lo lee y registra el pago en su cuota | `feature/prestamos-3-4` (junto con 13.4) | 13.2 | [ ] |
 | 13.4 | Préstamos en el inicio, en vencimientos y en el asistente | `feature/prestamos-3-4` | 13.2 | [ ] |
 | 13.5 | Aviso de cuota por email (Gmail): importe y fecha reales antes de pagar | `feature/prestamos-5-6` (junto con 13.6) | 13.2, módulo 10 | [ ] |
@@ -66,18 +66,18 @@ Consecuencias para el diseño:
 ## Parte 13.1 – Alta del préstamo
 
 ### Backend
-- [ ] Migración V14: tabla `loans` (usuario, entidad, nombre, número de préstamo, referencia corta del banco, moneda, capital, tasa fija/variable, TNA, fecha de alta, cantidad de cuotas, fecha de la primera cuota, documento del alta, último saldo del banco y su fecha, notas, estado `ACTIVE`/`PAID`/`CANCELLED`); único (usuario, número de préstamo); `obligations.loan_id` e `installment_number`; tipo de vencimiento `LOAN`; tipos de documento `LOAN_CONTRACT` y `LOAN_RECEIPT`.
-- [ ] `POST /loans`: valida (cuotas 1 a 360, importe > 0, ARS o USD, cuotas ya pagadas < total, número no repetido) y en una transacción crea el préstamo y sus N cuotas: el mismo día de cada mes que la primera (si el mes no lo tiene, el último), título "Préstamo {nombre} · cuota n/N", importe estimado; las ya pagadas quedan pagadas.
+- [x] Migración V14: tabla `loans` (usuario, entidad, nombre, número de préstamo, referencia corta del banco, moneda, capital, tasa fija/variable, TNA, fecha de alta, cantidad de cuotas, fecha de la primera cuota, documento del alta, último saldo del banco y su fecha, notas, estado `ACTIVE`/`PAID`/`CANCELLED`); único (usuario, número de préstamo); `obligations.loan_id` e `installment_number`; tipo de vencimiento `LOAN`; tipos de documento `LOAN_CONTRACT` y `LOAN_RECEIPT`.
+- [x] `POST /loans`: valida (cuotas 1 a 360, importe > 0, ARS o USD, cuotas ya pagadas < total, número no repetido) y en una transacción crea el préstamo y sus N cuotas: el mismo día de cada mes que la primera (si el mes no lo tiene, el último), título "Préstamo {nombre} · cuota n/N", importe estimado; las ya pagadas quedan pagadas.
 - [ ] Lectura del comprobante de alta (esquema `loan_contract/1` en el módulo 9): entidad, número, tipo, capital, moneda, tasa, TNA, fecha de alta. `POST /loans/from-document/{documentId}` devuelve la propuesta para completar.
 - [ ] Si se adjunta un comprobante de **pago** en el alta, la propuesta suma total de cuotas (pagada + pendientes), día de vencimiento, importe de referencia, cuotas ya pagadas y saldo.
-- [ ] `GET /loans` (cuotas pagadas y pendientes, lo que falta pagar, saldo del banco, próxima cuota) y `GET /loans/{id}`.
-- [ ] Tests: N cuotas con fechas correctas (31/1 → 28/2), cuotas ya pagadas, número repetido, aislamiento; lectura con el comprobante de ejemplo (fixture **anonimizado**: sin titular, CUIT, domicilio ni cuenta reales).
+- [x] `GET /loans` (cuotas pagadas y pendientes, lo que falta pagar, saldo del banco, próxima cuota) y `GET /loans/{id}`.
+- [x] Tests: N cuotas con fechas correctas (31/1 → 28/2), cuotas ya pagadas, número repetido, aislamiento; lectura con el comprobante de ejemplo (fixture **anonimizado**: sin titular, CUIT, domicilio ni cuenta reales).
 
 ### Frontend
-- [ ] "Préstamos" en el menú: lista con entidad, cuota n/N, lo que falta por moneda y próxima fecha.
+- [x] "Préstamos" en el menú: lista con entidad, cuota n/N, lo que falta por moneda y próxima fecha.
 - [ ] Alta en dos caminos: **"Subir el comprobante"** (alta y, opcional, un pago: la IA completa lo que puede y marca lo que falta) o **"Cargarlo a mano"**.
-- [ ] Formulario: entidad, nombre, número de préstamo, moneda, capital, tasa, cantidad de cuotas, importe de la cuota, fecha de la primera cuota, cuotas ya pagadas; los datos leídos por la IA se ven marcados para revisar.
-- [ ] Antes de guardar, vista previa: primera y última cuota y total estimado a pagar.
+- [x] Formulario: entidad, nombre, número de préstamo, moneda, capital, tasa, cantidad de cuotas, importe de la cuota, fecha de la primera cuota, cuotas ya pagadas; los datos leídos por la IA se ven marcados para revisar.
+- [x] Antes de guardar, vista previa: primera y última cuota y total estimado a pagar.
 
 **Listo cuando:** subo el comprobante de alta de BBVA, completo 30 cuotas que vencen los 7, y aparecen los 30 vencimientos con el capital y la tasa leídos.
 
@@ -86,16 +86,16 @@ Consecuencias para el diseño:
 ## Parte 13.2 – Ficha del préstamo
 
 ### Backend
-- [ ] `PATCH /loans/{id}/installments/{n}` (`amount`): cambia el importe de una cuota pendiente. Una cuota con pagos no se edita.
-- [ ] `POST /loans/{id}/cancel` (`reason`): cancela las cuotas pendientes y marca el préstamo `CANCELLED`.
-- [ ] El préstamo pasa a `PAID` cuando se paga su última cuota pendiente.
-- [ ] `PUT /loans/{id}`: editar nombre, entidad, notas y documento del alta (no cuotas ni montos).
-- [ ] Tests: editar cuota, no editar una pagada, cancelar deja las pagadas, `PAID` con la última.
+- [x] `PATCH /loans/{id}/installments/{n}` (`amount`): cambia el importe de una cuota pendiente. Una cuota con pagos no se edita.
+- [x] `POST /loans/{id}/cancel` (`reason`): cancela las cuotas pendientes y marca el préstamo `CANCELLED`.
+- [x] El préstamo pasa a `PAID` cuando se paga su última cuota pendiente.
+- [x] `PUT /loans/{id}`: editar nombre, entidad, notas y documento del alta (no cuotas ni montos).
+- [x] Tests: editar cuota, no editar una pagada, cancelar deja las pagadas, `PAID` con la última.
 
 ### Frontend
-- [ ] Ficha: **lo que falta pagar** (suma de cuotas pendientes, estimado) y **saldo de capital según el banco** (con su fecha), cada uno con su nombre; cuotas pagadas n de N con barra de progreso; fecha de la última cuota; total pagado; TNA y tipo de tasa.
-- [ ] Cronograma: cada cuota con fecha, importe (real o "estimado"), estado y link a su vencimiento; "Cambiar importe" en las pendientes.
-- [ ] Comprobante de alta con vista previa; "Cancelar el préstamo" con confirmación y motivo.
+- [x] Ficha: **lo que falta pagar** (suma de cuotas pendientes, estimado) y **saldo de capital según el banco** (con su fecha), cada uno con su nombre; cuotas pagadas n de N con barra de progreso; fecha de la última cuota; total pagado; TNA y tipo de tasa.
+- [x] Cronograma: cada cuota con fecha, importe (real o "estimado"), estado y link a su vencimiento; "Cambiar importe" en las pendientes.
+- [~] Comprobante de alta con vista previa (falta: se hace con 13.3); "Cancelar el préstamo" con confirmación y motivo.
 
 **Listo cuando:** pago la cuota 4 desde su vencimiento y la ficha muestra 4 de 30 pagadas y lo que falta actualizado.
 

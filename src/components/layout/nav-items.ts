@@ -10,6 +10,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: "Facturas", href: "/invoices", icon: "invoices" },
   { label: "Tarjetas", href: "/cards", icon: "cards" },
   { label: "Vencimientos", href: "/obligations", icon: "obligations" },
+  { label: "Préstamos", href: "/loans", icon: "loans" },
   { label: "Documentos", href: "/documents", icon: "documents" },
   { label: "Asistente", href: "/assistant", icon: "assistant" },
   { label: "Integraciones", href: "/integrations", icon: "integrations" },
