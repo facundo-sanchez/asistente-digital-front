@@ -4,6 +4,8 @@
 > Al terminar una parte: marcar `[x]`, cambiar su estado en la tabla y anotar la fecha.
 > Visión general: [ROADMAP-MODULOS.md](./ROADMAP-MODULOS.md). Reutiliza vencimientos, pagos, avisos y documentos (módulos 3, 4 y 8) y la lectura con IA (módulo 9). Criterio de código: simple, sin abstracciones de más.
 
+**Estado (26/11/2026):** plan listo, sin empezar. La migración será la siguiente libre (hoy V17), no V14 como dice 13.1.
+
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
 ## Objetivo

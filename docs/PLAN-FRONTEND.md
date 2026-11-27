@@ -13,17 +13,16 @@
 
 ## Estado actual (26/11/2026)
 
-- Hechos (front + backend, mergeados en `develop`): base y autenticación (módulos 0 y 1), servicios (2), documentos (3), vencimientos y pagos con recurrencias (4), facturas (5), tarjetas con resúmenes en pesos y dólares (6) e IA documental (9: resúmenes y facturas desde Excel, PDF o foto, con revisión y confirmación). Detalle por parte en los `MODULO-0N-*.md`.
-- Hecho, sin mergear (ramas `feature/dashboard-*`): **dashboard (7)** completo, 7.1 a 7.5; falta la prueba contra la base. También ahí: subir el comprobante desde el formulario del pago.
-- Hecho, sin mergear: **Gmail (10)** en `feature/gmail-*` y **consumos (11)** en `feature/consumos-1-2` (rubros, cuotas, informe, exportar).
-- Hecho, sin mergear (ramas `feature/notificaciones-*`): **notificaciones (8)** completo, 8.1 a 8.4: avisos en la app y por email, campana y preferencias.
+- **Hecho y mergeado en `develop` (front + backend):** módulos 0 a 12 (base, auth, servicios, documentos, vencimientos y pagos, facturas, tarjetas, dashboard, notificaciones, IA documental, Gmail, consumos e informe, asistente IA) y las mejoras 15 (app instalable y push), 16 (alerta de aumentos) y 17 (débito automático).
+- **Fuera de las fases:** presentación pública en la raíz, pagar con la billetera, remitente de facturas en proveedores propios, burbuja del asistente en el celular, Docker de producción y guía de despliegue.
+- **Sigue:** módulo 18 (suscripciones). Con plan: 13 (préstamos) y 14 (Outlook). Ver [ROADMAP-MODULOS.md](./ROADMAP-MODULOS.md).
 - Decisiones tomadas en el camino que cambian este plan: no se usó Redux ni material-react-table (Server Components + `fetch`, tablas propias "libro de cuentas"); fechas con `Intl` en vez de moment; filtros en la URL.
 
 ## Decisiones pendientes
 
 - [x] **Integración con proveedores (luz, gas, agua…):** vía email (Gmail, solo lectura) + extracción IA + confirmación del usuario. Sin APIs de proveedores ni scraping por ahora. (24/11/2026)
 - [x] **Autenticación:** JWT propio del backend (RS256 + refresh rotativo) y Next.js como BFF con cookies httpOnly. Better Auth descartado. Documentado en SPEC técnica §7.1. (24/11/2026)
-- [~] **basePath / nombre de la app:** ahora es configurable con `NEXT_PUBLIC_BASE_PATH` (vacío = raíz). Falta decidir el valor final (hoy los `.env` locales usan `/mi-balance`).
+- [x] **basePath / nombre de la app:** configurable con `NEXT_PUBLIC_BASE_PATH`; hoy `/asistente-digital` (la raíz es la presentación). En Vercel puede quedar vacío. (26/11/2026)
 - [x] **Estado del servidor:** sin Redux. Server Components + `fetch` al BFF, filtros en la URL y `router.refresh()` después de guardar (26/11/2026)
 - [ ] **Estilos:** definir cuándo se usa MUI y cuándo Tailwind, para no mezclarlos sin criterio.
 - [x] **Contratos API:** interfaces TypeScript escritas a mano en `src/types/api/`, espejo 1:1 de los DTOs Java (`interface` + uniones de strings para enums, no clases). Evaluar más adelante generarlas desde OpenAPI (`openapi-typescript`). (24/11/2026)
@@ -146,7 +145,7 @@
 - [x] Detalle del resumen: totales por moneda, obligaciones generadas (ARS / USD) y su estado de pago
 - [x] Aviso de resumen duplicado (misma tarjeta y fecha de vencimiento, RN-016)
 - [x] Campo "últimos 4 del número de cuenta" en la tarjeta, con ayuda: "figura en el email del resumen (ej. BBVA: Número de cuenta ****4521)"
-- [ ] (módulo 10) Resumen detectado por email sin PDF (ej. BBVA): mostrar totales y vencimiento, aviso "Subí el PDF para ver los consumos" (notificación `CARD_STATEMENT_AVAILABLE`) y botón de carga
+- [x] (módulo 10) Resumen detectado por email sin PDF (ej. BBVA): mostrar totales y vencimiento, aviso "Subí el PDF para ver los consumos" (notificación `CARD_STATEMENT_AVAILABLE`) y botón de carga
 - [x] Mostrar las obligaciones `CREDIT_CARD_PAYMENT` en obligaciones y en el dashboard
 
 ## Fase 7 – Dashboard (CU-012) 🔗
@@ -162,13 +161,13 @@
 
 ## Fase 8 – Notificaciones (CU-007) 🔗
 
-> Hecho en partes (8.1 a 8.4): ver [MODULO-08-NOTIFICACIONES.md](./MODULO-08-NOTIFICACIONES.md). Falta la prueba contra la base y el merge.
+> Hecho y mergeado (8.1 a 8.4): ver [MODULO-08-NOTIFICACIONES.md](./MODULO-08-NOTIFICACIONES.md). Probado con Mailpit.
 
 - [x] Campana en la barra con las no leídas y listado; pantalla `/notifications` (8.2)
 - [x] Marcar como leída y todas como leídas (8.1, 8.2)
 - [x] Preferencias en Mi perfil: canales (en la app, email), tipos de aviso y anticipación (8.3)
 - [x] Email diario con los avisos del día (8.4)
-- [ ] Web Push (post-MVP)
+- [x] Web Push y app instalable (módulo 15): sigue las preferencias de los avisos en la app; falta probar en un celular con HTTPS
 
 **✅ Fin del MVP (fase 1 de producto)**: verificar los criterios de aceptación de la especificación funcional §10.
 
@@ -207,25 +206,25 @@
 
 ## Fase 10 – Integraciones / Gmail (CU-003, CU-013) 🔗
 
-- [ ] Listado de integraciones disponibles y conectadas
+- [x] Listado de integraciones disponibles y conectadas
 > Vía elegida para proveedores (luz, gas, agua, internet): **email**. Flujo: Gmail → filtro por proveedor (`provider_email_rules`) → PDF → extracción IA → asociación al servicio por nro. de socio → confirmación del usuario.
 
-- [ ] Conectar Gmail (inicio de OAuth y página de callback con resultado)
-- [ ] Pantalla previa a OAuth: explicar el permiso de solo lectura y qué correos se analizan
-- [ ] Elegir desde cuándo importar (solo nuevos / últimos 3 / 6 / 12 meses → `sync_from`)
-- [ ] Detalle: estado, permisos y última sincronización; botón "Sincronizar"
-- [ ] Desconectar (con confirmación, aclarando que no se borra el historial, RN-011)
-- [ ] Aviso de "reconexión requerida" cuando vence la autorización (`REAUTH_REQUIRED`)
-- [ ] "Detectado en tu correo": lista de mensajes procesados (remitente, asunto, fecha, resultado: importado / descartado / duplicado)
-- [ ] Factura de un proveedor sin servicio registrado o con nro. de socio desconocido: proponer crear o vincular el servicio
-- [ ] Confirmar las facturas detectadas (reutiliza la pantalla de revisión de la Fase 9)
+- [x] Conectar Gmail (inicio de OAuth y página de callback con resultado)
+- [x] Pantalla previa a OAuth: explicar el permiso de solo lectura y qué correos se analizan
+- [x] Elegir desde cuándo importar (solo nuevos / últimos 3 / 6 / 12 meses → `sync_from`)
+- [x] Detalle: estado, permisos y última sincronización; botón "Sincronizar"
+- [x] Desconectar (con confirmación, aclarando que no se borra el historial, RN-011)
+- [x] Aviso de "reconexión requerida" cuando vence la autorización (`REAUTH_REQUIRED`)
+- [x] "Detectado en tu correo": lista de mensajes procesados (remitente, asunto, fecha, resultado: importado / descartado / duplicado)
+- [x] Factura de un proveedor sin servicio registrado o con nro. de socio desconocido: proponer crear o vincular el servicio
+- [x] Confirmar las facturas detectadas (reutiliza la pantalla de revisión de la Fase 9)
 
 ## Fase 11 – Asistente IA (CU-008) 🔗
 
-- [ ] Lista de conversaciones: crear y eliminar
-- [ ] Chat (evaluar `@mui/x-chat`) con streaming SSE
-- [ ] Respuestas con referencias y enlaces a los registros (facturas, obligaciones)
-- [ ] Sugerencias de consultas frecuentes
+- [x] Lista de conversaciones: crear y eliminar
+- [x] Chat propio con streaming SSE (sin `@mui/x-chat`), burbuja flotante en el celular
+- [x] Respuestas con referencias y enlaces a los registros (facturas, obligaciones)
+- [x] Sugerencias de consultas frecuentes
 
 ## Fase 12 – Bienes y futuro (CU-010) 🔗
 
@@ -244,7 +243,7 @@
 - [ ] E2E con Playwright de los flujos MVP: login → servicio → factura → obligación → pago
 - [ ] No exponer secretos ni tokens en el cliente (SPEC §10.2)
 - [ ] Mensajes de error claros a partir de Problem Details
-- [ ] Docker de producción actualizado y probado con el backend
+- [x] Docker de producción actualizado y probado con el backend (compose local y de producción)
 
 ## Registro de avances
 
@@ -267,3 +266,5 @@
 | 26/11/2026 | Plan del módulo 8 (notificaciones) |
 | 26/11/2026 | Módulo 8 (notificaciones) hecho en `feature/notificaciones-*`: avisos por umbral sin duplicados, campana, preferencias por canal y email diario con reintentos |
 | 26/11/2026 | Módulo 10 (Gmail) y módulo 11 (consumos: rubros por comercio, cuotas unidas, informe, cuotas pendientes, Excel y PDF del resumen) hechos, sin mergear |
+| 26/11/2026 | Mergeados en `develop`: módulos 10 (Gmail), 11 (consumos), 12 (asistente IA), 15 (app instalable y push), 16 (aumentos), 17 (débito automático), la presentación pública, pagar con la billetera, el remitente de proveedores propios y el despliegue con Docker |
+| 26/11/2026 | Planes de los módulos 13 (préstamos), 14 (Outlook) y 18 (suscripciones), y resumen de las mejoras 15 a 24 |

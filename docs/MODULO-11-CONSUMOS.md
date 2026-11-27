@@ -4,7 +4,7 @@
 > Al terminar una parte: marcar `[x]`, cambiar su estado en la tabla y anotar la fecha.
 > Visión general: [ROADMAP-MODULOS.md](./ROADMAP-MODULOS.md). Casos de uso: CU-016 (consumos), CU-017 (informe). Reglas: RN-017 (solo resúmenes confirmados), RN-018 (monedas por separado), RN-019 (regla por comercio), RN-020 (cuotas entre resúmenes). Criterio de código: simple, sin abstracciones de más.
 
-**Estado (26/11/2026):** las 5 partes hechas en `feature/consumos-1-2` (backend y front), con tests; falta la prueba contra la base y con un resumen real. Cambios respecto del plan: la PDF es la versión para imprimir del resumen (`/card-statements/{id}/print`, "Guardar como PDF" del navegador); el informe usa el mes de cierre (como el banco). Las consultas del informe (JPQL sobre `v_card_spending`) todavía no corrieron contra Postgres.
+**Estado (26/11/2026):** las 5 partes hechas y mergeadas en `develop`, con tests; falta validar el informe con varios resúmenes reales. Cambios respecto del plan: la PDF es la versión para imprimir del resumen (`/card-statements/{id}/print`, "Guardar como PDF" del navegador); el informe usa el mes de cierre (como el banco). Las consultas del informe (JPQL sobre `v_card_spending`) todavía no corrieron contra Postgres.
 
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
@@ -33,11 +33,11 @@ Saber en qué se va la plata de la tarjeta: cada consumo con su rubro, cuánto f
 
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 11.1 | Rubros: la IA los propone, reglas por comercio, corregir en el resumen | `feature/consumos-1-2` (junto con 11.2) | — | [~] |
-| 11.2 | Cuotas: unir entre resúmenes y cuotas pendientes | `feature/consumos-1-2` | — | [~] |
-| 11.3 | Informe de consumos con filtros y gráficos | `feature/consumos-3-5` (junto con 11.4 y 11.5) | 11.1 | [~] |
-| 11.4 | Exportar el resumen a Excel y PDF | `feature/consumos-3-5` | — | [~] |
-| 11.5 | Sumar los consumos a un resumen que llegó sin ellos | `feature/consumos-3-5` | — | [~] |
+| 11.1 | Rubros: la IA los propone, reglas por comercio, corregir en el resumen | `feature/consumos-1-2` (junto con 11.2) | — | [x] |
+| 11.2 | Cuotas: unir entre resúmenes y cuotas pendientes | `feature/consumos-1-2` | — | [x] |
+| 11.3 | Informe de consumos con filtros y gráficos | `feature/consumos-3-5` (junto con 11.4 y 11.5) | 11.1 | [x] |
+| 11.4 | Exportar el resumen a Excel y PDF | `feature/consumos-3-5` | — | [x] |
+| 11.5 | Sumar los consumos a un resumen que llegó sin ellos | `feature/consumos-3-5` | — | [x] |
 
 ---
 

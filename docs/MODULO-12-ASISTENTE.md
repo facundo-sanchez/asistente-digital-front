@@ -4,7 +4,7 @@
 > Al terminar una parte: marcar `[x]`, cambiar su estado en la tabla y anotar la fecha.
 > Visión general: [ROADMAP-MODULOS.md](./ROADMAP-MODULOS.md). Caso de uso: CU-008. SPEC técnica: 4.8 (módulo `assistant`), 6.9 (API), 9.5 (herramientas controladas). Criterio de código: simple, sin abstracciones de más.
 
-**Estado (26/11/2026):** las 4 partes hechas (12.1–12.2 en `feature/asistente-1-2`, 12.3–12.4 en `feature/asistente-3-4`) (backend y front), con tests; falta probarlas con Gemini real (sobre todo el streaming con herramientas). En el celular el asistente es una burbuja flotante en toda la app. Detener deja de mostrar la respuesta, pero el servidor la termina y la guarda. Los errores de Gemini responden 503 y la cuota 429. Cambios: se usó el esqueleto del módulo que ya existía (la respuesta trae `metadata.references` y `metadata.tools`); las sugerencias de la conversación vacía y el título con la primera pregunta se adelantaron de 12.3; `monthTotal(month)` quedó como `monthSummary()` (el mes actual) y `serviceSpending` como `servicePayments()`.
+**Estado (26/11/2026):** las 4 partes hechas y mergeadas en `develop`, probadas con Gemini (backend y front), con tests; falta probarlas con Gemini real (sobre todo el streaming con herramientas). En el celular el asistente es una burbuja flotante en toda la app. Detener deja de mostrar la respuesta, pero el servidor la termina y la guarda. Los errores de Gemini responden 503 y la cuota 429. Cambios: se usó el esqueleto del módulo que ya existía (la respuesta trae `metadata.references` y `metadata.tools`); las sugerencias de la conversación vacía y el título con la primera pregunta se adelantaron de 12.3; `monthTotal(month)` quedó como `monthSummary()` (el mes actual) y `serviceSpending` como `servicePayments()`.
 
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
@@ -35,10 +35,10 @@ Preguntarle a la app en lenguaje natural por tus datos: "¿Qué vence esta seman
 
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 12.1 | Conversaciones y chat básico (sin datos) | `feature/asistente-1-2` (junto con 12.2) | — | [~] |
-| 12.2 | Herramientas: responde con tus datos y con links | `feature/asistente-1-2` | 12.1 | [~] |
-| 12.3 | Respuesta progresiva (SSE), título automático y sugerencias | `feature/asistente-3-4` (junto con 12.4) | 12.2 | [~] |
-| 12.4 | Límites y cuidado: cuota por hora, errores del modelo, auditoría | `feature/asistente-3-4` | 12.2 | [~] |
+| 12.1 | Conversaciones y chat básico (sin datos) | `feature/asistente-1-2` (junto con 12.2) | — | [x] |
+| 12.2 | Herramientas: responde con tus datos y con links | `feature/asistente-1-2` | 12.1 | [x] |
+| 12.3 | Respuesta progresiva (SSE), título automático y sugerencias | `feature/asistente-3-4` (junto con 12.4) | 12.2 | [x] |
+| 12.4 | Límites y cuidado: cuota por hora, errores del modelo, auditoría | `feature/asistente-3-4` | 12.2 | [x] |
 
 ---
 

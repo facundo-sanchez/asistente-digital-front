@@ -4,6 +4,8 @@
 > Al terminar una parte: marcar `[x]`, cambiar su estado en la tabla y anotar la fecha.
 > Visión general: [ROADMAP-MODULOS.md](./ROADMAP-MODULOS.md) y [MEJORAS-15-24.md](./MEJORAS-15-24.md). Usa los consumos del módulo 11. Criterio de código: simple, sin abstracciones de más.
 
+**Estado (26/11/2026):** plan listo, sin empezar.
+
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
 ## Objetivo

@@ -10,7 +10,7 @@
 | 15 | App instalable (PWA) y notificaciones push | `feature/push-1-2` | 8 | [x] |
 | 16 | Alerta de aumentos de servicios | `feature/aumentos` | 5, 8 | [x] |
 | 17 | Débito automático | `feature/debito-automatico` | 2, 4 | [x] |
-| 18 | Suscripciones en la tarjeta | `feature/suscripciones` | 11 | [ ] |
+| 18 | Suscripciones en la tarjeta | `feature/suscripciones` | 11 | [ ] plan listo |
 | 19 | Calendario (link iCal) | `feature/calendario` | 4 | [ ] |
 | 20 | Presupuesto del mes | `feature/presupuesto` | 11 | [ ] |
 | 21 | Bienes (auto, casa, electrodomésticos) | `feature/bienes-<n>-*` | 3, 4 | [ ] |
@@ -18,7 +18,7 @@
 | 23 | Hogar compartido | `feature/hogar-<n>-*` | todos | [ ] |
 | 24 | Seguridad: verificación en dos pasos y sesiones | `feature/seguridad` | 1 | [ ] |
 
-Orden acordado: **17, 16 y 15** primero (débito automático, aumentos, push); después 18 y 19.
+Orden acordado: **17, 16 y 15** primero (hechos y mergeados el 26/11/2026); sigue el 18 (plan propio en [MODULO-18-SUSCRIPCIONES.md](./MODULO-18-SUSCRIPCIONES.md)) y el 19.
 
 ---
 

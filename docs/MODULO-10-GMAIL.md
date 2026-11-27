@@ -4,6 +4,8 @@
 > Al terminar una parte: marcar `[x]`, cambiar su estado en la tabla y anotar la fecha.
 > Visión general: [ROADMAP-MODULOS.md](./ROADMAP-MODULOS.md). Casos de uso: CU-003 (integrar una cuenta de correo), CU-013 (administrar integraciones), CU-015 (resumen detectado por email). Reglas: RN-007 (consentimiento para la IA), RN-011 (desconectar no borra el historial), RN-016. Criterio de código: simple, sin abstracciones de más.
 
+**Estado (26/11/2026):** las 4 partes hechas y mergeadas en `develop`; probado con Gmail real (facturas de Camuzzi y Personal). Después se sumó el remitente de facturas en proveedores propios (ver ROADMAP).
+
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
 ## Objetivo
@@ -34,10 +36,10 @@ Que el usuario no tenga que bajar ni subir nada: conecta su Gmail una vez y las 
 
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 10.1 | Conectar y desconectar Gmail: pantalla Integraciones, OAuth, tokens cifrados | `feature/gmail-1-2` (junto con 10.2) | — | [~] |
-| 10.2 | Sincronización: busca por reglas, guarda los adjuntos (o el texto del email) y los manda a la IA | `feature/gmail-1-2` | 10.1 | [~] |
-| 10.3 | Resumen sin PDF en el cuerpo (BBVA) y facturas de proveedores sin servicio | `feature/gmail-3-4` (junto con 10.4) | 10.2 | [~] |
-| 10.4 | "Detectado en tu correo", reconexión y avisos | `feature/gmail-3-4` | 10.2 | [~] |
+| 10.1 | Conectar y desconectar Gmail: pantalla Integraciones, OAuth, tokens cifrados | `feature/gmail-1-2` (junto con 10.2) | — | [x] |
+| 10.2 | Sincronización: busca por reglas, guarda los adjuntos (o el texto del email) y los manda a la IA | `feature/gmail-1-2` | 10.1 | [x] |
+| 10.3 | Resumen sin PDF en el cuerpo (BBVA) y facturas de proveedores sin servicio | `feature/gmail-3-4` (junto con 10.4) | 10.2 | [x] |
+| 10.4 | "Detectado en tu correo", reconexión y avisos | `feature/gmail-3-4` | 10.2 | [x] |
 
 Orden recomendado: 10.1 → 10.2 → 10.3 → 10.4. Con 10.1 y 10.2 las facturas ya llegan solas.
 
