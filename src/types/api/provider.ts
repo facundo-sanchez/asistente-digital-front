@@ -11,6 +11,8 @@ export interface ProviderResponse {
   /** true si lo creó el usuario (no es del catálogo). */
   custom: boolean;
   active: boolean;
+  /** Solo en proveedores propios: dirección o dominio desde el que llegan sus facturas. */
+  invoiceSender: string | null;
 }
 
 /** Alta de un proveedor propio del usuario. */
@@ -18,4 +20,6 @@ export interface ProviderRequest {
   name: string;
   category: ServiceCategory;
   website?: string | null;
+  /** Dirección (info@empresa.com.ar) o dominio (empresa.com.ar) de sus facturas; vacío = ninguno. */
+  invoiceSender?: string | null;
 }
