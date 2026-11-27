@@ -27,6 +27,7 @@
 | 11 | **Consumos e informe de tarjeta** | `feature/consumos-<n>-*` (5 partes, ver [MODULO-11-CONSUMOS.md](./MODULO-11-CONSUMOS.md)) | Vistas del informe, categorías y reglas por comercio (los movimientos con cuota n de m, cuotas pagas y monto se guardan desde el módulo 9) | Informe y cuotas; **exportar el resumen a PDF y Excel** | 6, 9 | [~] 5/5 partes, falta probar contra la base |
 | 12 | **Asistente IA** | `feature/asistente-<n>-*` (4 partes, ver [MODULO-12-ASISTENTE.md](./MODULO-12-ASISTENTE.md)) | Herramientas sobre los módulos anteriores | Chat | todo lo anterior | [ ] |
 | 13 | **Préstamos** (tomados) | `feature/prestamos-<n>-*` (6 partes, ver [MODULO-13-PRESTAMOS.md](./MODULO-13-PRESTAMOS.md)) | Préstamo con sus cuotas como vencimientos; comprobantes de alta y de pago leídos con IA; aviso de cuota por Gmail; frecuencia de lectura de emails en Mi perfil | Lista, alta desde el comprobante, ficha, pago de cuota | 4, 8, 9, 10 | [ ] |
+| 14 | **Outlook** | `feature/outlook-<n>-*` (3 partes, ver [MODULO-14-OUTLOOK.md](./MODULO-14-OUTLOOK.md)) | Gmail pasa a ser un correo entre dos; Microsoft Graph con `Mail.Read` | Conectar Outlook, cuentas por proveedor | 10 | [ ] |
 
 Módulos 0 a 8 = **MVP**. Desde el 9: automatización e IA.
 
