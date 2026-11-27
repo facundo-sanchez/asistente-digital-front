@@ -22,11 +22,13 @@ Registrar los préstamos que tomó el usuario (banco, financiera, una persona) y
 | Comprobante | Datos que trae | Lo que **no** trae |
 |---|---|---|
 | **Alta** ("Concepto: ALTA") | número de préstamo, tipo (préstamo personal), capital, moneda, tasa fija o variable, TNA, CFTEA, fecha de alta | cantidad de cuotas, importe de la cuota, fecha de la primera cuota |
+| **Aviso por email** (avisos@bbva.com.ar, asunto "Mensajes y avisos por e-mail - PRESTAMOS", unos días antes) | número de cuota, referencia corta del préstamo (ej. "203/2"), moneda, importe real y fecha de vencimiento, en una frase fija: "La cuota 10 de su préstamo personal 203/2, por ars 584292,14, vence el 07/11/2026." | el número largo del préstamo, el saldo, el desglose |
 | **Pago de cuota** ("Concepto: PAGO DE RECIBO") | número de préstamo, monto del préstamo, fecha de desembolso, número de cuota pagada, cuotas pendientes, fecha de vencimiento de la cuota, fecha de pago, importe total, desglose (capital, intereses, IVA, sellados), saldo anterior y nuevo saldo | — |
 
 Consecuencias para el diseño:
 - El alta solo con su comprobante no alcanza para armar el cronograma: la cantidad de cuotas, el importe y la primera fecha los completa el usuario, o salen de un comprobante de pago (cuota pagada + pendientes = total; el día de vencimiento; el importe).
 - El importe de la cuota cambia mes a mes aunque la tasa sea fija (sistema francés: baja el interés y con él el IVA). Por eso **todas** las cuotas se tratan como estimadas hasta que llega su comprobante.
+- El aviso por email llega **antes** del vencimiento con el importe real: con Gmail conectado, la cuota deja de ser estimada sin que el usuario haga nada. Pero usa una referencia corta ("203/2") distinta del número del comprobante, así que el préstamo guarda también esa referencia.
 - El "saldo" del banco es **capital adeudado**, no lo que falta pagar (las cuotas suman además intereses, IVA y sellados). La ficha muestra los dos, cada uno con su nombre.
 
 ## Decisiones
@@ -38,6 +40,8 @@ Consecuencias para el diseño:
 | Importe de las cuotas | El de la cuota informada (o el que pone el usuario), marcado como estimado; el comprobante de pago lo reemplaza por el real | Sin calcular amortización ni tasas: el banco manda el importe |
 | Identificar el préstamo | Por número de préstamo (único por usuario) | Así un comprobante de pago encuentra su préstamo y su cuota sin que el usuario elija |
 | Comprobantes | Se guardan como documentos (tipos nuevos `LOAN_CONTRACT` y `LOAN_RECEIPT`) y se leen con la IA del módulo 9, con revisión antes de confirmar (RN de siempre: nada se registra sin confirmar) | Reutiliza la cola, Gemini y la pantalla de revisión |
+| Aviso de cuota por email | Lo detecta Gmail (módulo 10) con una regla del proveedor BBVA por remitente y asunto, y lo lee **con un patrón, sin IA** (la frase es fija; no gasta cuota de Gemini). Actualiza importe y fecha de la cuota; no registra ningún pago | El importe real llega antes de pagar, sin intervención |
+| Referencia corta del préstamo | Se guarda en el préstamo la primera vez que llega un aviso: si el usuario tiene un solo préstamo de esa entidad se asocia solo; si tiene varios, se le pregunta a cuál corresponde y se recuerda | El aviso no trae el número largo |
 | Saldo del banco | Se guarda el último "nuevo saldo" leído, con su fecha | Es el dato que el banco usa para cancelar anticipadamente |
 | Moneda | ARS o USD, por separado (RN-018); UVA = ARS con cuota variable | Igual que el resto de la app |
 | Cuotas ya pagadas al cargar | Se indica cuántas: se crean pagadas, sin comprobante | Cargar un préstamo en curso sin inventar pagos |
@@ -52,13 +56,14 @@ Consecuencias para el diseño:
 | 13.2 | Ficha: cuánto falta, cronograma, cambiar importe, cancelar | `feature/prestamos-1-2` | 13.1 | [ ] |
 | 13.3 | Comprobante de pago de cuota: la IA lo lee y registra el pago en su cuota | `feature/prestamos-3-4` (junto con 13.4) | 13.2 | [ ] |
 | 13.4 | Préstamos en el inicio, en vencimientos y en el asistente | `feature/prestamos-3-4` | 13.2 | [ ] |
+| 13.5 | Aviso de cuota por email (Gmail): importe y fecha reales antes de pagar | `feature/prestamos-5` | 13.2, módulo 10 | [ ] |
 
 ---
 
 ## Parte 13.1 – Alta del préstamo
 
 ### Backend
-- [ ] Migración V14: tabla `loans` (usuario, entidad, nombre, número de préstamo, moneda, capital, tasa fija/variable, TNA, fecha de alta, cantidad de cuotas, fecha de la primera cuota, documento del alta, último saldo del banco y su fecha, notas, estado `ACTIVE`/`PAID`/`CANCELLED`); único (usuario, número de préstamo); `obligations.loan_id` e `installment_number`; tipo de vencimiento `LOAN`; tipos de documento `LOAN_CONTRACT` y `LOAN_RECEIPT`.
+- [ ] Migración V14: tabla `loans` (usuario, entidad, nombre, número de préstamo, referencia corta del banco, moneda, capital, tasa fija/variable, TNA, fecha de alta, cantidad de cuotas, fecha de la primera cuota, documento del alta, último saldo del banco y su fecha, notas, estado `ACTIVE`/`PAID`/`CANCELLED`); único (usuario, número de préstamo); `obligations.loan_id` e `installment_number`; tipo de vencimiento `LOAN`; tipos de documento `LOAN_CONTRACT` y `LOAN_RECEIPT`.
 - [ ] `POST /loans`: valida (cuotas 1 a 360, importe > 0, ARS o USD, cuotas ya pagadas < total, número no repetido) y en una transacción crea el préstamo y sus N cuotas: el mismo día de cada mes que la primera (si el mes no lo tiene, el último), título "Préstamo {nombre} · cuota n/N", importe estimado; las ya pagadas quedan pagadas.
 - [ ] Lectura del comprobante de alta (esquema `loan_contract/1` en el módulo 9): entidad, número, tipo, capital, moneda, tasa, TNA, fecha de alta. `POST /loans/from-document/{documentId}` devuelve la propuesta para completar.
 - [ ] Si se adjunta un comprobante de **pago** en el alta, la propuesta suma total de cuotas (pagada + pendientes), día de vencimiento, importe de referencia, cuotas ya pagadas y saldo.
@@ -126,9 +131,27 @@ Consecuencias para el diseño:
 
 ---
 
+## Parte 13.5 – Aviso de cuota por email
+
+### Backend
+- [ ] Regla de email del proveedor BBVA: remitente `avisos@bbva.com.ar`, asunto que contiene "PRESTAMOS", lectura del cuerpo (V15 si hace falta una regla nueva en `provider_email_rules`).
+- [ ] Lector por patrón de la frase "La cuota {n} de su préstamo {tipo} {referencia}, por {moneda} {importe}, vence el {dd/mm/aaaa}" (importe con coma decimal). Si la frase no coincide, el email queda en "Detectado en tu correo" como no leído, sin tocar nada.
+- [ ] Asociación: préstamo por referencia corta; si no hay, el único préstamo activo de BBVA (y se guarda la referencia); si hay varios, queda pendiente para que el usuario elija.
+- [ ] Actualiza la cuota n: importe real (deja de ser estimado) y fecha de vencimiento si cambió. No toca cuotas con pagos. El mismo email no se procesa dos veces (como el resto de Gmail).
+- [ ] Tests con el texto del ejemplo (anonimizado): importe 584292,14 → 584.292,14; fecha; préstamo único se asocia solo; con dos, queda pendiente; cuota pagada no cambia.
+
+### Frontend
+- [ ] En la cuota: "Importe confirmado por el banco el 05/11" en lugar de "estimado".
+- [ ] En "Detectado en tu correo" (Integraciones): el aviso del préstamo con lo que se actualizó, o "¿A qué préstamo corresponde?" con un selector cuando hay varios.
+
+**Listo cuando:** con Gmail conectado, llega el aviso de la cuota 10 y su vencimiento pasa de estimado a $ 584.292,14 con vencimiento 07/11, sin tocar nada.
+
+---
+
 ## Fuera de alcance
 
 - Plata prestada a otros (lo que me deben).
 - Calcular las cuotas a partir de tasa y plazo (sistema francés o alemán).
-- Detectar los comprobantes en Gmail (posible mejora sobre el módulo 10, con una regla por banco).
+- Detectar en Gmail los comprobantes de alta y de pago (hoy se suben a mano); solo se detecta el aviso de cuota.
+- Avisos de otros bancos: se suman con su regla y su patrón (o con la IA del módulo 10) cuando haya ejemplos.
 - Refinanciaciones y renovaciones: se cancela el préstamo y se carga uno nuevo.
