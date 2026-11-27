@@ -10,6 +10,7 @@ import { HeroSection } from "@/modules/landing/components/HeroSection";
 import { LandingFooter } from "@/modules/landing/components/LandingFooter";
 import { LandingNav } from "@/modules/landing/components/LandingNav";
 import { MonthStory } from "@/modules/landing/components/MonthStory";
+import { UpcomingSection } from "@/modules/landing/components/UpcomingSection";
 import { TrustSection } from "@/modules/landing/components/TrustSection";
 
 export const metadata: Metadata = {
@@ -35,6 +36,7 @@ export default async function LandingPage() {
         <HeroSection signedIn={signedIn} />
         <MonthStory />
         <FeatureLedger />
+        <UpcomingSection />
         <AssistantDemo />
         <TrustSection />
         <FounderSection />

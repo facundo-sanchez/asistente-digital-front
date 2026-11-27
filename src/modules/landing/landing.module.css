@@ -527,6 +527,12 @@
   flex-shrink: 0;
 }
 
+/* Planificado: solo el contorno, todavía sin color propio. */
+.tintPending {
+  background: transparent;
+  border: 1.5px solid var(--ink-soft);
+}
+
 .fakeButton {
   display: inline-flex;
   align-items: center;
