@@ -28,6 +28,7 @@ export function ServiceDetails({ service }: { service: ServiceResponse }) {
     ],
     ["Nro. de socio", service.customerReference ? <span className="tabular-nums">{service.customerReference}</span> : EMPTY],
     ["Periodicidad", BILLING_FREQUENCY_LABELS[service.billingFrequency]],
+    ["Débito automático", service.autoDebit ? `Sí${service.autoDebitMethod ? ` · ${service.autoDebitMethod}` : ""}` : "No"],
     ["Desde", formatDate(service.startDate) ?? EMPTY],
     ["Hasta", formatDate(service.endDate) ?? EMPTY],
     ["Estado", <ServiceStatus key="status" active={service.active} />],

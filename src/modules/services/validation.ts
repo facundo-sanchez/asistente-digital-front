@@ -21,6 +21,8 @@ export const serviceSchema = yup.object({
       return !endDate || !startDate || endDate >= startDate;
     }),
   notes: yup.string().trim().max(2000, "Hasta 2000 caracteres").default(""),
+  autoDebit: yup.boolean().default(false),
+  autoDebitMethod: yup.string().trim().max(100, "Hasta 100 caracteres").default(""),
   paymentUrl: yup
     .string()
     .trim()

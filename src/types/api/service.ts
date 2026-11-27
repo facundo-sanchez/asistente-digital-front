@@ -25,6 +25,10 @@ export interface ServiceResponse {
   notes: string | null;
   /** Página donde se pagan sus facturas (https). */
   paymentUrl: string | null;
+  /** Se paga por débito automático: el vencimiento se da por pagado el día que vence. */
+  autoDebit: boolean;
+  /** Con qué se debita (texto libre). */
+  autoDebitMethod: string | null;
   metadata: JsonObject;
   createdAt: ISODateTime;
   updatedAt: ISODateTime;
@@ -41,6 +45,8 @@ export interface ServiceRequest {
   endDate?: ISODate | null;
   notes?: string | null;
   paymentUrl?: string | null;
+  autoDebit?: boolean;
+  autoDebitMethod?: string | null;
   metadata?: JsonObject | null;
 }
 

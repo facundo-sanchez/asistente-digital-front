@@ -9,7 +9,7 @@
 |---|---|---|---|---|
 | 15 | App instalable (PWA) y notificaciones push | `feature/push-<n>-*` | 8 | [ ] |
 | 16 | Alerta de aumentos de servicios | `feature/aumentos` | 5, 8 | [ ] |
-| 17 | Débito automático | `feature/debito-automatico` | 2, 4 | [ ] |
+| 17 | Débito automático | `feature/debito-automatico` | 2, 4 | [x] |
 | 18 | Suscripciones en la tarjeta | `feature/suscripciones` | 11 | [ ] |
 | 19 | Calendario (link iCal) | `feature/calendario` | 4 | [ ] |
 | 20 | Presupuesto del mes | `feature/presupuesto` | 11 | [ ] |
@@ -81,10 +81,13 @@ Orden acordado: **17, 16 y 15** primero (débito automático, aumentos, push); d
 | Sin importe | Si el vencimiento no tiene importe, no se registra el pago y se avisa "No sabemos cuánto se debitó" | No inventar montos |
 | Corregir | El pago automático se anula como cualquier otro (por ejemplo, si el débito rebotó) | Mismo mecanismo de pagos |
 
+**Hecho (26/11/2026):** usa el método de pago `DIRECT_DEBIT` que ya existía (no hizo falta uno nuevo) y el aviso de "vence pronto" con el texto "Se debita mañana" (así respeta las preferencias que ya hay, sin un tipo nuevo). Recupera hasta 3 días si la tarea no corrió. Falta la marca en la lista de vencimientos y en el inicio.
+
 ### Parte 17.1
-- [ ] Backend: migración `services.auto_debit` (bool) y `auto_debit_method` (texto); método de pago `AUTOMATIC_DEBIT`; la tarea diaria registra los pagos del día (idempotente: no paga dos veces); notificación `AUTO_DEBIT` un día antes; los de débito se excluyen de "vence pronto" y "vencido".
-- [ ] Front: en el formulario del servicio, "Se paga por débito automático" y el medio; en vencimientos y en el inicio, la marca "Débito automático"; en la factura, el botón Pagar no aparece (se debita solo).
-- [ ] Tests: registra el pago el día del vencimiento, no duplica, sin importe no paga y avisa, excluido de vencidos, aislamiento.
+- [x] Backend: migración V14 `services.auto_debit` y `auto_debit_method`; la tarea (cada hora) registra los pagos del día con `DIRECT_DEBIT` (no paga dos veces); aviso "Se debita mañana" el día anterior; los de débito con importe no avisan como vencidos.
+- [x] Front: en el formulario del servicio, "Se paga por débito automático" y con qué; en el detalle del servicio; en la factura y su vencimiento no aparece Pagar ("Se debita sola").
+- [ ] Front: la marca "Débito automático" en la lista de vencimientos y en el inicio.
+- [x] Tests: registra el pago el día del vencimiento, no duplica, sin importe no paga y avisa, excluido de vencidos, aislamiento.
 - **Listo cuando:** marco Luz como débito automático y el día que vence aparece pagada sola, con el aviso del día anterior.
 
 ---

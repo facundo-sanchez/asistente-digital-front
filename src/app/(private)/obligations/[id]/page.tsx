@@ -30,6 +30,8 @@ async function invoicePayment(obligation: ObligationResponse) {
   const invoice = await serverGet<InvoiceResponse>(`/invoices/${obligation.invoiceId}`);
   if (!invoice?.paymentCode) return null;
   const [service, user] = await Promise.all([serverGet<ServiceResponse>(`/services/${invoice.serviceId}`), requireUser()]);
+  // Débito automático: no hay nada que pagar a mano
+  if (service?.autoDebit) return null;
   return { code: invoice.paymentCode, target: paymentTarget(service, user.paymentWallet) };
 }
 
