@@ -19,6 +19,7 @@ import { firstParam, type SearchParams } from "@/lib/search-params";
 import { serverGet } from "@/lib/server/server-get";
 import { isUuid } from "@/lib/uuid";
 import { CancelLoanAction } from "@/modules/loans/components/CancelLoanAction";
+import { EditLoanAction } from "@/modules/loans/components/EditLoanAction";
 import { LoanSchedule } from "@/modules/loans/components/LoanSchedule";
 import { LoanStatusLabel } from "@/modules/loans/components/LoanStatusLabel";
 
@@ -36,6 +37,7 @@ export default async function LoanPage({ params, searchParams }: { params: Promi
     ["Entidad", loan.lender],
     ["Estado", <LoanStatusLabel key="status" status={loan.status} />],
     ["Número", loan.loanNumber ?? "—"],
+    ["Referencia en los avisos", loan.shortReference ?? "—"],
     ["Monto pedido", money(loan.principal)],
     ["Tasa", loan.rateType ? `${loan.rateType === "FIXED" ? "Fija" : "Variable"}${loan.annualRate != null ? ` · TNA ${String(loan.annualRate).replace(".", ",")} %` : ""}` : "—"],
     ["Última cuota", formatDate(loan.lastDueDate) ?? "—"],
@@ -59,6 +61,7 @@ export default async function LoanPage({ params, searchParams }: { params: Promi
                 <ButtonLink href="/documents/new?type=LOAN_RECEIPT" variant="contained">
                   Subir comprobante de pago
                 </ButtonLink>
+                <EditLoanAction loan={loan} />
                 <CancelLoanAction loanId={loan.id} />
               </Stack>
             ) : undefined

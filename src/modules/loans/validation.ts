@@ -17,7 +17,11 @@ export const loanSchema = yup.object({
   rateType: yup.string().oneOf(["", "FIXED", "VARIABLE"]).default(""),
   annualRate: amount("Ingresá la TNA, ej. 71"),
   installmentsCount: yup.number().typeError("Poné la cantidad de cuotas").integer().min(1, "Al menos 1").max(360, "Hasta 360").required(),
-  installmentAmount: amount("Ingresá un importe válido, ej. 584292,14").test("required", "Poné el importe de la cuota", (v) => !!v),
+  installmentAmount: amount("Ingresá un importe válido, ej. 584292,14").test("required", "Poné el importe de la cuota", function (v) {
+    // Con tasa fija, capital y TNA se calcula sola (sistema francés)
+    const p = this.parent as { rateType: string; principal: string; annualRate: string };
+    return !!v || (p.rateType === "FIXED" && !!p.principal && !!p.annualRate);
+  }),
   firstDueDate: yup.string().required("Poné cuándo vence la primera cuota"),
   paidInstallments: yup
     .number()

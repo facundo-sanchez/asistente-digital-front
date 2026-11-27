@@ -4,7 +4,7 @@
 > Al terminar una parte: marcar `[x]`, cambiar su estado en la tabla y anotar la fecha.
 > Visión general: [ROADMAP-MODULOS.md](./ROADMAP-MODULOS.md). Reutiliza vencimientos, pagos, avisos y documentos (módulos 3, 4 y 8) y la lectura con IA (módulo 9). Criterio de código: simple, sin abstracciones de más.
 
-**Estado (27/11/2026):** 13.1 a 13.4 hechas (13.1–13.2 en `feature/prestamos-1-2`, 13.3–13.4 en `feature/prestamos-3-4`), con tests; falta probarlas con tus comprobantes reales y Gemini. Cambios: la migración de 13.1 es V17 (recrea `v_obligations`) y la de los comprobantes V18 (tipos de documento `LOAN_CONTRACT` y `LOAN_RECEIPT`); la lectura del comprobante de alta se hizo en 13.3; el pago del comprobante se registra con método "Otro" y el desglose en sus notas; el inicio muestra los préstamos leyendo `/loans` (sin tocar `/dashboard`); en vencimientos se ve el tipo "Préstamo", sin un filtro nuevo. "Pagado" se calcula (sin cuotas pendientes), no se guarda.
+**Estado (27/11/2026):** las 6 partes hechas (13.1–13.2 en `feature/prestamos-1-2`, 13.3–13.4 en `feature/prestamos-3-4`, 13.5–13.6 y el cálculo de cuotas en `feature/prestamos-5-6`), con tests; falta probarlas con tus comprobantes reales y Gemini. Cambios: la migración de 13.1 es V17 (recrea `v_obligations`) y la de los comprobantes V18 (tipos de documento `LOAN_CONTRACT` y `LOAN_RECEIPT`); la lectura del comprobante de alta se hizo en 13.3; el pago del comprobante se registra con método "Otro" y el desglose en sus notas; el inicio muestra los préstamos leyendo `/loans` (sin tocar `/dashboard`); en vencimientos se ve el tipo "Préstamo", sin un filtro nuevo. "Pagado" se calcula (sin cuotas pendientes), no se guarda. **Además:** préstamos de tasa fija con capital y TNA calculan sus cuotas por sistema francés (capital + interés + IVA 21 %, sin sellados) y el saldo de capital de cada una; verificado contra los comprobantes de BBVA (saldo exacto al centavo, cuota sin sellados). 13.5: si hay varios préstamos del banco sin referencia, el aviso queda en "Detectado" con el motivo y la referencia se carga editando el préstamo (no hay selector en Integraciones). V19 suma la regla de BBVA y la frecuencia por usuario.
 
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
@@ -58,8 +58,8 @@ Consecuencias para el diseño:
 | 13.2 | Ficha: cuánto falta, cronograma, cambiar importe, cancelar | `feature/prestamos-1-2` | 13.1 | [x] |
 | 13.3 | Comprobante de pago de cuota: la IA lo lee y registra el pago en su cuota | `feature/prestamos-3-4` (junto con 13.4) | 13.2 | [x] |
 | 13.4 | Préstamos en el inicio, en vencimientos y en el asistente | `feature/prestamos-3-4` | 13.2 | [x] |
-| 13.5 | Aviso de cuota por email (Gmail): importe y fecha reales antes de pagar | `feature/prestamos-5-6` (junto con 13.6) | 13.2, módulo 10 | [ ] |
-| 13.6 | Cada cuánto se leen los emails, configurable en Mi perfil | `feature/prestamos-5-6` | módulo 10 | [ ] |
+| 13.5 | Aviso de cuota por email (Gmail): importe y fecha reales antes de pagar | `feature/prestamos-5-6` (junto con 13.6) | 13.2, módulo 10 | [x] |
+| 13.6 | Cada cuánto se leen los emails, configurable en Mi perfil | `feature/prestamos-5-6` | módulo 10 | [x] |
 
 ---
 
@@ -137,15 +137,15 @@ Consecuencias para el diseño:
 ## Parte 13.5 – Aviso de cuota por email
 
 ### Backend
-- [ ] Regla de email del proveedor BBVA: remitente `avisos@bbva.com.ar`, asunto que contiene "PRESTAMOS", lectura del cuerpo (V15 si hace falta una regla nueva en `provider_email_rules`).
-- [ ] Lector por patrón de la frase "La cuota {n} de su préstamo {tipo} {referencia}, por {moneda} {importe}, vence el {dd/mm/aaaa}" (importe con coma decimal). Si la frase no coincide, el email queda en "Detectado en tu correo" como no leído, sin tocar nada.
-- [ ] Asociación: préstamo por referencia corta; si no hay, el único préstamo activo de BBVA (y se guarda la referencia); si hay varios, queda pendiente para que el usuario elija.
-- [ ] Actualiza la cuota n: importe real (deja de ser estimado) y fecha de vencimiento si cambió. No toca cuotas con pagos. El mismo email no se procesa dos veces (como el resto de Gmail).
-- [ ] Tests con el texto del ejemplo (anonimizado): importe 584292,14 → 584.292,14; fecha; préstamo único se asocia solo; con dos, queda pendiente; cuota pagada no cambia.
+- [x] Regla de email del proveedor BBVA: remitente `avisos@bbva.com.ar`, asunto que contiene "PRESTAMOS", lectura del cuerpo (V15 si hace falta una regla nueva en `provider_email_rules`).
+- [x] Lector por patrón de la frase "La cuota {n} de su préstamo {tipo} {referencia}, por {moneda} {importe}, vence el {dd/mm/aaaa}" (importe con coma decimal). Si la frase no coincide, el email queda en "Detectado en tu correo" como no leído, sin tocar nada.
+- [x] Asociación: préstamo por referencia corta; si no hay, el único préstamo activo de BBVA (y se guarda la referencia); si hay varios, queda pendiente para que el usuario elija.
+- [x] Actualiza la cuota n: importe real (deja de ser estimado) y fecha de vencimiento si cambió. No toca cuotas con pagos. El mismo email no se procesa dos veces (como el resto de Gmail).
+- [x] Tests con el texto del ejemplo (anonimizado): importe 584292,14 → 584.292,14; fecha; préstamo único se asocia solo; con dos, queda pendiente; cuota pagada no cambia.
 
 ### Frontend
-- [ ] En la cuota: "Importe confirmado por el banco el 05/11" en lugar de "estimado".
-- [ ] En "Detectado en tu correo" (Integraciones): el aviso del préstamo con lo que se actualizó, o "¿A qué préstamo corresponde?" con un selector cuando hay varios.
+- [x] En la cuota: "Importe confirmado por el banco el 05/11" en lugar de "estimado".
+- [~] En "Detectado en tu correo": "Cuota actualizada" o el motivo (sin selector: con varios préstamos del banco se carga la referencia editando el préstamo).
 
 **Listo cuando:** con Gmail conectado, llega el aviso de la cuota 10 y su vencimiento pasa de estimado a $ 584.292,14 con vencimiento 07/11, sin tocar nada.
 
@@ -161,14 +161,14 @@ Hoy Gmail se revisa cada 15 minutos para todos (`app.integrations.sync-every`). 
 - "Revisar ahora" (Integraciones) sigue funcionando con cualquier opción.
 
 ### Backend
-- [ ] Migración: `users.email_check_interval` (`15M`, `1H`, `6H`, `DAILY`, `MANUAL`; por defecto `15M`).
-- [ ] `PUT /users/me/email-check-interval` y el valor en `GET /users/me` (como la billetera: endpoint propio para no pisar el resto del perfil).
-- [ ] `GmailSyncUseCase`: antes de revisar una cuenta, compara `last_sync_at` con el intervalo de su usuario; `DAILY` revisa una vez por día desde las 8 en la zona del usuario; `MANUAL` nunca en automático.
-- [ ] Tests: con 1 hora no revisa a los 30 minutos y sí a los 61; `DAILY` una sola vez por día; `MANUAL` nunca en automático pero sí con "Revisar ahora".
+- [x] Migración: `users.email_check_interval` (`15M`, `1H`, `6H`, `DAILY`, `MANUAL`; por defecto `15M`).
+- [x] `PUT /users/me/email-check-interval` y el valor en `GET /users/me` (como la billetera: endpoint propio para no pisar el resto del perfil).
+- [x] `GmailSyncUseCase`: antes de revisar una cuenta, compara `last_sync_at` con el intervalo de su usuario; `DAILY` revisa una vez por día desde las 8 en la zona del usuario; `MANUAL` nunca en automático.
+- [x] Tests: con 1 hora no revisa a los 30 minutos y sí a los 61; `DAILY` una sola vez por día; `MANUAL` nunca en automático pero sí con "Revisar ahora".
 
 ### Frontend
-- [ ] Mi perfil → sección **Correo**: "Revisar mis emails" con las cinco opciones y Guardar; solo se ve si el usuario tiene Gmail conectado (si no, un link a Integraciones).
-- [ ] En Integraciones, junto a la cuenta: "Se revisa cada hora · última revisión 10:15".
+- [x] Mi perfil → sección **Correo**: "Revisar mis emails" con las cinco opciones y Guardar; solo se ve si el usuario tiene Gmail conectado (si no, un link a Integraciones).
+- [x] En Integraciones, junto a la cuenta: "Se revisa cada hora · última revisión 10:15".
 
 **Listo cuando:** elijo "cada 6 horas" en Mi perfil y Gmail no se vuelve a revisar hasta 6 horas después de la última vez, salvo que toque "Revisar ahora".
 
@@ -177,7 +177,7 @@ Hoy Gmail se revisa cada 15 minutos para todos (`app.integrations.sync-every`). 
 ## Fuera de alcance
 
 - Plata prestada a otros (lo que me deben).
-- Calcular las cuotas a partir de tasa y plazo (sistema francés o alemán).
+- Sellados en el cálculo de cuotas; sistema alemán; préstamos UVA o de tasa variable (siguen con el importe cargado o el del banco).
 - Detectar en Gmail los comprobantes de alta y de pago (hoy se suben a mano); solo se detecta el aviso de cuota.
 - Avisos de otros bancos: se suman con su regla y su patrón (o con la IA del módulo 10) cuando haya ejemplos.
 - Refinanciaciones y renovaciones: se cancela el préstamo y se carga uno nuevo.

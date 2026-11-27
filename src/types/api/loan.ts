@@ -37,7 +37,35 @@ export interface LoanResponse {
   next: ObligationResponse | null;
   lastDueDate: ISODate | null;
   installments: ObligationResponse[];
+  /** Cronograma calculado (tasa fija, sistema francés, sin sellados); vacío si no se puede calcular. */
+  schedule: ScheduleRowResponse[];
   createdAt: ISODateTime;
+}
+
+export interface ScheduleRowResponse {
+  number: number;
+  interest: Decimal;
+  capital: Decimal;
+  vat: Decimal;
+  /** Capital + interés + IVA (sin sellados). */
+  amount: Decimal;
+  /** Saldo de capital después de pagarla. */
+  balance: Decimal;
+}
+
+/** PUT /loans/{id}: lo que se edita sin cambiar el cronograma. */
+export interface LoanUpdateRequest {
+  lender: string;
+  name: string;
+  loanNumber?: string | null;
+  /** Referencia corta de los avisos por email del banco (ej. "203/2"). */
+  shortReference?: string | null;
+  principal?: Decimal | null;
+  rateType?: LoanRateType | null;
+  annualRate?: Decimal | null;
+  disbursementDate?: ISODate | null;
+  contractDocumentId?: UUID | null;
+  notes?: string | null;
 }
 
 /** POST /loans */
@@ -52,7 +80,8 @@ export interface LoanRequest {
   annualRate?: Decimal | null;
   disbursementDate?: ISODate | null;
   installmentsCount: number;
-  installmentAmount: Decimal;
+  /** Obligatorio salvo tasa fija con capital y TNA (se calcula). */
+  installmentAmount?: Decimal | null;
   firstDueDate: ISODate;
   paidInstallments: number;
   contractDocumentId?: UUID | null;

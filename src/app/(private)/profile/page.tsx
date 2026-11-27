@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
-import type { NotificationPreferenceResponse } from "@/types/api";
+import type { NotificationPreferenceResponse, IntegrationResponse } from "@/types/api";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Panel } from "@/components/layout/Panel";
 import { requireUser } from "@/lib/server/dal";
@@ -12,13 +12,19 @@ import { PushToggle } from "@/modules/notifications/components/PushToggle";
 import { ChangePasswordForm } from "@/modules/user/components/ChangePasswordForm";
 import { EmailVerificationBanner } from "@/modules/user/components/EmailVerificationBanner";
 import { PaymentWalletForm } from "@/modules/user/components/PaymentWalletForm";
+import { EmailCheckIntervalForm } from "@/modules/integrations/components/EmailCheckIntervalForm";
+import { TextLink } from "@/components/common/TextLink";
 import { ProfileForm } from "@/modules/user/components/ProfileForm";
 
 export const metadata: Metadata = { title: "Mi perfil" };
 
 export default async function ProfilePage() {
   const user = await requireUser();
-  const preferences = await serverGet<NotificationPreferenceResponse[]>("/notification-preferences");
+  const [preferences, integrations] = await Promise.all([
+    serverGet<NotificationPreferenceResponse[]>("/notification-preferences"),
+    serverGet<IntegrationResponse[]>("/integrations"),
+  ]);
+  const hasMail = (integrations ?? []).some((i) => i.provider === "GMAIL");
   return (
     <Stack spacing={4} sx={{ maxWidth: 720 }}>
       <PageHeader title="Mi perfil" description="Tus datos, tus avisos y cómo querés ver fechas y montos." />
@@ -31,6 +37,13 @@ export default async function ProfilePage() {
           <PaymentWalletForm initial={user.paymentWallet} />
         </Panel>
       </Box>
+      <Panel title="Correo" description="Cada cuánto buscamos facturas, resúmenes y avisos en tu correo. Menos seguido gasta menos lecturas con IA.">
+        {hasMail ? (
+          <EmailCheckIntervalForm initial={user.emailCheckInterval} />
+        ) : (
+          <TextLink href="/integrations">Conectá Gmail para que busquemos tus facturas solas</TextLink>
+        )}
+      </Panel>
       {preferences && (
         <Panel
           title="Avisos"

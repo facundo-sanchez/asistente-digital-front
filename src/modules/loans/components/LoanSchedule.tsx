@@ -58,12 +58,15 @@ export function LoanSchedule({ loan }: { loan: LoanResponse }) {
               <Box component="th" scope="col" sx={ledgerHeadCell}>Cuota</Box>
               <Box component="th" scope="col" sx={ledgerHeadCell}>Vence</Box>
               <Box component="th" scope="col" sx={{ ...ledgerHeadCell, textAlign: "right" }}>Importe</Box>
+              <Box component="th" scope="col" sx={{ ...ledgerHeadCell, ...desktopOnly, textAlign: "right" }}>Saldo de capital</Box>
               <Box component="th" scope="col" sx={{ ...ledgerHeadCell, ...desktopOnly }}>Estado</Box>
               <Box component="th" scope="col" sx={ledgerHeadCell}><Box component="span" sx={{ position: "absolute", width: "1px", height: "1px", overflow: "hidden" }}>Acciones</Box></Box>
             </Box>
           </Box>
           <Box component="tbody">
-            {loan.installments.map((i) => (
+            {loan.installments.map((i) => {
+              const row = loan.schedule.find((s) => s.number === i.installmentNumber);
+              return (
               <Box component="tr" key={i.id}>
                 <Box component="td" sx={ledgerCell} className="tabular-nums">
                   <TextLink href={`/obligations/${i.id}`} sx={{ color: "text.primary", fontWeight: 600 }}>
@@ -78,6 +81,14 @@ export function LoanSchedule({ loan }: { loan: LoanResponse }) {
                       estimado
                     </Typography>
                   )}
+                  {row && (
+                    <Typography component="span" variant="caption" color="text.secondary" sx={{ display: { xs: "none", sm: "block" } }}>
+                      Capital {formatMoney(row.capital, i.currency)} · Interés {formatMoney(row.interest, i.currency)} · IVA {formatMoney(row.vat, i.currency)}
+                    </Typography>
+                  )}
+                </Box>
+                <Box component="td" sx={{ ...ledgerCell, ...desktopOnly, textAlign: "right" }} className="tabular-nums">
+                  {row ? formatMoney(row.balance, i.currency) : "—"}
                 </Box>
                 <Box component="td" sx={{ ...ledgerCell, ...desktopOnly }}>
                   <ObligationStatus status={i.effectiveStatus} />
@@ -97,7 +108,8 @@ export function LoanSchedule({ loan }: { loan: LoanResponse }) {
                   )}
                 </Box>
               </Box>
-            ))}
+              );
+            })}
           </Box>
         </Box>
       </Box>

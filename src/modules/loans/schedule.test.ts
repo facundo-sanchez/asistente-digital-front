@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { installmentDate, schedulePreview } from "./schedule";
+import { frenchAmounts, installmentDate, schedulePreview } from "./schedule";
 
 describe("cronograma del préstamo", () => {
+  it("sistema francés: la cuota 10 coincide con el comprobante sin sellados y baja mes a mes", () => {
+    const amounts = frenchAmounts(7000000, 71, 30);
+    expect(amounts[9]).toBe(578206.57);
+    expect(amounts[10]).toBeLessThan(amounts[9]);
+  });
+
   it("cae el mismo día y, si el mes no lo tiene, el último", () => {
     expect([0, 1, 2, 12].map((i) => installmentDate("2027-01-31", i))).toEqual(["2027-01-31", "2027-02-28", "2027-03-31", "2028-01-31"]);
   });

@@ -5,6 +5,7 @@ import type { DetectedEmailResponse, IntegrationResponse, PageResponse } from "@
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Panel } from "@/components/layout/Panel";
 import { firstParam, type SearchParams } from "@/lib/search-params";
+import { requireUser } from "@/lib/server/dal";
 import { serverGet } from "@/lib/server/server-get";
 import { ConnectGmail } from "@/modules/integrations/components/ConnectGmail";
 import { DetectedEmails } from "@/modules/integrations/components/DetectedEmails";
@@ -23,7 +24,8 @@ const RESULTS: Record<string, { severity: "success" | "info" | "error"; text: st
 
 export default async function IntegrationsPage({ searchParams }: { searchParams: SearchParams }) {
   const result = RESULTS[firstParam((await searchParams).gmail) ?? ""];
-  const integrations = (await serverGet<IntegrationResponse[]>("/integrations")) ?? [];
+  const [user, found] = await Promise.all([requireUser(), serverGet<IntegrationResponse[]>("/integrations")]);
+  const integrations = found ?? [];
   const gmail = integrations.filter((i) => i.provider === "GMAIL");
   const detected = await Promise.all(
     gmail.map((i) =>
@@ -41,7 +43,7 @@ export default async function IntegrationsPage({ searchParams }: { searchParams:
         ) : (
           <Stack spacing={4}>
             {gmail.map((integration) => (
-              <GmailAccount key={integration.id} integration={integration} />
+              <GmailAccount key={integration.id} integration={integration} interval={user?.emailCheckInterval} />
             ))}
           </Stack>
         )}

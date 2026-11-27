@@ -18,7 +18,7 @@ import { formatDate } from "@/lib/dates";
 import { formatMoney } from "@/lib/money";
 import { parseAmount } from "@/modules/obligations/validation";
 import { loansApi } from "../api";
-import { schedulePreview } from "../schedule";
+import { frenchAmounts, schedulePreview } from "../schedule";
 import { loanSchema, type LoanFormValues } from "../validation";
 
 const EMPTY: LoanFormValues = {
@@ -45,11 +45,12 @@ export function LoanForm({ initial, extractionId, next }: { initial?: Partial<Lo
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const { control, handleSubmit, setError, formState } = useForm<LoanFormValues>({ resolver: yupResolver(loanSchema), defaultValues: { ...EMPTY, ...initial } });
-  const [count, amount, first, paid, currency] = useWatch({
+  const [count, amount, first, paid, currency, rateType, principal, annualRate] = useWatch({
     control,
-    name: ["installmentsCount", "installmentAmount", "firstDueDate", "paidInstallments", "currency"],
+    name: ["installmentsCount", "installmentAmount", "firstDueDate", "paidInstallments", "currency", "rateType", "principal", "annualRate"],
   });
-  const preview = schedulePreview(first ?? "", Number(count), parseAmount(amount ?? ""), Number(paid));
+  const french = rateType === "FIXED" ? frenchAmounts(parseAmount(principal ?? "") ?? 0, parseAmount(annualRate ?? "") ?? 0, Number(count)) : [];
+  const preview = schedulePreview(first ?? "", Number(count), parseAmount(amount ?? ""), Number(paid), french);
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
@@ -63,7 +64,7 @@ export function LoanForm({ initial, extractionId, next }: { initial?: Partial<Lo
         rateType: (values.rateType || null) as LoanRateType | null,
         annualRate: parseAmount(values.annualRate),
         installmentsCount: values.installmentsCount,
-        installmentAmount: parseAmount(values.installmentAmount) ?? 0,
+        installmentAmount: parseAmount(values.installmentAmount),
         firstDueDate: values.firstDueDate,
         paidInstallments: values.paidInstallments,
         notes: values.notes || null,
@@ -113,9 +114,13 @@ export function LoanForm({ initial, extractionId, next }: { initial?: Partial<Lo
           <FormTextField<LoanFormValues>
             name="installmentAmount"
             control={control}
-            label="Importe de la cuota"
-            required
-            helperText="El de una cuota reciente. Cada comprobante o aviso del banco lo reemplaza por el real."
+            label={french.length > 0 ? "Importe de la cuota (se calcula)" : "Importe de la cuota"}
+            required={french.length === 0}
+            helperText={
+              french.length > 0
+                ? "Con tasa fija calculamos cada cuota (capital, interés e IVA, sin sellados); bajan mes a mes. Dejalo vacío."
+                : "El de una cuota reciente. Cada comprobante o aviso del banco lo reemplaza por el real."
+            }
             slotProps={{ htmlInput: { inputMode: "decimal" } }}
           />
           <FormTextField<LoanFormValues>
@@ -137,7 +142,8 @@ export function LoanForm({ initial, extractionId, next }: { initial?: Partial<Lo
 
         {preview && (
           <Alert severity="info" icon={false} className="tabular-nums">
-            Primera cuota el {formatDate(preview.first)}, última el {formatDate(preview.last)}. Total estimado:{" "}
+            Primera cuota el {formatDate(preview.first)}, última el {formatDate(preview.last)}.
+            {french.length > 0 ? ` Cuotas de ${formatMoney(french[0], currency ?? "ARS")} a ${formatMoney(french[french.length - 1], currency ?? "ARS")} (sin sellados).` : ""} Total estimado:{" "}
             <strong>{formatMoney(preview.total, currency ?? "ARS")}</strong> en {count} cuotas
             {Number(paid) > 0 ? `, ${preview.pending} pendientes` : ""}.
           </Alert>
