@@ -5,6 +5,8 @@
 export const GOOGLE_LOGIN_ERRORS = {
   google_cancelled: "Cancelaste el inicio de sesión con Google.",
   google_unavailable: "El inicio de sesión con Google no está disponible en este momento.",
+  google_wrong_host:
+    "El inicio con Google solo funciona desde la dirección principal de la app. Desde acá, ingresá con tu email y contraseña.",
   google_failed: "No pudimos iniciar sesión con Google. Probá de nuevo o ingresá con tu email.",
 } as const;
 

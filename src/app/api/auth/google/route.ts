@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type { GoogleAuthorizationRequest, GoogleAuthorizationResponse } from "@/types/api";
 import { backendFetch } from "@/lib/server/backend";
+import { callbackOrigin } from "@/lib/server/callback-origin";
 import { codeChallengeOf, createGoogleOAuthState, saveGoogleOAuthState } from "@/lib/server/google-oauth";
+import { publicOrigin } from "@/lib/server/public-origin";
 import { redirectTo } from "@/lib/server/route-helpers";
 
 /**
@@ -23,6 +25,10 @@ export async function GET(request: NextRequest) {
   } catch {
     return redirectTo(request, "/login?error=google_unavailable");
   }
+
+  // Google vuelve a otra dirección que la de esta página: la cookie del intento no llegaría
+  const origin = callbackOrigin(authorization.url);
+  if (origin && origin !== publicOrigin(request)) return redirectTo(request, "/login?error=google_wrong_host");
 
   const response = NextResponse.redirect(authorization.url);
   saveGoogleOAuthState(response.cookies, attempt);
