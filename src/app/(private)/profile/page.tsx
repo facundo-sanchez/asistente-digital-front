@@ -8,6 +8,7 @@ import { requireUser } from "@/lib/server/dal";
 import { serverGet } from "@/lib/server/server-get";
 import { NotificationPreferencesForm } from "@/modules/notifications/components/NotificationPreferencesForm";
 import { PriceIncreaseThresholdForm } from "@/modules/notifications/components/PriceIncreaseThresholdForm";
+import { PushToggle } from "@/modules/notifications/components/PushToggle";
 import { ChangePasswordForm } from "@/modules/user/components/ChangePasswordForm";
 import { EmailVerificationBanner } from "@/modules/user/components/EmailVerificationBanner";
 import { PaymentWalletForm } from "@/modules/user/components/PaymentWalletForm";
@@ -35,6 +36,9 @@ export default async function ProfilePage() {
           title="Avisos"
           description={`Qué te avisamos y cuándo. Los avisos por email llegan juntos, en un solo email por día, a ${user.email}.`}
         >
+          <Box sx={{ mb: 3 }}>
+            <PushToggle />
+          </Box>
           <NotificationPreferencesForm initial={preferences} />
           <Box sx={{ mt: 4 }}>
             <PriceIncreaseThresholdForm initial={user.priceIncreaseThreshold} />

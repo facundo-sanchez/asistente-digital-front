@@ -4,6 +4,7 @@ import { Archivo, Archivo_Narrow } from "next/font/google";
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import { AppProviders } from "@/components/providers/AppProviders";
+import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import "./globals.css";
 
 const archivo = Archivo({ variable: "--font-archivo", subsets: ["latin"] });
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {/* enableCssLayer: los estilos de MUI van en la capa "mui" y Tailwind puede sobrescribirlos */}
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <AppProviders>{children}</AppProviders>
+          <ServiceWorkerRegister />
         </AppRouterCacheProvider>
       </body>
     </html>

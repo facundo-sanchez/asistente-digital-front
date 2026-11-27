@@ -31,7 +31,8 @@ export async function proxy(request: NextRequest) {
   const hasAccess = request.cookies.has(ACCESS_COOKIE);
   const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
 
-  if (matches(pathname, PUBLIC_PATHS)) {
+  // Íconos de la app instalable: el navegador los pide sin sesión
+  if (pathname.startsWith("/pwa-icon/") || matches(pathname, PUBLIC_PATHS)) {
     if ((hasAccess || refreshToken) && matches(pathname, GUEST_ONLY_PATHS)) {
       return redirectTo(request, HOME_PATH);
     }

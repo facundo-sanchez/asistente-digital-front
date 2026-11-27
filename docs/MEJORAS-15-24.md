@@ -7,7 +7,7 @@
 
 | Módulo | Mejora | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 15 | App instalable (PWA) y notificaciones push | `feature/push-<n>-*` | 8 | [ ] |
+| 15 | App instalable (PWA) y notificaciones push | `feature/push-1-2` | 8 | [x] |
 | 16 | Alerta de aumentos de servicios | `feature/aumentos` | 5, 8 | [x] |
 | 17 | Débito automático | `feature/debito-automatico` | 2, 4 | [x] |
 | 18 | Suscripciones en la tarjeta | `feature/suscripciones` | 11 | [ ] |
@@ -34,17 +34,19 @@ Orden acordado: **17, 16 y 15** primero (débito automático, aumentos, push); d
 | Qué se manda | Las mismas notificaciones del módulo 8 por un canal nuevo `PUSH` (que la tabla ya prevé), con sus preferencias | Un aviso, tres canales |
 | Suscripciones | Una por navegador o dispositivo; se borra sola si el servicio de push responde 404/410 | El usuario puede tener celular y compu |
 
+**Hecho (26/11/2026):** push **sigue las preferencias de los avisos en la app** (cada aviso nuevo de la campana sale también por push a los dispositivos activados) en lugar de tener preferencias propias: menos configuración y el mismo criterio. Falta probarlo en un celular real (necesita HTTPS o localhost y las claves VAPID).
+
 ### Parte 15.1 – Instalable
-- [ ] Front: `manifest.webmanifest`, íconos (192, 512, maskable) generados de la roseta, `theme-color` por modo, service worker en `public/sw.js` registrado solo en producción.
-- [ ] Front: pantalla "Sin conexión" del service worker.
+- [x] Front: `manifest.webmanifest`, íconos (192, 512, maskable) generados de la roseta, `theme-color` por modo, service worker en `public/sw.js` registrado solo en producción.
+- [x] Front: pantalla "Sin conexión" del service worker.
 - **Listo cuando:** Chrome en Android ofrece "Instalar app" y abre sin barra del navegador.
 
 ### Parte 15.2 – Notificaciones push
-- [ ] Backend: migración `push_subscriptions` (usuario, endpoint, claves p256dh y auth, user agent, fechas); `POST /push-subscriptions` y `DELETE /push-subscriptions`; claves `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` (sin ellas, push no disponible).
-- [ ] Backend: envío con cifrado Web Push (librería `web-push` de Java); tarea que manda las notificaciones `PUSH` pendientes como el resumen por email (reintentos, `FAILED` al quinto); borra la suscripción ante 404/410.
-- [ ] Backend: preferencias del módulo 8 con el canal `PUSH`.
-- [ ] Front: service worker muestra la notificación y al tocarla abre su link; Mi perfil → Avisos: "En este dispositivo" (activar o desactivar, pide permiso al tocarlo, nunca al entrar).
-- [ ] Tests: suscribir, enviar (cliente falso), borrar ante 410, aislamiento.
+- [x] Backend: migración V16 `push_subscriptions` (usuario, endpoint, claves p256dh y auth, user agent, fechas); `POST /push-subscriptions` y `DELETE /push-subscriptions`; claves `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` (sin ellas, push no disponible).
+- [x] Backend: envío con cifrado Web Push (librería `web-push` de Java); tarea que manda las notificaciones `PUSH` pendientes como el resumen por email (reintentos, `FAILED` al quinto); borra la suscripción ante 404/410.
+- [x] Backend: cada aviso nuevo en la app se encola también como `PUSH` si el usuario tiene dispositivos (sin preferencias propias).
+- [x] Front: service worker muestra la notificación y al tocarla abre su link; Mi perfil → Avisos: "En este dispositivo" (activar o desactivar, pide permiso al tocarlo, nunca al entrar).
+- [x] Tests: suscribir, enviar (cliente falso), borrar ante 410, aislamiento.
 - **Listo cuando:** con la app instalada en el celular llega "Mañana vence Gas casa · $ 32.100" y al tocarla abre el vencimiento.
 
 ---
