@@ -28,6 +28,16 @@
 | 12 | **Asistente IA** | `feature/asistente-<n>-*` (4 partes, ver [MODULO-12-ASISTENTE.md](./MODULO-12-ASISTENTE.md)) | Herramientas sobre los módulos anteriores | Chat | todo lo anterior | [ ] |
 | 13 | **Préstamos** (tomados) | `feature/prestamos-<n>-*` (6 partes, ver [MODULO-13-PRESTAMOS.md](./MODULO-13-PRESTAMOS.md)) | Préstamo con sus cuotas como vencimientos; comprobantes de alta y de pago leídos con IA; aviso de cuota por Gmail; frecuencia de lectura de emails en Mi perfil | Lista, alta desde el comprobante, ficha, pago de cuota | 4, 8, 9, 10 | [ ] |
 | 14 | **Outlook** | `feature/outlook-<n>-*` (3 partes, ver [MODULO-14-OUTLOOK.md](./MODULO-14-OUTLOOK.md)) | Gmail pasa a ser un correo entre dos; Microsoft Graph con `Mail.Read` | Conectar Outlook, cuentas por proveedor | 10 | [ ] |
+| 15 | **App instalable y notificaciones push** | `feature/push-<n>-*` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 8 | [ ] |
+| 16 | **Alerta de aumentos** | `feature/aumentos` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 5, 8 | [ ] |
+| 17 | **Débito automático** | `feature/debito-automatico` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 2, 4 | [ ] |
+| 18 | **Suscripciones en la tarjeta** | `feature/suscripciones` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 11 | [ ] |
+| 19 | **Calendario (iCal)** | `feature/calendario` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 4 | [ ] |
+| 20 | **Presupuesto del mes** | `feature/presupuesto` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 11 | [ ] |
+| 21 | **Bienes** | `feature/bienes-<n>-*` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 3, 4 | [ ] |
+| 22 | **Resumen anual** | `feature/resumen-anual` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 4, 11 | [ ] |
+| 23 | **Hogar compartido** | `feature/hogar-<n>-*` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | todos | [ ] |
+| 24 | **Seguridad (2 pasos, sesiones)** | `feature/seguridad` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 1 | [ ] |
 
 Módulos 0 a 8 = **MVP**. Desde el 9: automatización e IA.
 
