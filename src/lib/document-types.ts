@@ -8,5 +8,7 @@ export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   POLICY: "Póliza",
   CONTRACT: "Contrato",
   PERSONAL_ID: "Documento personal",
+  LOAN_CONTRACT: "Alta de préstamo",
+  LOAN_RECEIPT: "Pago de cuota de préstamo",
   OTHER: "Otro",
 };

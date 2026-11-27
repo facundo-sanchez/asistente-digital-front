@@ -36,11 +36,15 @@ const EMPTY: LoanFormValues = {
   notes: "",
 };
 
-/** Alta de un préstamo: los datos del préstamo y del cronograma, con la vista previa de las cuotas antes de guardar. */
-export function LoanForm() {
+/**
+ * Alta de un préstamo: los datos del préstamo y del cronograma, con la vista previa de las cuotas antes de guardar.
+ * initial: lo que leyó la IA de un comprobante; extractionId: el comprobante de alta (queda como contrato);
+ * next: adónde volver al guardar (ej. a la revisión del comprobante de pago).
+ */
+export function LoanForm({ initial, extractionId, next }: { initial?: Partial<LoanFormValues>; extractionId?: string; next?: string }) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
-  const { control, handleSubmit, setError, formState } = useForm<LoanFormValues>({ resolver: yupResolver(loanSchema), defaultValues: EMPTY });
+  const { control, handleSubmit, setError, formState } = useForm<LoanFormValues>({ resolver: yupResolver(loanSchema), defaultValues: { ...EMPTY, ...initial } });
   const [count, amount, first, paid, currency] = useWatch({
     control,
     name: ["installmentsCount", "installmentAmount", "firstDueDate", "paidInstallments", "currency"],
@@ -63,8 +67,9 @@ export function LoanForm() {
         firstDueDate: values.firstDueDate,
         paidInstallments: values.paidInstallments,
         notes: values.notes || null,
+        extractionId: extractionId ?? null,
       });
-      router.push(`/loans/${loan.id}?created=1`);
+      router.push(next ?? `/loans/${loan.id}?created=1`);
       router.refresh();
     } catch (e) {
       setFormError(applyApiErrors(e, setError));

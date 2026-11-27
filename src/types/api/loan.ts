@@ -57,4 +57,62 @@ export interface LoanRequest {
   paidInstallments: number;
   contractDocumentId?: UUID | null;
   notes?: string | null;
+  /** Propuesta del comprobante de alta leído con IA, si se cargó desde ahí. */
+  extractionId?: UUID | null;
+}
+
+export type ExtractionStatus = "PENDING" | "CONFIRMED" | "CORRECTED" | "REJECTED";
+
+/** GET /loan-extractions/contract/{id}: el comprobante de alta leído (todo puede venir en null). */
+export interface LoanContractReviewResponse {
+  extractionId: UUID;
+  documentId: UUID;
+  status: ExtractionStatus;
+  contract: {
+    lender: string | null;
+    loanNumber: string | null;
+    loanType: string | null;
+    principal: Decimal | null;
+    currency: CurrencyCode | null;
+    rateType: LoanRateType | null;
+    annualRate: Decimal | null;
+    disbursementDate: ISODate | null;
+  };
+  warnings: string[];
+}
+
+/** GET /loan-extractions/receipt/{id}: el comprobante de pago leído y su préstamo (por número). */
+export interface LoanReceiptReviewResponse {
+  extractionId: UUID;
+  documentId: UUID;
+  status: ExtractionStatus;
+  receipt: {
+    lender: string | null;
+    loanNumber: string | null;
+    principal: Decimal | null;
+    disbursementDate: ISODate | null;
+    installmentNumber: number | null;
+    pendingInstallments: number | null;
+    dueDate: ISODate | null;
+    paymentDate: ISODate | null;
+    totalAmount: Decimal | null;
+    currency: CurrencyCode | null;
+    capital: Decimal | null;
+    interest: Decimal | null;
+    vat: Decimal | null;
+    stamps: Decimal | null;
+    previousBalance: Decimal | null;
+    newBalance: Decimal | null;
+  };
+  suggestedLoanId: UUID | null;
+  warnings: string[];
+}
+
+/** POST /loan-extractions/receipt/{id}/confirm */
+export interface LoanReceiptConfirmationRequest {
+  loanId: UUID;
+  installmentNumber: number;
+  amount: Decimal;
+  paymentDate: ISODate;
+  newBalance?: Decimal | null;
 }

@@ -5,6 +5,7 @@ const HREFS: Record<ReferenceType, string> = {
   INVOICE: "/invoices",
   SERVICE: "/services",
   DOCUMENT: "/documents",
+  LOAN: "/loans",
 };
 
 export function referenceHref(reference: AssistantReference): string {

@@ -8,6 +8,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import ArrowBackOutlined from "@mui/icons-material/ArrowBackOutlined";
 import type { LoanResponse } from "@/types/api";
+import { ButtonLink } from "@/components/common/ButtonLink";
 import { TextLink } from "@/components/common/TextLink";
 import { DetailList } from "@/components/layout/DetailList";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -41,6 +42,7 @@ export default async function LoanPage({ params, searchParams }: { params: Promi
     ["Total pagado", money(loan.totalPaid)],
   ];
   if (loan.bankBalance != null) rows.push(["Saldo de capital (banco)", `${money(loan.bankBalance)} al ${formatDate(loan.bankBalanceDate)}`]);
+  if (loan.contractDocumentId) rows.push(["Comprobante de alta", <TextLink key="contract" href={`/documents/${loan.contractDocumentId}`}>Ver comprobante</TextLink>]);
   if (loan.cancelReason) rows.push(["Cancelado", loan.cancelReason]);
   if (loan.notes) rows.push(["Notas", loan.notes]);
 
@@ -51,7 +53,16 @@ export default async function LoanPage({ params, searchParams }: { params: Promi
           <ArrowBackOutlined fontSize="small" />
           Préstamos
         </TextLink>
-        <PageHeader title={loan.name} description={loan.lender} action={loan.status === "ACTIVE" ? <CancelLoanAction loanId={loan.id} /> : undefined} />
+        <PageHeader title={loan.name} description={loan.lender} action={
+            loan.status === "ACTIVE" ? (
+              <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: "wrap" }}>
+                <ButtonLink href="/documents/new?type=LOAN_RECEIPT" variant="contained">
+                  Subir comprobante de pago
+                </ButtonLink>
+                <CancelLoanAction loanId={loan.id} />
+              </Stack>
+            ) : undefined
+          } />
       </Box>
       {created && <Alert severity="success">Cargamos el préstamo y sus {loan.installmentsCount} cuotas como vencimientos.</Alert>}
       <Panel title="Cuánto falta">

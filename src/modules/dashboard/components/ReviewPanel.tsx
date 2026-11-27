@@ -4,6 +4,7 @@ import type { PendingReviewResponse } from "@/types/api";
 import { TextLink } from "@/components/common/TextLink";
 import { Panel } from "@/components/layout/Panel";
 import { ledgerCell, ledgerTable } from "@/components/ledger/ledger-styles";
+import { extractionHref, extractionLabel } from "@/lib/extraction-href";
 
 function isInvoice(review: PendingReviewResponse): boolean {
   return review.schemaVersion.startsWith("invoice/");
@@ -21,11 +22,11 @@ export function ReviewPanel({ reviews }: { reviews: PendingReviewResponse[] }) {
               <Box component="td" sx={ledgerCell}>
                 <Typography sx={{ fontWeight: 600 }}>{r.documentTitle ?? "Documento"}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {isInvoice(r) ? "Factura" : "Resumen de tarjeta"}
+                  {extractionLabel(r.schemaVersion)}
                 </Typography>
               </Box>
               <Box component="td" sx={{ ...ledgerCell, textAlign: "right" }}>
-                <TextLink href={isInvoice(r) ? `/invoice-extractions/${r.id}` : `/extractions/${r.id}`}>Revisar</TextLink>
+                <TextLink href={extractionHref(r)}>Revisar</TextLink>
               </Box>
             </Box>
           ))}

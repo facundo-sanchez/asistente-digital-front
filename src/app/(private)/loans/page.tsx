@@ -25,9 +25,14 @@ function remainingByCurrency(loans: LoanResponse[]): string {
 export default async function LoansPage() {
   const loans = (await serverGet<LoanResponse[]>("/loans")) ?? [];
   const newButton = (
-    <ButtonLink href="/loans/new" variant="contained" startIcon={<AddOutlined />}>
-      Cargar préstamo
-    </ButtonLink>
+    <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: "wrap" }}>
+      <ButtonLink href="/documents/new?type=LOAN_CONTRACT" variant="outlined">
+        Desde el comprobante
+      </ButtonLink>
+      <ButtonLink href="/loans/new" variant="contained" startIcon={<AddOutlined />}>
+        Cargar préstamo
+      </ButtonLink>
+    </Stack>
   );
   const remaining = remainingByCurrency(loans);
 

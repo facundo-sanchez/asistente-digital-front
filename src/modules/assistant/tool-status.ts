@@ -10,6 +10,7 @@ const STATUS: Record<string, string> = {
   pendingInstallments: "Revisando tus cuotas…",
   expiringDocuments: "Buscando documentos por vencer…",
   searchDocuments: "Buscando en tus documentos…",
+  loans: "Revisando tus préstamos…",
 };
 
 export function toolStatus(name: string | null): string {

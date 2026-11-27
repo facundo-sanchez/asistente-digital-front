@@ -19,13 +19,13 @@ import { DocumentDetails } from "@/modules/documents/components/DocumentDetails"
 import { DocumentProcessing } from "@/modules/documents/components/DocumentProcessing";
 import { DocumentPreview } from "@/modules/documents/components/DocumentPreview";
 import { documentFileUrl } from "@/modules/documents/file-url";
+import { extractionHref } from "@/lib/extraction-href";
 
 export const metadata: Metadata = { title: "Documento" };
 
-/** La revisión según lo que leyó la IA: factura o resumen de tarjeta. */
+/** La revisión según lo que leyó la IA. */
 function reviewHref(extraction: LatestExtractionResponse | null): string | null {
-  if (!extraction) return null;
-  return extraction.schemaVersion.startsWith("invoice/") ? `/invoice-extractions/${extraction.id}` : `/extractions/${extraction.id}`;
+  return extraction ? extractionHref(extraction) : null;
 }
 
 export default async function DocumentPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {

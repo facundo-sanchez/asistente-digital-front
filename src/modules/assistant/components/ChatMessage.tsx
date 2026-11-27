@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import DescriptionOutlined from "@mui/icons-material/DescriptionOutlined";
+import AccountBalanceOutlined from "@mui/icons-material/AccountBalanceOutlined";
 import EventOutlined from "@mui/icons-material/EventOutlined";
 import ReceiptLongOutlined from "@mui/icons-material/ReceiptLongOutlined";
 import RequestQuoteOutlined from "@mui/icons-material/RequestQuoteOutlined";
@@ -15,6 +16,7 @@ const ICONS: Record<ReferenceType, React.ReactElement> = {
   INVOICE: <RequestQuoteOutlined fontSize="small" />,
   SERVICE: <ReceiptLongOutlined fontSize="small" />,
   DOCUMENT: <DescriptionOutlined fontSize="small" />,
+  LOAN: <AccountBalanceOutlined fontSize="small" />,
 };
 
 function Rich({ text }: { text: string }) {
