@@ -14,6 +14,8 @@
   --contrast-hover: #ffffff;
   --on-contrast: #0f2328;
   --paid: #8dbf84;
+  --warn: #e0b25c;
+  --overdue: #e8958c;
   --engrave: #2a4a52;
   --narrow: var(--font-archivo-narrow), "Archivo Narrow", sans-serif;
   --gutter: clamp(16px, 5.5vw, 80px);
@@ -41,6 +43,8 @@
   --contrast-hover: #1d4650;
   --on-contrast: #f6f9f7;
   --paid: #3f6e3a;
+  --warn: #8a5a00;
+  --overdue: #b3261e;
   --engrave: #9fbdb1;
   color-scheme: light;
 }
@@ -562,9 +566,9 @@
 
 .ledgerRow {
   display: grid;
-  grid-template-columns: 14px minmax(160px, 1.2fr) minmax(0, 3fr);
-  gap: 20px;
-  align-items: baseline;
+  grid-template-columns: 14px minmax(150px, 1fr) minmax(0, 2fr) minmax(280px, 1.5fr);
+  gap: 20px 28px;
+  align-items: start;
   padding-block: 24px;
   border-bottom: 1px solid var(--rule);
 }
@@ -581,12 +585,23 @@
   max-width: 62ch;
 }
 
+@media (max-width: 1080px) {
+  .ledgerRow {
+    grid-template-columns: 14px minmax(150px, 1fr) minmax(0, 2fr);
+  }
+
+  .example {
+    grid-column: 3;
+  }
+}
+
 @media (max-width: 640px) {
   .ledgerRow {
     grid-template-columns: 14px 1fr;
   }
 
-  .ledgerRow p {
+  .ledgerRow p,
+  .example {
     grid-column: 2;
   }
 }
@@ -774,4 +789,217 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* ---------- ejemplos chicos de cada función ---------- */
+.example {
+  margin: 0;
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 6px 16px;
+  font-size: 14px;
+  min-width: 0;
+}
+
+.example .plateRow {
+  padding-block: 9px;
+  align-items: center;
+}
+
+.ledgerRow .tint {
+  margin-top: 8px;
+}
+
+.warn {
+  color: var(--warn);
+  font-weight: 700;
+}
+
+.overdue {
+  color: var(--overdue);
+  font-weight: 700;
+}
+
+.mono {
+  font-family: var(--narrow);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fakeButtonSmall {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--mint);
+  color: var(--on-mint);
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.meter {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--rule);
+  overflow: hidden;
+  margin-block: 2px 6px;
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  background: var(--paid);
+}
+
+.questionSmall {
+  justify-self: end;
+  width: fit-content;
+  margin: 10px 0 2px auto;
+  padding: 6px 12px;
+  border-radius: 12px 12px 4px 12px;
+  background: var(--rule);
+}
+
+.notice {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding-block: 12px;
+}
+
+/* ---------- calendario: el mes con los vencimientos ---------- */
+.calendarSteps {
+  margin: 32px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 18px;
+  counter-reset: step;
+  max-width: 46ch;
+}
+
+.calendarSteps li {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 14px;
+  align-items: baseline;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.calendarSteps li::before {
+  counter-increment: step;
+  content: counter(step);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  font: 700 14px var(--narrow);
+  color: var(--ink);
+}
+
+.calendarSteps strong {
+  color: var(--ink);
+}
+
+.month {
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 18px;
+  font-size: 13px;
+}
+
+.monthHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.monthTitle {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+}
+
+.monthGrid > span {
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  min-height: 74px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.monthGrid > .weekday {
+  min-height: 0;
+  padding: 6px 5px;
+  font: 600 11px var(--narrow);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.dayNumber {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.outside {
+  opacity: 0.35;
+}
+
+.today .dayNumber {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--mint);
+  color: var(--on-mint);
+  font-weight: 700;
+}
+
+.event {
+  display: block;
+  padding: 2px 5px;
+  border-radius: 4px;
+  border-left: 3px solid var(--event);
+  background: color-mix(in srgb, var(--event) 22%, transparent);
+  color: var(--ink);
+  font-size: 11.5px;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .monthGrid > span {
+    min-height: 56px;
+    padding: 3px;
+  }
+
+  .event {
+    font-size: 0;
+    height: 6px;
+    padding: 0;
+  }
 }

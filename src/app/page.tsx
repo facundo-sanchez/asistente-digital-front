@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { ACCESS_COOKIE, REFRESH_COOKIE } from "@/lib/server/session-cookies";
 import styles from "@/modules/landing/landing.module.css";
 import { AssistantDemo } from "@/modules/landing/components/AssistantDemo";
+import { CalendarSection } from "@/modules/landing/components/CalendarSection";
 import { ClosingSection } from "@/modules/landing/components/ClosingSection";
 import { FeatureLedger } from "@/modules/landing/components/FeatureLedger";
 import { FounderSection } from "@/modules/landing/components/FounderSection";
@@ -36,6 +37,7 @@ export default async function LandingPage() {
         <HeroSection signedIn={signedIn} />
         <MonthStory />
         <FeatureLedger />
+        <CalendarSection />
         <UpcomingSection />
         <AssistantDemo />
         <TrustSection />
