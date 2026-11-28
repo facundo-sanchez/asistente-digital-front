@@ -20,3 +20,4 @@ export * from "./statement-extraction";
 export * from "./invoice-extraction";
 export * from "./dashboard";
 export * from "./loan";
+export * from "./feedback";

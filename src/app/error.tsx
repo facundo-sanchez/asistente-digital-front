@@ -8,13 +8,14 @@ import Typography from "@mui/material/Typography";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { GuillocheRosette } from "@/components/brand/GuillocheRosette";
 import { ButtonLink } from "@/components/common/ButtonLink";
+import { ReportErrorButton } from "@/modules/feedback/components/ReportErrorButton";
 
 /**
  * Error de una página (casi siempre: el backend no responde). La sesión no se cierra.
  * Pantalla tranquila sobre el papel: la roseta sin anillo, qué pasó, que los datos están
  * a salvo y cómo seguir. Reintentar vuelve a pedir los datos al servidor.
  */
-export default function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const router = useRouter();
   const [retrying, setRetrying] = useState(false);
 
@@ -80,7 +81,7 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
             <dt>Estado</dt>
             <dd>Sin respuesta del servicio</dd>
             <dt>Qué podés hacer</dt>
-            <dd>Reintentar o volver al inicio</dd>
+            <dd>Reintentar, volver al inicio o reportarnos el error</dd>
           </Box>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, pt: 0.5 }}>
             <Button variant="contained" onClick={retry} loading={retrying}>
@@ -89,6 +90,7 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
             <ButtonLink href="/dashboard" variant="text" color="inherit">
               Ir al inicio
             </ButtonLink>
+            <ReportErrorButton error={error} />
           </Box>
         </Box>
       </Box>
