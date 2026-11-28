@@ -7,7 +7,8 @@ import type { NextConfig } from "next";
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || undefined;
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // standalone es para la imagen de Docker; en Vercel rompe su build (busca .next/next-server.js.nft.json)
+  output: process.env.VERCEL ? undefined : "standalone",
   basePath,
   // Solo en desarrollo: sin esto, al entrar desde otro dispositivo de la red (ej. el celular) Next bloquea su JavaScript
   allowedDevOrigins: ["192.168.1.6"],
