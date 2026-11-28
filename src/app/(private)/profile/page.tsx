@@ -13,6 +13,7 @@ import { ChangePasswordForm } from "@/modules/user/components/ChangePasswordForm
 import { EmailVerificationBanner } from "@/modules/user/components/EmailVerificationBanner";
 import { PaymentWalletForm } from "@/modules/user/components/PaymentWalletForm";
 import { EmailCheckIntervalForm } from "@/modules/integrations/components/EmailCheckIntervalForm";
+import { CalendarLink } from "@/modules/calendar/components/CalendarLink";
 import { TextLink } from "@/components/common/TextLink";
 import { ProfileForm } from "@/modules/user/components/ProfileForm";
 
@@ -20,9 +21,10 @@ export const metadata: Metadata = { title: "Mi perfil" };
 
 export default async function ProfilePage() {
   const user = await requireUser();
-  const [preferences, integrations] = await Promise.all([
+  const [preferences, integrations, calendar] = await Promise.all([
     serverGet<NotificationPreferenceResponse[]>("/notification-preferences"),
     serverGet<IntegrationResponse[]>("/integrations"),
+    serverGet<{ token: string }>("/calendar"),
   ]);
   const hasMail = (integrations ?? []).some((i) => i.provider === "GMAIL");
   return (
@@ -57,6 +59,13 @@ export default async function ProfilePage() {
             <PriceIncreaseThresholdForm initial={user.priceIncreaseThreshold} />
           </Box>
         </Panel>
+      )}
+      {calendar && (
+        <Box id="calendario">
+          <Panel title="Calendario" description="Tus vencimientos en Google Calendar o en el calendario del celular, con un link.">
+            <CalendarLink initialToken={calendar.token} />
+          </Panel>
+        </Box>
       )}
       <Panel
         title={user.hasPassword ? "Contraseña" : "Crear contraseña"}

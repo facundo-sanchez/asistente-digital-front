@@ -51,7 +51,7 @@ Módulos 0 a 8 = **MVP**. Desde el 9: automatización e IA. Del 15 al 24: mejora
   - **Despliegue:** Dockerfile del backend, `deploy/docker-compose.prod.yml` (Postgres 19 + backend + Caddy) y `docker-compose.local.yml`, guía para Oracle Cloud + Vercel (`deploy/README.md` del backend).
   - **Asistente en el celular:** burbuja flotante en toda la app.
 - **Con plan, sin empezar:** 14 (Outlook).
-- **Sin plan detallado (resumen en [MEJORAS-15-24.md](./MEJORAS-15-24.md)):** 19 a 24.
+- **Hecho, sin mergear:** 19 (calendario). **Sin plan detallado (resumen en [MEJORAS-15-24.md](./MEJORAS-15-24.md)):** 20 a 24.
 - **Pendiente transversal:** publicar la app (Vercel + Oracle), cargar las claves VAPID, verificar la app de Google (permiso restringido de Gmail) y la cuota de Gemini (tope diario, menos rondas e historial).
 
 **Cambio de orden (26/11/2026):** después del módulo 6 se sigue con el **9 (IA documental)**, antes del 7 y el 8. Motivo: la idea es que el usuario adjunte el resumen o la factura (Excel, PDF o foto) y los datos se carguen solos; cada banco arma su Excel distinto, así que la lectura se resuelve con IA para todos los formatos en vez de programar un lector por banco. Los módulos 7 y 8 no dependen de esto.

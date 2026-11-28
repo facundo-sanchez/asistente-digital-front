@@ -11,7 +11,7 @@
 | 16 | Alerta de aumentos de servicios | `feature/aumentos` | 5, 8 | [x] |
 | 17 | Débito automático | `feature/debito-automatico` | 2, 4 | [x] |
 | 18 | Suscripciones en la tarjeta | `feature/suscripciones` | 11 | [x] sin mergear |
-| 19 | Calendario (link iCal) | `feature/calendario` | 4 | [ ] |
+| 19 | Calendario (link iCal) | `feature/calendario` | 4 | [x] sin mergear |
 | 20 | Presupuesto del mes | `feature/presupuesto` | 11 | [ ] |
 | 21 | Bienes (auto, casa, electrodomésticos) | `feature/bienes-<n>-*` | 3, 4 | [ ] |
 | 22 | Resumen anual exportable | `feature/resumen-anual` | 4, 11 | [ ] |
@@ -112,8 +112,8 @@ Orden acordado: **17, 16 y 15** primero (hechos y mergeados el 26/11/2026); sigu
 **Objetivo:** ver los vencimientos en Google Calendar, Outlook o el calendario del celular.
 
 - Decisión: un link iCal privado por usuario (token largo y aleatorio, se puede regenerar), de solo lectura, con los vencimientos pendientes de los próximos 12 meses; el calendario lo actualiza solo.
-- [ ] Backend: `users.calendar_token`; `GET /calendar/{token}.ics` público (el token es la clave), eventos de todo el día con título, importe y link a la app.
-- [ ] Front: Mi perfil → Calendario: copiar link, cómo agregarlo en Google y en el iPhone, "Generar otro link" (invalida el anterior).
+- [x] Backend: tabla `calendar_feeds` (token por usuario, V23); `GET /calendar/feeds/{token}.ics` público, servido por el front en `/api/calendar/{token}.ics` (el token es la clave), eventos de todo el día con título, importe y link a la app.
+- [x] Front: Mi perfil → Calendario: copiar link, cómo agregarlo en Google y en el iPhone, "Generar otro link" (invalida el anterior).
 - **Listo cuando:** agrego el link en Google Calendar y veo los vencimientos del mes.
 
 ## Módulo 20 – Presupuesto del mes
