@@ -30,7 +30,7 @@ export function LandingNav({ signedIn }: { signedIn: boolean }) {
           ) : (
             <>
               <Link className={styles.navLink} href="/login">Ingresar</Link>
-              <Link className={`${styles.btn} ${styles.btnSmall} ${styles.btnLight}`} href="/register">
+              <Link className={`${styles.btn} ${styles.btnSmall} ${styles.btnLight} ${styles.navCreate}`} href="/register">
                 Crear cuenta
               </Link>
             </>
