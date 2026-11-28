@@ -10,8 +10,8 @@
 | 15 | App instalable (PWA) y notificaciones push | `feature/push-1-2` | 8 | [x] |
 | 16 | Alerta de aumentos de servicios | `feature/aumentos` | 5, 8 | [x] |
 | 17 | Débito automático | `feature/debito-automatico` | 2, 4 | [x] |
-| 18 | Suscripciones en la tarjeta | `feature/suscripciones` | 11 | [ ] plan listo |
-| 19 | Calendario (link iCal) | `feature/calendario` | 4 | [ ] |
+| 18 | Suscripciones en la tarjeta | `feature/suscripciones` | 11 | [x] sin mergear |
+| 19 | Calendario (link iCal) | `feature/calendario` | 4 | [x] sin mergear |
 | 20 | Presupuesto del mes | `feature/presupuesto` | 11 | [ ] |
 | 21 | Bienes (auto, casa, electrodomésticos) | `feature/bienes-<n>-*` | 3, 4 | [ ] |
 | 22 | Resumen anual exportable | `feature/resumen-anual` | 4, 11 | [ ] |
@@ -102,9 +102,9 @@ Orden acordado: **17, 16 y 15** primero (hechos y mergeados el 26/11/2026); sigu
 **Objetivo:** ver los cargos que se repiten todos los meses en la tarjeta, cuánto suman y cuál aumentó.
 
 - Decisión: es suscripción un comercio con consumo sin cuotas en al menos 3 de los últimos 4 resúmenes, con importes dentro del ±30 % (las suscripciones en pesos suben seguido). El usuario puede marcar "No es una suscripción" y se recuerda por comercio.
-- [ ] Backend: `GET /cards/subscriptions` desde `v_card_spending`; tabla de comercios descartados; aumento respecto del mes anterior.
-- [ ] Front: "Suscripciones" en Tarjetas: comercio, último importe, desde cuándo, aumento, total por mes por moneda.
-- [ ] Asistente: herramienta `subscriptions()`.
+- [x] Backend: `GET /cards/subscriptions` desde `v_card_spending`; tabla de comercios descartados; aumento respecto del mes anterior.
+- [x] Front: "Suscripciones" en Tarjetas: comercio, último importe, desde cuándo, aumento, total por mes por moneda.
+- [x] Asistente: herramienta `subscriptions()`.
 - **Listo cuando:** Netflix y Spotify aparecen como suscripciones con su total mensual.
 
 ## Módulo 19 – Calendario
@@ -112,8 +112,8 @@ Orden acordado: **17, 16 y 15** primero (hechos y mergeados el 26/11/2026); sigu
 **Objetivo:** ver los vencimientos en Google Calendar, Outlook o el calendario del celular.
 
 - Decisión: un link iCal privado por usuario (token largo y aleatorio, se puede regenerar), de solo lectura, con los vencimientos pendientes de los próximos 12 meses; el calendario lo actualiza solo.
-- [ ] Backend: `users.calendar_token`; `GET /calendar/{token}.ics` público (el token es la clave), eventos de todo el día con título, importe y link a la app.
-- [ ] Front: Mi perfil → Calendario: copiar link, cómo agregarlo en Google y en el iPhone, "Generar otro link" (invalida el anterior).
+- [x] Backend: tabla `calendar_feeds` (token por usuario, V23); `GET /calendar/feeds/{token}.ics` público, servido por el front en `/api/calendar/{token}.ics` (el token es la clave), eventos de todo el día con título, importe y link a la app.
+- [x] Front: Mi perfil → Calendario: copiar link, cómo agregarlo en Google y en el iPhone, "Generar otro link" (invalida el anterior).
 - **Listo cuando:** agrego el link en Google Calendar y veo los vencimientos del mes.
 
 ## Módulo 20 – Presupuesto del mes

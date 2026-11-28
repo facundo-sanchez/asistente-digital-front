@@ -4,7 +4,7 @@
 > Al terminar una parte: marcar `[x]`, cambiar su estado en la tabla y anotar la fecha.
 > Visión general: [ROADMAP-MODULOS.md](./ROADMAP-MODULOS.md) y [MEJORAS-15-24.md](./MEJORAS-15-24.md). Usa los consumos del módulo 11. Criterio de código: simple, sin abstracciones de más.
 
-**Estado (26/11/2026):** plan listo, sin empezar.
+**Estado (27/11/2026):** 18.1 y 18.2 hechas en `feature/suscripciones`, sin mergear. El total del inicio se pide a `GET /cards/subscriptions` (no se agregó a `/dashboard`); "No es una suscripción" se deshace desde "Ocultas"; volver a mostrar es `POST /cards/subscriptions/restore`.
 
 **Leyenda:** `[ ]` pendiente · `[~]` en progreso · `[x]` hecho
 
@@ -35,25 +35,25 @@ Ver los cargos que se repiten todos los meses en la tarjeta (Netflix, Spotify, Y
 
 | Parte | Qué entrega | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 18.1 | Detectar suscripciones y la pantalla "Suscripciones" | `feature/suscripciones` (junto con 18.2) | módulo 11 | [ ] |
-| 18.2 | Descartar, aumentos, inicio y asistente | `feature/suscripciones` | 18.1 | [ ] |
+| 18.1 | Detectar suscripciones y la pantalla "Suscripciones" | `feature/suscripciones` (junto con 18.2) | módulo 11 | [x] 27/11 |
+| 18.2 | Descartar, aumentos, inicio y asistente | `feature/suscripciones` | 18.1 | [x] 27/11 |
 
 ---
 
 ## Parte 18.1 – Detectar y mostrar
 
 ### Backend
-- [ ] `SubscriptionDetector` (caso de uso): toma los consumos de resúmenes confirmados de los últimos 4 cierres por tarjeta (tipo compra, sin cuotas), agrupa por tarjeta, moneda y comercio normalizado, y se queda con los que aparecen en ≥ 3 de esos cierres con importes dentro de ±30 % de su mediana.
-- [ ] Por suscripción: comercio, tarjeta, rubro, moneda, último importe y fecha, importe anterior, desde cuándo (primer consumo encontrado en los últimos 12 meses), cantidad de meses cobrados.
-- [ ] `GET /cards/subscriptions?cardId=`: la lista y el total mensual por moneda (suma de los últimos importes).
-- [ ] Puerto `CardSubscriptionRepository` con la consulta de consumos candidatos (JPQL sobre `card_transactions` + `card_statements` confirmados), adaptador y su versión en memoria para tests.
-- [ ] Tests: detecta 3 de 4; no detecta 2 de 4; excluye cuotas; un consumo fuera del ±30 % no cuenta; agrupa "NETFLIX.COM 12345" con "NETFLIX.COM 67890"; otra moneda por separado; aislamiento entre usuarios.
+- [x] `SubscriptionDetector` (caso de uso): toma los consumos de resúmenes confirmados de los últimos 4 cierres por tarjeta (tipo compra, sin cuotas), agrupa por tarjeta, moneda y comercio normalizado, y se queda con los que aparecen en ≥ 3 de esos cierres con importes dentro de ±30 % de su mediana.
+- [x] Por suscripción: comercio, tarjeta, rubro, moneda, último importe y fecha, importe anterior, desde cuándo (primer consumo encontrado en los últimos 12 meses), cantidad de meses cobrados.
+- [x] `GET /cards/subscriptions?cardId=`: la lista y el total mensual por moneda (suma de los últimos importes).
+- [x] Puerto `CardSubscriptionRepository` con la consulta de consumos candidatos (JPQL sobre `card_transactions` + `card_statements` confirmados), adaptador y su versión en memoria para tests.
+- [x] Tests: detecta 3 de 4; no detecta 2 de 4; excluye cuotas; un consumo fuera del ±30 % no cuenta; agrupa "NETFLIX.COM 12345" con "NETFLIX.COM 67890"; otra moneda por separado; aislamiento entre usuarios.
 
 ### Frontend
-- [ ] "Suscripciones" en Tarjetas (botón junto a Informe y Cuotas pendientes) → `/cards/subscriptions`.
-- [ ] Total mensual por moneda arriba; tabla: comercio, tarjeta, rubro (con su color), último importe, desde cuándo, meses cobrados; filtro por tarjeta.
-- [ ] Cada fila lleva a sus consumos (`/cards/transactions?merchant=`), como el informe.
-- [ ] Estado vacío: "Necesitamos al menos 3 resúmenes confirmados para reconocer lo que se cobra todos los meses."
+- [x] "Suscripciones" en Tarjetas (botón junto a Informe y Cuotas pendientes) → `/cards/subscriptions`.
+- [x] Total mensual por moneda arriba; tabla: comercio, tarjeta, rubro (con su color), último importe, desde cuándo, meses cobrados; filtro por tarjeta.
+- [x] Cada fila lleva a sus consumos (`/cards/transactions?merchant=`), como el informe.
+- [x] Estado vacío: "Necesitamos al menos 3 resúmenes confirmados para reconocer lo que se cobra todos los meses."
 
 **Listo cuando:** con 4 resúmenes cargados, Netflix y Spotify aparecen con su importe y el total mensual, y una compra en 6 cuotas no aparece.
 
@@ -62,16 +62,16 @@ Ver los cargos que se repiten todos los meses en la tarjeta (Netflix, Spotify, Y
 ## Parte 18.2 – Descartar, aumentos, inicio y asistente
 
 ### Backend
-- [ ] Migración: `card_subscription_dismissals` (usuario, comercio normalizado, fecha); `POST /cards/subscriptions/dismiss` (`merchant`) y `DELETE` para volver a mostrarla. Las descartadas no se listan.
-- [ ] Aumento: `increase` (%) cuando el último importe supera al anterior en 10 % o más.
-- [ ] `GET /dashboard`: total mensual de suscripciones por moneda.
-- [ ] Herramienta del asistente `subscriptions()`: lista con importes, total y aumentos ("¿cuánto pago de suscripciones?").
-- [ ] Tests: descartar la saca y se recuerda en el próximo cálculo; volver a mostrarla; aumento desde 10 %.
+- [x] Migración: `card_subscription_dismissals` (usuario, comercio normalizado, fecha); `POST /cards/subscriptions/dismiss` (`merchant`) y `DELETE` para volver a mostrarla. Las descartadas no se listan.
+- [x] Aumento: `increase` (%) cuando el último importe supera al anterior en 10 % o más.
+- [x] `GET /dashboard`: total mensual de suscripciones por moneda.
+- [x] Herramienta del asistente `subscriptions()`: lista con importes, total y aumentos ("¿cuánto pago de suscripciones?").
+- [x] Tests: descartar la saca y se recuerda en el próximo cálculo; volver a mostrarla; aumento desde 10 %.
 
 ### Frontend
-- [ ] En cada fila: "No es una suscripción" (con deshacer en el aviso); el aumento marcado ("+25 % este mes").
-- [ ] "Ocultas (2)" al pie para volver a mostrarlas.
-- [ ] Inicio: una línea "Suscripciones: $ 28.400 por mes" con link a la pantalla.
+- [x] En cada fila: "No es una suscripción" (con deshacer en el aviso); el aumento marcado ("+25 % este mes").
+- [x] "Ocultas (2)" al pie para volver a mostrarlas.
+- [x] Inicio: una línea "Suscripciones: $ 28.400 por mes" con link a la pantalla.
 
 **Listo cuando:** descarto "SUPERMERCADO DIA" y no vuelve a aparecer, Netflix muestra "+25 % este mes" y el asistente responde cuánto pago de suscripciones.
 

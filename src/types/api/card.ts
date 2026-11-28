@@ -325,3 +325,25 @@ export interface PendingInstallmentsResponse {
   items: PendingInstallmentResponse[];
   totals: CurrencyTotalResponse[];
 }
+
+/** Un comercio que se cobra todos los meses. increase: % sobre el mes anterior, solo desde 10 %. */
+export interface CardSubscriptionResponse {
+  cardId: UUID;
+  cardName: string;
+  merchant: string;
+  category: SpendingCategory;
+  currency: CurrencyCode;
+  lastAmount: Decimal;
+  lastDate: ISODate;
+  previousAmount: Decimal;
+  since: ISODate;
+  months: number;
+  increase: number | null;
+}
+
+/** GET /cards/subscriptions */
+export interface CardSubscriptionsResponse {
+  items: CardSubscriptionResponse[];
+  totals: CurrencyTotalResponse[];
+  hidden: string[];
+}

@@ -36,7 +36,7 @@ export function LoginForm({ next, expired, initialError }: LoginFormProps) {
   });
 
   return (
-    <Box component="form" onSubmit={onSubmit} noValidate>
+    <Box component="form" method="post" /* si el JS no cargó, la contraseña no queda en la URL */ onSubmit={onSubmit} noValidate>
       <Stack spacing={2.5}>
         {expired && !error && <Alert severity="info">Tu sesión expiró. Ingresá de nuevo.</Alert>}
         {error && <Alert severity="error">{error}</Alert>}

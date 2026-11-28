@@ -35,7 +35,7 @@ export function RegisterForm() {
   });
 
   return (
-    <Box component="form" onSubmit={onSubmit} noValidate>
+    <Box component="form" method="post" /* si el JS no cargó, la contraseña no queda en la URL */ onSubmit={onSubmit} noValidate>
       <Stack spacing={2.5}>
         {error && <Alert severity="error">{error}</Alert>}
         <FormTextField name="name" control={control} label="Nombre" autoComplete="given-name" autoFocus />

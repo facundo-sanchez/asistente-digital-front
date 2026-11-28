@@ -31,7 +31,7 @@
 | 15 | **App instalable y notificaciones push** | `feature/push-<n>-*` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 8 | [x] mergeado; falta probar en un celular con HTTPS y claves VAPID |
 | 16 | **Alerta de aumentos** | `feature/aumentos` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 5, 8 | [x] mergeado; falta el indicador en la lista de facturas y el gráfico por servicio |
 | 17 | **Débito automático** | `feature/debito-automatico` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 2, 4 | [x] mergeado; falta la marca en la lista de vencimientos y en el inicio |
-| 18 | **Suscripciones en la tarjeta** | `feature/suscripciones` (2 partes, ver [MODULO-18-SUSCRIPCIONES.md](./MODULO-18-SUSCRIPCIONES.md)) | ver plan | ver plan | 11 | [ ] plan listo (2 partes) |
+| 18 | **Suscripciones en la tarjeta** | `feature/suscripciones` (2 partes, ver [MODULO-18-SUSCRIPCIONES.md](./MODULO-18-SUSCRIPCIONES.md)) | ver plan | ver plan | 11 | [x] hecho, sin mergear |
 | 19 | **Calendario (iCal)** | `feature/calendario` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 4 | [ ] |
 | 20 | **Presupuesto del mes** | `feature/presupuesto` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 11 | [ ] |
 | 21 | **Bienes** | `feature/bienes-<n>-*` (ver [MEJORAS-15-24.md](./MEJORAS-15-24.md)) | ver plan | ver plan | 3, 4 | [ ] |
@@ -50,8 +50,8 @@ Módulos 0 a 8 = **MVP**. Desde el 9: automatización e IA. Del 15 al 24: mejora
   - **Remitente de facturas en proveedores propios:** dirección o dominio que Gmail usa para detectar sus facturas (ej. Nativa).
   - **Despliegue:** Dockerfile del backend, `deploy/docker-compose.prod.yml` (Postgres 19 + backend + Caddy) y `docker-compose.local.yml`, guía para Oracle Cloud + Vercel (`deploy/README.md` del backend).
   - **Asistente en el celular:** burbuja flotante en toda la app.
-- **Con plan, sin empezar:** 13 (préstamos), 14 (Outlook) y 18 (suscripciones).
-- **Sin plan detallado (resumen en [MEJORAS-15-24.md](./MEJORAS-15-24.md)):** 19 a 24.
+- **Con plan, sin empezar:** 14 (Outlook).
+- **Hecho, sin mergear:** 19 (calendario). **Sin plan detallado (resumen en [MEJORAS-15-24.md](./MEJORAS-15-24.md)):** 20 a 24.
 - **Pendiente transversal:** publicar la app (Vercel + Oracle), cargar las claves VAPID, verificar la app de Google (permiso restringido de Gmail) y la cuota de Gemini (tope diario, menos rondas e historial).
 
 **Cambio de orden (26/11/2026):** después del módulo 6 se sigue con el **9 (IA documental)**, antes del 7 y el 8. Motivo: la idea es que el usuario adjunte el resumen o la factura (Excel, PDF o foto) y los datos se carguen solos; cada banco arma su Excel distinto, así que la lectura se resuelve con IA para todos los formatos en vez de programar un lector por banco. Los módulos 7 y 8 no dependen de esto.

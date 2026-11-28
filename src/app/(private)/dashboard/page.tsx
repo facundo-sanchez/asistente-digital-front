@@ -3,11 +3,12 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { requireUser } from "@/lib/server/dal";
-import type { DashboardSpendingResponse, DashboardSummaryResponse, ObligationResponse, PageResponse, LoanResponse } from "@/types/api";
+import type { DashboardSpendingResponse, DashboardSummaryResponse, ObligationResponse, PageResponse, CardSubscriptionsResponse, LoanResponse } from "@/types/api";
 import { serverGet } from "@/lib/server/server-get";
 import { ActivityPanel } from "@/modules/dashboard/components/ActivityPanel";
 import { ExpiringDocumentsPanel } from "@/modules/dashboard/components/ExpiringDocumentsPanel";
 import { LoansPanel } from "@/modules/dashboard/components/LoansPanel";
+import { SubscriptionsLine } from "@/modules/dashboard/components/SubscriptionsLine";
 import { KpiRow } from "@/modules/dashboard/components/KpiRow";
 import { MonthPanel } from "@/modules/dashboard/components/MonthPanel";
 import { ReviewPanel } from "@/modules/dashboard/components/ReviewPanel";
@@ -34,7 +35,7 @@ function dayFromToday(timeZone: string, days: number): string {
 export default async function DashboardPage() {
   const user = await requireUser();
   const monthLabel = currentMonthLabel(user.locale, user.timezone);
-  const [summary, overdue, upcoming, spending, loans] = await Promise.all([
+  const [summary, overdue, upcoming, spending, loans, subscriptions] = await Promise.all([
     serverGet<DashboardSummaryResponse>("/dashboard"),
     serverGet<PageResponse<ObligationResponse>>("/obligations?status=OVERDUE&size=10"),
     serverGet<PageResponse<ObligationResponse>>(
@@ -42,6 +43,7 @@ export default async function DashboardPage() {
     ),
     serverGet<DashboardSpendingResponse>("/dashboard/spending"),
     serverGet<LoanResponse[]>("/loans"),
+    serverGet<CardSubscriptionsResponse>("/cards/subscriptions"),
   ]);
   // Lo vencido primero; entre los dos, como mucho 10 filas
   const rows = [...(overdue?.content ?? []), ...(upcoming?.content ?? [])].slice(0, 10);
@@ -63,6 +65,7 @@ export default async function DashboardPage() {
         </Box>
       )}
       <LoansPanel loans={loans ?? []} />
+      <SubscriptionsLine subscriptions={subscriptions} />
       {spending && <SpendingPanel spending={spending} />}
       {summary && <ActivityPanel activity={summary.activity} timeZone={user.timezone} />}
     </Stack>

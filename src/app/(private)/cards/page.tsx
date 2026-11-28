@@ -38,6 +38,9 @@ export default async function CardsPage() {
           <ButtonLink href="/cards/installments" variant="outlined">
             Cuotas pendientes
           </ButtonLink>
+          <ButtonLink href="/cards/subscriptions" variant="outlined">
+            Suscripciones
+          </ButtonLink>
           <ButtonLink href="/cards/rules" variant="text">
             Rubros por comercio
           </ButtonLink>
