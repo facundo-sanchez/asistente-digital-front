@@ -50,7 +50,7 @@ export function CalendarLink({ initialToken }: { initialToken: string }) {
         </Typography>
         <CopyButton text={url} label="Copiar link" />
       </Box>
-      <Box component="ol" sx={{ m: 0, pl: 2.5, display: "grid", gap: 1, color: "text.secondary" }}>
+      <Box component="ol" sx={{ m: 0, pl: 2.5, display: "grid", gap: 1, color: "text.secondary", listStyle: "decimal", "& li::marker": { fontWeight: 600 } }}>
         <li>
           <Typography variant="body2">
             <strong>Google Calendar</strong> (desde la computadora): Otros calendarios → + → Desde URL, pegá el link y tocá Agregar calendario.
