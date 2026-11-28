@@ -39,7 +39,8 @@ export function CalendarLink({ initialToken }: { initialToken: string }) {
   };
 
   return (
-    <Box sx={{ display: "grid", gap: 2.5 }}>
+    // minmax(0, 1fr): sin esto la columna toma el ancho del link entero y se sale del panel
+    <Box sx={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 2.5 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, border: 1, borderColor: "divider", borderRadius: "10px", pl: 1.5, pr: 0.5, py: 0.5 }}>
         <Typography
           component="code"
@@ -48,7 +49,9 @@ export function CalendarLink({ initialToken }: { initialToken: string }) {
         >
           {url}
         </Typography>
-        <CopyButton text={url} label="Copiar link" />
+        <Box sx={{ flexShrink: 0, whiteSpace: "nowrap" }}>
+          <CopyButton text={url} label="Copiar link" />
+        </Box>
       </Box>
       <Box component="ol" sx={{ m: 0, pl: 2.5, display: "grid", gap: 1, color: "text.secondary", listStyle: "decimal", "& li::marker": { fontWeight: 600 } }}>
         <li>
