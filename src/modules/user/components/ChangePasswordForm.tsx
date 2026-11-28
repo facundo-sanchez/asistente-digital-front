@@ -52,7 +52,7 @@ export function ChangePasswordForm({ hasPassword }: ChangePasswordFormProps) {
   });
 
   return (
-    <Box component="form" onSubmit={onSubmit} noValidate>
+    <Box component="form" method="post" /* si el JS no cargó, la contraseña no queda en la URL */ onSubmit={onSubmit} noValidate>
       <Stack spacing={2.5}>
         {result && <Alert severity={result.ok ? "success" : "error"}>{result.message}</Alert>}
         {hasPassword && (
