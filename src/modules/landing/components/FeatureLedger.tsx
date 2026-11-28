@@ -9,7 +9,7 @@ export function FeatureLedger() {
       <h2 id="features-title" className={styles.h2}>
         Todo lo de la casa, en una planilla.
       </h2>
-      <p className={styles.sectionLead}>Cada cosa en su fila, en pesos y en dólares por separado. Los ejemplos usan datos inventados.</p>
+      <p className={styles.sectionLead}>Cada cosa en su fila, en pesos y en dólares por separado.</p>
       <div className={styles.ledger}>
         {FEATURES.map((feature) => {
           const example = FEATURE_EXAMPLES[feature.name];
