@@ -2,8 +2,8 @@
 
 export const LINKEDIN_URL = "https://www.linkedin.com/in/facundo-sanchez-647b5a21a/";
 
-/** Un mes de ejemplo: lo pagado después de cada paso de la historia. */
-export const SAMPLE_MONTH = { label: "Noviembre", total: "$ 1.005.142" };
+/** Un mes de ejemplo: lo pagado después de cada paso de la historia. Los importes llevan un espacio que no se corta (no se separa el $ del número). */
+export const SAMPLE_MONTH = { label: "Noviembre", total: "$ 1.005.142" };
 
 export const STEPS = [
   { title: "Llega la factura", text: "Camuzzi te la manda por mail, como siempre." },
@@ -14,10 +14,10 @@ export const STEPS = [
 
 /** Cuánto del mes de ejemplo está pagado al llegar a cada paso. */
 export const STORY_PROGRESS = [
-  { value: 0.25, paid: "$ 251.300" },
-  { value: 0.5, paid: "$ 502.600" },
-  { value: 0.75, paid: "$ 753.800" },
-  { value: 1, paid: "$ 1.005.142" },
+  { value: 0.25, paid: "$ 251.300" },
+  { value: 0.5, paid: "$ 502.600" },
+  { value: 0.75, paid: "$ 753.800" },
+  { value: 1, paid: "$ 1.005.142" },
 ] as const;
 
 /** Lo que ordena la app. El color es el tinte de la categoría y va siempre junto a su nombre. */
