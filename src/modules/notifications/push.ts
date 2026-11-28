@@ -1,5 +1,6 @@
 /** Notificaciones push en el navegador (módulo 15). */
 import { api } from "@/lib/api/client";
+import { withBasePath } from "@/lib/config";
 
 /** La clave VAPID viene en base64url; el navegador la quiere en bytes. */
 export function urlBase64ToBytes(base64: string): Uint8Array<ArrayBuffer> {
@@ -30,6 +31,10 @@ export async function enablePush(): Promise<"enabled" | "denied"> {
   const permission = await Notification.requestPermission();
   if (permission !== "granted") return "denied";
   const { publicKey } = await api.get<{ publicKey: string }>("push-subscriptions/public-key");
+  // En desarrollo el service worker no se registra al entrar: sin esto, ready no termina nunca
+  if (!(await navigator.serviceWorker.getRegistration())) {
+    await navigator.serviceWorker.register(withBasePath("/sw.js"), { scope: withBasePath("/") });
+  }
   const registration = await navigator.serviceWorker.ready;
   const subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToBytes(publicKey) });
   await api.post<void>("push-subscriptions", { ...subscription.toJSON(), userAgent: navigator.userAgent.slice(0, 300) });
