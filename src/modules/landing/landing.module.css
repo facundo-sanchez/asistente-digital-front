@@ -91,6 +91,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
+  white-space: nowrap;
   color: var(--ink);
   text-decoration: none;
   font-weight: 700;
@@ -127,6 +129,7 @@
     gap: 16px;
   }
 }
+
 
 /* ---------- botones ---------- */
 .btn {
@@ -165,6 +168,7 @@
   min-height: 42px;
   padding: 0 18px;
   font-size: 15px;
+  white-space: nowrap;
 }
 
 .btnLight {
@@ -1001,5 +1005,33 @@
     font-size: 0;
     height: 6px;
     padding: 0;
+  }
+}
+
+/* Celulares chicos (iPhone SE, 375px): la barra entra en una línea */
+@media (max-width: 420px) {
+  .navInner {
+    gap: 12px;
+    min-height: 64px;
+  }
+
+  .brand {
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .navLinks {
+    gap: 12px;
+  }
+
+  .btnSmall {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
+  /* Sin sesión, "Crear cuenta" ya está en grande debajo del título */
+  .navCreate {
+    display: none;
   }
 }
